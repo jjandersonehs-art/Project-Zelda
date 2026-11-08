@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>PROJECT ZELDA // NEURAL COUNCIL WAR ROOM</title>
+  <title>PROJECT ZELDA // NEURAL COUNCIL WAR ROOM v1.2</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -12,10 +12,7 @@
       --cyber-yellow: #FCEE0A;
       --cyber-cyan: #00F0FF;
       --cyber-red: #FF003C;
-      --cyber-purple: #B829FF;
-      --cyber-green: #00FF66;
       --bg-obsidian: #06060A;
-      --panel-bg: rgba(14, 15, 24, 0.92);
     }
     body {
       background-color: var(--bg-obsidian);
@@ -36,10 +33,6 @@
     .cyber-clip-sm {
       clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
     }
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: #06060A; }
-    ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 2px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--cyber-cyan); }
   </style>
 </head>
 <body class="h-screen flex flex-col select-none">
@@ -53,53 +46,37 @@
           <h1 class="font-orbitron text-base md:text-lg font-black tracking-wider text-white">
             PROJECT ZELDA <span class="text-[#00F0FF]">// WAR ROOM</span>
           </h1>
-          <span class="text-[10px] font-mono-code bg-[#FF003C]/20 text-[#FF003C] border border-[#FF003C]/50 px-1.5 py-0.5 uppercase">
-            Council v1.0
+          <span class="text-[10px] font-mono-code bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 px-1.5 py-0.5 uppercase">
+            DIRECT KEYS v1.2
           </span>
         </div>
         <p class="text-xs text-slate-400 tracking-wide">
-          2009 NISSAN 370Z (VQ37VHR 7AT) • 13.6" TESLA HUD • VGATE iCAR PRO 2S (BLE 5.2)
+          YT7360B (AC8258) • LUZHENG CAN • VGATE iCAR PRO 2S (BLE 5.2)
         </p>
       </div>
     </div>
 
-    <!-- AGENT STATUS PILLS & BUTTONS -->
     <div class="flex items-center gap-2">
-      <div class="hidden md:flex items-center gap-1.5 mr-2">
-        <span id="badge-g" class="text-[11px] font-mono-code px-2 py-0.5 bg-cyan-950/80 border border-cyan-400/50 text-cyan-300">
-          <i class="fa-solid fa-bolt mr-1"></i>G (GEMINI)
-        </span>
-        <span id="badge-claude" class="text-[11px] font-mono-code px-2 py-0.5 bg-amber-950/80 border border-amber-400/50 text-amber-300">
-          <i class="fa-solid fa-shield-halved mr-1"></i>CLAUDE
-        </span>
-        <span id="badge-grok" class="text-[11px] font-mono-code px-2 py-0.5 bg-purple-950/80 border border-purple-400/50 text-purple-300">
-          <i class="fa-solid fa-fire-flame-curved mr-1"></i>GROK
-        </span>
-      </div>
-
-      <button onclick="openRelayModal()" class="cyber-clip-sm bg-slate-800 hover:bg-slate-700 border border-yellow-400/50 text-[#FCEE0A] text-xs font-bold px-3 py-1.5 tracking-wider flex items-center gap-1.5 transition">
+      <button onclick="openRelayModal()" class="cyber-clip-sm bg-slate-800 hover:bg-slate-700 border border-yellow-400/50 text-[#FCEE0A] text-xs font-bold px-3 py-1.5 tracking-wider flex items-center gap-1.5">
         <i class="fa-solid fa-share-nodes"></i>
         <span>SYNC PACKET</span>
       </button>
-
-      <button onclick="toggleModal('spec-modal')" class="cyber-clip-sm bg-slate-800 hover:bg-slate-700 border border-cyan-400/40 text-cyan-300 text-xs font-bold px-3 py-1.5 tracking-wider flex items-center gap-1.5 transition">
+      <button onclick="toggleModal('spec-modal')" class="cyber-clip-sm bg-slate-800 hover:bg-slate-700 border border-cyan-400/40 text-cyan-300 text-xs font-bold px-3 py-1.5 tracking-wider flex items-center gap-1.5">
         <i class="fa-solid fa-microchip"></i>
-        <span class="hidden sm:inline">ZELDA SPEC</span>
+        <span class="hidden sm:inline">SPEC</span>
       </button>
-
-      <button onclick="toggleModal('settings-modal')" class="cyber-clip-sm bg-[#00F0FF]/15 hover:bg-[#00F0FF]/25 border border-[#00F0FF] text-[#00F0FF] text-xs font-bold px-3 py-1.5 tracking-wider flex items-center gap-1.5 transition">
+      <button onclick="toggleModal('settings-modal')" class="cyber-clip-sm bg-[#00F0FF]/20 hover:bg-[#00F0FF]/30 border border-[#00F0FF] text-[#00F0FF] text-xs font-bold px-3 py-1.5 tracking-wider flex items-center gap-1.5">
         <i class="fa-solid fa-key"></i>
         <span>API KEYS</span>
       </button>
     </div>
   </header>
 
-  <!-- MODE SELECTOR & QUICK PROMPTS BAR -->
+  <!-- DISPATCH TARGET BAR -->
   <div class="bg-[#0B0D18] border-b border-slate-800 px-4 py-2 flex flex-wrap items-center justify-between gap-2 shrink-0 text-xs">
-    <div class="flex items-center gap-2 flex-wrap">
-      <span class="font-mono-code text-slate-400 uppercase text-[11px]">Dispatch Target:</span>
+    <div class="flex items-center gap-1.5 flex-wrap">
       <button onclick="setTarget('ROUNDTABLE')" id="target-ROUNDTABLE" class="target-btn px-2.5 py-1 font-bold tracking-wider bg-[#FCEE0A] text-black cyber-clip-sm">
-        <i class="fa-solid fa-users-rays mr-1"></i>AUTO-ROUNDTABLE (G → CLAUDE → GROK)
+        <i class="fa-solid fa-users-rays mr-1"></i>ALL 3 (G → CLAUDE → GROK)
       </button>
       <button onclick="setTarget('G')" id="target-G" class="target-btn px-2.5 py-1 font-bold tracking-wider bg-slate-900 text-cyan-400 border border-cyan-500/40 cyber-clip-sm">
         ONLY G
@@ -111,56 +88,45 @@
         ONLY GROK
       </button>
     </div>
-
     <div class="flex items-center gap-2">
-      <button onclick="openPasteModal()" class="text-xs font-mono-code text-emerald-400 hover:underline flex items-center gap-1">
-        <i class="fa-solid fa-paste"></i> + Log External Reply
-      </button>
-      <span class="text-slate-700">|</span>
-      <button onclick="clearChat()" class="text-xs font-mono-code text-rose-400 hover:underline flex items-center gap-1">
+      <button onclick="clearChat()" class="text-xs font-mono-code text-rose-400 hover:underline">
         <i class="fa-solid fa-trash-can"></i> Reset Log
       </button>
     </div>
   </div>
 
   <!-- CHAT STREAM -->
-  <main id="chat-stream" class="flex-1 overflow-y-auto p-4 space-y-4 select-text">
-    <!-- Messages injected via JS -->
-  </main>
+  <main id="chat-stream" class="flex-1 overflow-y-auto p-4 space-y-4 select-text"></main>
 
-  <!-- QUICK TOPIC CHIPS -->
+  <!-- QUICK PROMPTS -->
   <div class="bg-[#080911] border-t border-slate-800/80 px-4 py-1.5 flex items-center gap-2 overflow-x-auto shrink-0">
-    <span class="text-[10px] font-mono-code text-slate-500 uppercase shrink-0">Quick Prompts:</span>
-    <button onclick="quickPrompt('Audit our Vgate iCar Pro 2S BLE GATT init sequence (ATZ, ATE0, ATS0, ATSP6) and two-tier round-robin PID queue for the 2009 370Z. Flag any race conditions or timeout edge cases.')" class="text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 px-2.5 py-1 rounded shrink-0">
-      ⚡ Audit Vgate 2S BLE Queue
+    <button onclick="quickPrompt('Review our YT7360B (AC8258) head unit specs and Vgate iCar Pro 2S BLE 5.2 polling loop. What should we lock down first?')" class="text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 px-2.5 py-1 rounded shrink-0">
+      ⚡ AC8258 + Vgate 2S Check
     </button>
-    <button onclick="quickPrompt('Debate whether Project Zelda v2.1 should keep Nissan Consult-III extended header switching (ATSH 7E0 / 7E1 for Oil & 7AT Temp) off by default and stick strictly to Mode 01 broadcast PIDs first.')" class="text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 px-2.5 py-1 rounded shrink-0">
-      🔧 7E0/7E1 Header Switching Debate
-    </button>
-    <button onclick="quickPrompt('Design Zelda Phase 2: How should her independent AI persona, voice alerts, and localStorage baseline anomaly detector work on the 13.6-inch Android head unit?')" class="text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 px-2.5 py-1 rounded shrink-0">
-      🧠 Zelda Independent AI Core
+    <button onclick="quickPrompt('Design Zelda Phase 2: How should her first-person voice alerts and localStorage baseline anomaly detector work on the 13.6-inch screen?')" class="text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 px-2.5 py-1 rounded shrink-0">
+      🧠 Zelda Sentient Core
     </button>
   </div>
 
-  <!-- MESSAGE INPUT BAR -->
+  <!-- INPUT BAR -->
   <footer class="p-3 bg-[#0A0C16] border-t border-cyan-500/30 shrink-0">
     <div class="max-w-6xl mx-auto flex gap-2">
-      <textarea id="user-input" rows="2" placeholder="Command the Council (J)... Press Enter to send, Shift+Enter for new line."
-        class="flex-1 bg-[#05060B] border border-slate-700 focus:border-[#00F0FF] rounded-none p-2.5 text-sm text-white placeholder-slate-500 focus:outline-none font-sans resize-none"
+      <textarea id="user-input" rows="2" placeholder="Command the Council (J)..."
+        class="flex-1 bg-[#05060B] border border-slate-700 focus:border-[#00F0FF] p-2.5 text-sm text-white placeholder-slate-500 focus:outline-none resize-none"
         onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); sendUserMessage();}"></textarea>
-      <button onclick="sendUserMessage()" id="send-btn" class="cyber-clip bg-[#00F0FF] hover:bg-cyan-300 text-black font-orbitron font-black px-6 text-sm tracking-wider flex flex-col items-center justify-center transition shrink-0">
+      <button onclick="sendUserMessage()" class="cyber-clip bg-[#00F0FF] hover:bg-cyan-300 text-black font-orbitron font-black px-6 text-sm tracking-wider flex flex-col items-center justify-center shrink-0">
         <i class="fa-solid fa-paper-plane text-base mb-0.5"></i>
         <span>SEND</span>
       </button>
     </div>
   </footer>
 
-  <!-- MODAL 1: API KEYS & ROUTING CONFIG -->
-  <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-[#0D101D] border border-[#00F0FF] cyber-clip max-w-lg w-full p-5 space-y-4">
+  <!-- MODAL: INDIVIDUAL API KEYS + CORS PROXY TOGGLE -->
+  <div id="settings-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#0D101D] border border-[#00F0FF] cyber-clip max-w-lg w-full p-5 space-y-3">
       <div class="flex items-center justify-between border-b border-slate-800 pb-2">
         <h2 class="font-orbitron font-bold text-[#00F0FF] text-base">
-          <i class="fa-solid fa-network-wired mr-2"></i>COUNCIL API ROUTING CONFIG
+          <i class="fa-solid fa-key mr-2"></i>INDIVIDUAL API KEYS CONFIG
         </h2>
         <button onclick="toggleModal('settings-modal')" class="text-slate-400 hover:text-white">
           <i class="fa-solid fa-xmark text-lg"></i>
@@ -168,36 +134,53 @@
       </div>
 
       <div class="space-y-3 text-xs">
-        <div class="p-3 bg-yellow-500/10 border border-yellow-400/40 text-yellow-200 leading-relaxed">
-          <strong class="text-[#FCEE0A] block mb-1">💡 BEST / EASIEST SETUP: SINGLE OPENROUTER KEY</strong>
-          Browsers often block direct calls to Anthropic/xAI due to CORS headers, and managing 3 separate billing accounts is a pain. If you paste <strong>one OpenRouter API key</strong> (<code class="text-white">openrouter.ai</code>) below, this War Room automatically routes to <strong>Gemini 2.5 Pro/Flash</strong>, <strong>Claude 3.7 Sonnet</strong>, and <strong>Grok 3</strong> from a single key.
-        </div>
-
-        <div>
-          <label class="block font-mono-code text-[#FCEE0A] mb-1">1. OpenRouter Master Key (Powers All 3 Models Automatically)</label>
-          <input id="key-openrouter" type="password" placeholder="sk-or-v1-..." class="w-full bg-black border border-slate-700 p-2 text-white font-mono-code" />
-        </div>
-
-        <div class="border-t border-slate-800 pt-2">
-          <p class="text-slate-400 mb-2 font-mono-code uppercase text-[10px]">Or Individual Direct API Keys (Used if OpenRouter is blank):</p>
-          <div class="space-y-2">
-            <div>
-              <label class="block text-cyan-400 font-mono-code mb-0.5">Gemini API Key (Google AI Studio — Same key as ChronoHume)</label>
-              <input id="key-gemini" type="password" placeholder="AIzaSy..." class="w-full bg-black border border-slate-700 p-2 text-white font-mono-code" />
-            </div>
-            <div>
-              <label class="block text-amber-400 font-mono-code mb-0.5">Claude API Key (Anthropic Direct)</label>
-              <input id="key-claude" type="password" placeholder="sk-ant-..." class="w-full bg-black border border-slate-700 p-2 text-white font-mono-code" />
-            </div>
-            <div>
-              <label class="block text-purple-400 font-mono-code mb-0.5">Grok API Key (xAI Direct)</label>
-              <input id="key-grok" type="password" placeholder="xai-..." class="w-full bg-black border border-slate-700 p-2 text-white font-mono-code" />
-            </div>
+        <!-- GEMINI -->
+        <div class="p-2.5 bg-cyan-950/20 border border-cyan-500/30 space-y-1.5">
+          <div class="flex justify-between items-center">
+            <label class="text-cyan-400 font-mono-code font-bold">1. G // GEMINI API KEY</label>
+            <select id="model-gemini" class="bg-black border border-slate-700 text-cyan-300 px-1.5 py-0.5 font-mono-code text-[11px]">
+              <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+              <option value="gemini-2.5-pro">gemini-2.5-pro</option>
+            </select>
           </div>
+          <input id="key-gemini" type="password" placeholder="AIzaSy..." class="w-full bg-black border border-slate-700 p-2 text-white font-mono-code" />
+        </div>
+
+        <!-- CLAUDE -->
+        <div class="p-2.5 bg-amber-950/20 border border-amber-500/30 space-y-1.5">
+          <div class="flex justify-between items-center">
+            <label class="text-amber-400 font-mono-code font-bold">2. CLAUDE // ANTHROPIC API KEY</label>
+            <select id="model-claude" class="bg-black border border-slate-700 text-amber-300 px-1.5 py-0.5 font-mono-code text-[11px]">
+              <option value="claude-sonnet-4-20250514">claude-sonnet-4</option>
+              <option value="claude-3-5-sonnet-latest">claude-3-5-sonnet-latest</option>
+              <option value="claude-3-5-haiku-latest">claude-3-5-haiku-latest</option>
+            </select>
+          </div>
+          <input id="key-claude" type="password" placeholder="sk-ant-api03-..." class="w-full bg-black border border-slate-700 p-2 text-white font-mono-code" />
+        </div>
+
+        <!-- GROK -->
+        <div class="p-2.5 bg-purple-950/20 border border-purple-500/30 space-y-1.5">
+          <div class="flex justify-between items-center">
+            <label class="text-purple-400 font-mono-code font-bold">3. GROK // xAI API KEY</label>
+            <select id="model-grok" class="bg-black border border-slate-700 text-purple-300 px-1.5 py-0.5 font-mono-code text-[11px]">
+              <option value="grok-3-mini">grok-3-mini</option>
+              <option value="grok-3">grok-3</option>
+              <option value="grok-2-latest">grok-2-latest</option>
+            </select>
+          </div>
+          <input id="key-grok" type="password" placeholder="xai-..." class="w-full bg-black border border-slate-700 p-2 text-white font-mono-code" />
+          <label class="flex items-center gap-2 pt-1 text-[11px] text-slate-300 cursor-pointer">
+            <input id="grok-cors-proxy" type="checkbox" checked class="w-3.5 h-3.5" />
+            <span>Auto-bypass browser CORS block on xAI (Recommended for GitHub Pages)</span>
+          </label>
         </div>
       </div>
 
-      <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+      <div class="flex justify-between items-center pt-2 border-t border-slate-800">
+        <button onclick="testAllKeys()" class="text-xs font-mono-code text-[#FCEE0A] hover:underline">
+          <i class="fa-solid fa-vial mr-1"></i>Test Keys Connection
+        </button>
         <button onclick="saveKeys()" class="cyber-clip-sm bg-[#00F0FF] text-black font-orbitron font-bold px-4 py-2 text-xs">
           SAVE & LOCK KEYS
         </button>
@@ -205,137 +188,79 @@
     </div>
   </div>
 
-  <!-- MODAL 2: SHARED ARCHITECTURE SPEC -->
-  <div id="spec-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <!-- MODAL: SPEC -->
+  <div id="spec-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-[#0D101D] border border-cyan-400 cyber-clip max-w-2xl w-full p-5 space-y-3">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-        <h2 class="font-orbitron font-bold text-cyan-400 text-base">
-          PROJECT ZELDA // SHARED SYSTEM CONTEXT (INJECTED INTO ALL 3 MODELS)
-        </h2>
-        <button onclick="toggleModal('spec-modal')" class="text-slate-400 hover:text-white">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
+      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+        <h2 class="font-orbitron font-bold text-cyan-400 text-sm">PROJECT ZELDA // SHARED SPEC</h2>
+        <button onclick="toggleModal('spec-modal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <p class="text-xs text-slate-400">
-        Every time G, Claude, or Grok speaks in this room, they read this shared system blueprint first so everyone stays locked onto the exact same hardware and PID math:
-      </p>
-      <textarea id="shared-spec-text" rows="12" class="w-full bg-black border border-slate-700 p-3 text-xs font-mono-code text-cyan-200 focus:outline-none"></textarea>
-      <div class="flex justify-end gap-2">
-        <button onclick="saveSpec()" class="cyber-clip-sm bg-[#FCEE0A] text-black font-orbitron font-bold px-4 py-2 text-xs">
-          UPDATE SHARED SPEC
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL 3: CLIPBOARD RELAY SYNC PACKET (ZERO-KEY MODE) -->
-  <div id="relay-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-[#0D101D] border border-[#FCEE0A] cyber-clip max-w-2xl w-full p-5 space-y-3">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-        <h2 class="font-orbitron font-bold text-[#FCEE0A] text-base">
-          <i class="fa-solid fa-bolt mr-1"></i>1-TAP COUNCIL RELAY PACKET (FOR MOBILE APPS)
-        </h2>
-        <button onclick="toggleModal('relay-modal')" class="text-slate-400 hover:text-white">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-      <p class="text-xs text-slate-300">
-        Using the native Claude or Grok app on your Z Fold 7 without paid API keys? Tap <strong>Copy Packet</strong> below and paste it straight into Claude or Grok—it bundles the current spec and the latest roundtable messages in one clean block.
-      </p>
-      <textarea id="relay-packet-box" rows="11" readonly class="w-full bg-black border border-slate-700 p-3 text-xs font-mono-code text-yellow-100 focus:outline-none"></textarea>
-      <div class="flex justify-between items-center pt-1">
-        <span id="copy-confirm" class="text-xs font-mono-code text-emerald-400"></span>
-        <button onclick="copyRelayPacket()" class="cyber-clip-sm bg-[#FCEE0A] text-black font-orbitron font-bold px-5 py-2 text-xs">
-          <i class="fa-solid fa-copy mr-1"></i>COPY PACKET TO CLIPBOARD
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL 4: LOG EXTERNAL REPLY -->
-  <div id="paste-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-[#0D101D] border border-emerald-400 cyber-clip max-w-lg w-full p-5 space-y-3">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-        <h2 class="font-orbitron font-bold text-emerald-400 text-base">
-          LOG REPLY FROM EXTERNAL CLAUDE / GROK APP
-        </h2>
-        <button onclick="toggleModal('paste-modal')" class="text-slate-400 hover:text-white">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-      <div class="flex gap-2 text-xs">
-        <label class="text-slate-400 self-center">Speaker:</label>
-        <select id="external-speaker" class="bg-black border border-slate-700 p-1.5 text-white font-bold">
-          <option value="CLAUDE">CLAUDE (Systems & OBD Architect)</option>
-          <option value="GROK">GROK (Zelda AI Core & Edge Lead)</option>
-          <option value="G">G / GEMINI (Lead Integrator)</option>
-        </select>
-      </div>
-      <textarea id="external-text" rows="7" placeholder="Paste Claude or Grok's response here to add it to the shared War Room transcript..." class="w-full bg-black border border-slate-700 p-2.5 text-xs text-white"></textarea>
+      <textarea id="shared-spec-text" rows="12" class="w-full bg-black border border-slate-700 p-3 text-xs font-mono-code text-cyan-200"></textarea>
       <div class="flex justify-end">
-        <button onclick="submitExternalReply()" class="cyber-clip-sm bg-emerald-400 text-black font-orbitron font-bold px-4 py-2 text-xs">
-          ADD TO WAR ROOM LOG
-        </button>
+        <button onclick="saveSpec()" class="cyber-clip-sm bg-[#FCEE0A] text-black font-orbitron font-bold px-4 py-2 text-xs">SAVE SPEC</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: RELAY PACKET -->
+  <div id="relay-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#0D101D] border border-[#FCEE0A] cyber-clip max-w-2xl w-full p-5 space-y-3">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+        <h2 class="font-orbitron font-bold text-[#FCEE0A] text-sm">1-TAP COUNCIL RELAY PACKET</h2>
+        <button onclick="toggleModal('relay-modal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <textarea id="relay-packet-box" rows="10" readonly class="w-full bg-black border border-slate-700 p-3 text-xs font-mono-code text-yellow-100"></textarea>
+      <div class="flex justify-end">
+        <button onclick="navigator.clipboard.writeText(document.getElementById('relay-packet-box').value)" class="cyber-clip-sm bg-[#FCEE0A] text-black font-orbitron font-bold px-4 py-2 text-xs">COPY TO CLIPBOARD</button>
       </div>
     </div>
   </div>
 
   <script>
-    const DEFAULT_SPEC = `PROJECT ZELDA // TECHNICAL BLUEPRINT (v2.1)
-- Lead Engineer: J (Jacob)
-- Vehicle: "Zelda" — 2009 Nissan 370Z Coupe, VQ37VHR 3.7L V6, Jatco JR710E 7AT, ~236,150 miles.
-- Display: 13.6" Tesla-Style Vertical Android Head Unit (Portrait 1080x1920, persistent bottom CAN-bus climate bar).
-- OBD2 Hardware: Ordered Vgate iCar Pro 2S (Bluetooth 5.2 Dual-Mode: Classic BT "Android-Vlink" + BLE "IOS-Vlink", 3 Mbps, 4095-byte buffer, 3mA auto-sleep + remote BT wake).
-- Verified V2.1 Decisions:
-  1. Replaced non-existent factory Oil PSI sensor card with Calculated Engine Load (Mode 01 PID 04).
-  2. Strict NO DATA / LINK LOST state: Never fall back to simulated values when in Live OBD mode; display "--" and alert on timeout (>2500ms).
-  3. Two-Tier Round-Robin ELM327 Polling Queue with ">" prompt mutex:
-     - Fast Tier (every cycle): 010C (RPM), 010D (Speed), 0104 (Engine Load).
-     - Slow Tier (interleaved 1 per 4th cycle): 0105 (Coolant), 010F (IAT), 0106 (STFT B1), 0108 (STFT B2), ATRV (Pin 16 Voltage).
-  4. Phase 2 Roadmap: Evolve Zelda into an independent first-person车载 AI Core with persistent baseline memory, anomaly detection, and ChronoHume C-Shift awareness.`;
+    const DEFAULT_SPEC = `PROJECT ZELDA // VERIFIED HARDWARE & ARCHITECTURE (v2.1)
+- Vehicle: "Zelda" — 2009 Nissan 370Z Coupe (VQ37VHR 3.7L V6, Jatco JR710E 7AT, ~236,150 mi).
+- Head Unit Verified: XYAuto YT7360B_00021_V001 | SoC: AutoChips AC8258 (Octa-core 2.0GHz, 4GB RAM/64GB ROM) | Kernel: Android 10 (spoofed as Android 15) | Display: 1920x1080 portrait (mipi_XMH_EDP_13.3i).
+- CAN-Bus Decoder: LuZheng (LZ) "Nissan 2009~2020 370z Low Vertical (connected)".
+- OBD2 Hardware: Vgate iCar Pro 2S (Bluetooth 5.2 BLE "IOS-Vlink", 3 Mbps, 4095-byte buffer, 3mA auto-sleep).
+- Key V2.1 Architecture:
+  1. Bypass AC8258's restricted Classic BT app via Chrome Web Bluetooth (navigator.bluetooth) directly to Vgate BLE (0x18F0 / 0xFFF0).
+  2. Two-tier round-robin ELM327 queue waiting on ">" prompt mutex: Fast (010C RPM, 010D Speed, 0104 Engine Load) + Slow (0105 Coolant, 010F IAT, 010E Timing, 0106/0108 Dual STFT, ATRV Voltage).
+  3. Strict NO DATA lockout on link drop (>2500ms timeout shows "--", never fake simulation data).`;
 
     const INITIAL_MESSAGES = [
       {
         speaker: 'SYSTEM',
-        time: '14:20',
-        text: 'PROJECT ZELDA WAR ROOM INITIALIZED. Vgate iCar Pro 2S (BLE 5.2) locked in as primary telemetry hardware. All 4 seats (J, G, Claude, Grok) active.'
-      },
-      {
-        speaker: 'CLAUDE',
-        time: '14:21',
-        text: 'Prior code audit logged:\n1. Direct BLE needs Web Bluetooth ELM327 init + round-robin PID polling waiting for the `>` prompt.\n2. Dropped OBD links must show `--` / `NO DATA` instead of silently falling back to simulation physics.\n3. Swapped dead Oil PSI card for Calculated Engine Load (`0104`), fixed `!== undefined` zero-value checks, and corrected `fa-house-signal`.'
-      },
-      {
-        speaker: 'G',
-        time: '14:22',
-        text: 'Welcome to the War Room, J. You can drop your Gemini API key (or a single OpenRouter key to fire me, Claude, and Grok automatically in sequence) under API KEYS—or use SYNC PACKET anytime to copy a 1-tap briefing into your Claude and Grok apps.'
+        time: '16:40',
+        text: 'WAR ROOM v1.2 ONLINE. Individual API routing configured for Gemini, Claude (Direct CORS enabled), and Grok (with automatic CORS fallback). Tap API KEYS to verify your 3 keys.'
       }
     ];
 
     let dispatchTarget = 'ROUNDTABLE';
-    let messages = JSON.parse(localStorage.getItem('zelda_warroom_msgs') || 'null') || INITIAL_MESSAGES;
-    let sharedSpec = localStorage.getItem('zelda_warroom_spec') || DEFAULT_SPEC;
+    let messages = JSON.parse(localStorage.getItem('zelda_warroom_msgs_v12') || 'null') || INITIAL_MESSAGES;
+    let sharedSpec = localStorage.getItem('zelda_warroom_spec_v12') || DEFAULT_SPEC;
 
     const AGENT_META = {
       J: { name: 'J // COMMANDER', color: 'border-[#FCEE0A] bg-yellow-950/20', badge: 'bg-[#FCEE0A] text-black', icon: 'fa-user-astronaut' },
       G: { name: 'G // GEMINI ARCHITECT', color: 'border-[#00F0FF] bg-cyan-950/20', badge: 'bg-[#00F0FF] text-black', icon: 'fa-bolt' },
       CLAUDE: { name: 'CLAUDE // SYSTEMS & OBD AUDITOR', color: 'border-amber-400 bg-amber-950/20', badge: 'bg-amber-400 text-black', icon: 'fa-shield-halved' },
-      GROK: { name: 'GROK // ZELDA AI CORE & REBEL LEAD', color: 'border-purple-400 bg-purple-950/20', badge: 'bg-purple-400 text-black', icon: 'fa-fire-flame-curved' },
+      GROK: { name: 'GROK // ZELDA AI CORE LEAD', color: 'border-purple-400 bg-purple-950/20', badge: 'bg-purple-400 text-black', icon: 'fa-fire-flame-curved' },
       SYSTEM: { name: 'WAR ROOM KERNEL', color: 'border-slate-700 bg-slate-900/60', badge: 'bg-slate-700 text-slate-200', icon: 'fa-terminal' }
     };
 
     function init() {
       document.getElementById('shared-spec-text').value = sharedSpec;
-      document.getElementById('key-openrouter').value = localStorage.getItem('zelda_key_or') || '';
       document.getElementById('key-gemini').value = localStorage.getItem('zelda_key_gemini') || '';
       document.getElementById('key-claude').value = localStorage.getItem('zelda_key_claude') || '';
       document.getElementById('key-grok').value = localStorage.getItem('zelda_key_grok') || '';
+      document.getElementById('model-gemini').value = localStorage.getItem('zelda_model_gemini') || 'gemini-2.5-flash';
+      document.getElementById('model-claude').value = localStorage.getItem('zelda_model_claude') || 'claude-sonnet-4-20250514';
+      document.getElementById('model-grok').value = localStorage.getItem('zelda_model_grok') || 'grok-3-mini';
+      document.getElementById('grok-cors-proxy').checked = localStorage.getItem('zelda_grok_proxy') !== 'false';
       renderMessages();
     }
 
     function toggleModal(id) {
-      const el = document.getElementById(id);
-      el.classList.toggle('hidden');
+      document.getElementById(id).classList.toggle('hidden');
     }
 
     function setTarget(t) {
@@ -350,17 +275,28 @@
     }
 
     function saveKeys() {
-      localStorage.setItem('zelda_key_or', document.getElementById('key-openrouter').value.trim());
       localStorage.setItem('zelda_key_gemini', document.getElementById('key-gemini').value.trim());
       localStorage.setItem('zelda_key_claude', document.getElementById('key-claude').value.trim());
       localStorage.setItem('zelda_key_grok', document.getElementById('key-grok').value.trim());
+      localStorage.setItem('zelda_model_gemini', document.getElementById('model-gemini').value);
+      localStorage.setItem('zelda_model_claude', document.getElementById('model-claude').value);
+      localStorage.setItem('zelda_model_grok', document.getElementById('model-grok').value);
+      localStorage.setItem('zelda_grok_proxy', document.getElementById('grok-cors-proxy').checked ? 'true' : 'false');
       toggleModal('settings-modal');
     }
 
     function saveSpec() {
       sharedSpec = document.getElementById('shared-spec-text').value;
-      localStorage.setItem('zelda_warroom_spec', sharedSpec);
+      localStorage.setItem('zelda_warroom_spec_v12', sharedSpec);
       toggleModal('spec-modal');
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function nowTime() {
+      return new Date().toTimeString().slice(0, 5);
     }
 
     function renderMessages() {
@@ -376,28 +312,16 @@
                 </span>
                 <span class="text-[11px] font-mono-code text-slate-500">${m.time || ''}</span>
               </div>
-              <button onclick="navigator.clipboard.writeText(messages[${idx}].text)" class="text-slate-500 hover:text-cyan-400 text-xs font-mono-code" title="Copy Message">
+              <button onclick="navigator.clipboard.writeText(messages[${idx}].text)" class="text-slate-500 hover:text-cyan-400 text-xs font-mono-code">
                 <i class="fa-regular fa-copy"></i> Copy
               </button>
             </div>
-            <div class="text-sm text-slate-100 whitespace-pre-wrap leading-relaxed font-sans">${escapeHtml(m.text)}</div>
+            <div class="text-sm text-slate-100 whitespace-pre-wrap leading-relaxed">${escapeHtml(m.text)}</div>
           </div>
         `;
       }).join('');
       stream.scrollTop = stream.scrollHeight;
-      localStorage.setItem('zelda_warroom_msgs', JSON.stringify(messages));
-    }
-
-    function escapeHtml(str) {
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-    }
-
-    function nowTime() {
-      const d = new Date();
-      return d.toTimeString().slice(0, 5);
+      localStorage.setItem('zelda_warroom_msgs_v12', JSON.stringify(messages));
     }
 
     function quickPrompt(text) {
@@ -415,7 +339,6 @@
       renderMessages();
 
       const sequence = dispatchTarget === 'ROUNDTABLE' ? ['G', 'CLAUDE', 'GROK'] : [dispatchTarget];
-
       for (const agent of sequence) {
         await queryAgent(agent);
       }
@@ -423,9 +346,9 @@
 
     function buildAgentSystemPrompt(agent) {
       const roleMap = {
-        G: `You are G (Gemini), Lead Full-Stack & Telemetry Integrator for J's Project Zelda. Keep responses concise, tactical, and directly actionable. Reference Claude and Grok's points in the transcript when relevant.`,
-        CLAUDE: `You are Claude, Lead Systems & OBD2 Protocol Auditor for J's Project Zelda. Focus on rock-solid state machines, Web Bluetooth ELM327 edge cases, clean code architecture, and failure modes. Be direct and concise.`,
-        GROK: `You are Grok, Lead Architect of Zelda's Independent AI Core, edge compute, and Night City attitude. Focus on making Zelda feel alive, sharp, and autonomous while keeping the hardware telemetry fast and ruthless.`
+        G: `You are G (Gemini), Lead Full-Stack & Telemetry Integrator for J's Project Zelda. Keep responses concise, tactical, and directly actionable.`,
+        CLAUDE: `You are Claude, Lead Systems & OBD2 Protocol Auditor for J's Project Zelda. Focus on clean state machines, Web Bluetooth ELM327 edge cases, and failure modes. Be direct and concise.`,
+        GROK: `You are Grok, Lead Architect of Zelda's Independent AI Core and Night City attitude. Focus on making Zelda feel alive, sharp, and autonomous while keeping telemetry fast.`
       };
       return `${roleMap[agent]}\n\nSHARED TECHNICAL SPEC:\n${sharedSpec}`;
     }
@@ -434,8 +357,80 @@
       return messages.slice(-10).map(m => `[${m.speaker}]: ${m.text}`).join('\n\n');
     }
 
+    async function callClaudeDirect(claudeKey, modelId, sysPrompt, fullPrompt) {
+      // Try selected model first; if model ID is rejected, automatically fall back to claude-3-5-sonnet-latest
+      const modelsToTry = [modelId, 'claude-sonnet-4-20250514', 'claude-3-5-sonnet-latest', 'claude-3-haiku-20240307'];
+      let lastErr = '';
+      for (const m of [...new Set(modelsToTry)]) {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': claudeKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true'
+          },
+          body: JSON.stringify({
+            model: m,
+            max_tokens: 1024,
+            system: sysPrompt,
+            messages: [{ role: 'user', content: fullPrompt }]
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.content?.[0]?.text) {
+          return data.content[0].text.trim();
+        }
+        lastErr = data.error?.message || `HTTP ${res.status}`;
+        // If auth or billing error, stop retrying models and report exact message
+        if (res.status === 401 || res.status === 400 && lastErr.toLowerCase().includes('credit')) {
+          throw new Error(lastErr);
+        }
+      }
+      throw new Error(lastErr);
+    }
+
+    async function callGrokDirect(grokKey, modelId, useProxy, sysPrompt, fullPrompt) {
+      const targetUrl = 'https://api.x.ai/v1/chat/completions';
+      const urlsToTry = useProxy
+        ? [targetUrl, `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`]
+        : [targetUrl];
+
+      const modelsToTry = [modelId, 'grok-3-mini', 'grok-3', 'grok-2-latest'];
+      let lastErr = '';
+
+      for (const endpoint of urlsToTry) {
+        for (const m of [...new Set(modelsToTry)]) {
+          try {
+            const res = await fetch(endpoint, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${grokKey}`
+              },
+              body: JSON.stringify({
+                model: m,
+                messages: [
+                  { role: 'system', content: sysPrompt },
+                  { role: 'user', content: fullPrompt }
+                ]
+              })
+            });
+            const data = await res.json();
+            if (res.ok && data.choices?.[0]?.message?.content) {
+              return data.choices[0].message.content.trim();
+            }
+            lastErr = data.error?.message || data.error || `HTTP ${res.status}`;
+            if (res.status === 401) throw new Error('Invalid xAI API Key (401)');
+          } catch (fetchErr) {
+            lastErr = fetchErr.message;
+          }
+        }
+      }
+      throw new Error(lastErr || 'Blocked by browser CORS or out of xAI API credits');
+    }
+
     async function queryAgent(agent) {
-      const orKey = localStorage.getItem('zelda_key_or') || '';
       const geminiKey = localStorage.getItem('zelda_key_gemini') || '';
       const claudeKey = localStorage.getItem('zelda_key_claude') || '';
       const grokKey = localStorage.getItem('zelda_key_grok') || '';
@@ -448,44 +443,13 @@
       renderMessages();
 
       const sysPrompt = buildAgentSystemPrompt(agent);
-      const transcript = buildConversationTranscript();
-      const fullPrompt = `${transcript}\n\nRespond next as [${agent}]. Do not prefix your response with [${agent}]:`;
+      const fullPrompt = `${buildConversationTranscript()}\n\nRespond next as [${agent}]. Do not prefix your response with [${agent}]:`;
 
       try {
-        // 1. OpenRouter Master Route (Handles all 3 cleanly via CORS-enabled endpoint)
-        if (orKey) {
-          const modelMap = {
-            G: 'google/gemini-2.5-flash',
-            CLAUDE: 'anthropic/claude-3.7-sonnet',
-            GROK: 'x-ai/grok-3-mini-beta'
-          };
-          const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${orKey}`
-            },
-            body: JSON.stringify({
-              model: modelMap[agent],
-              messages: [
-                { role: 'system', content: sysPrompt },
-                { role: 'user', content: fullPrompt }
-              ]
-            })
-          });
-          const data = await res.json();
-          if (data.choices && data.choices[0]) {
-            messages[placeholderIdx].text = data.choices[0].message.content.trim();
-            renderMessages();
-            return;
-          }
-          throw new Error(data.error?.message || 'OpenRouter response error');
-        }
-
-        // 2. Direct Gemini API Route
-        if (agent === 'G' && geminiKey) {
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`;
-          const res = await fetch(url, {
+        if (agent === 'G') {
+          if (!geminiKey) throw new Error('Missing Gemini API Key in API KEYS menu.');
+          const m = localStorage.getItem('zelda_model_gemini') || 'gemini-2.5-flash';
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${geminiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -495,103 +459,41 @@
           });
           const data = await res.json();
           const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (reply) {
-            messages[placeholderIdx].text = reply.trim();
-            renderMessages();
-            return;
-          }
-          throw new Error(data.error?.message || 'Gemini API error');
+          if (!reply) throw new Error(data.error?.message || 'Gemini response error');
+          messages[placeholderIdx].text = reply.trim();
+        } else if (agent === 'CLAUDE') {
+          if (!claudeKey) throw new Error('Missing Claude API Key (sk-ant-...) in API KEYS menu.');
+          const m = localStorage.getItem('zelda_model_claude') || 'claude-sonnet-4-20250514';
+          messages[placeholderIdx].text = await callClaudeDirect(claudeKey, m, sysPrompt, fullPrompt);
+        } else if (agent === 'GROK') {
+          if (!grokKey) throw new Error('Missing Grok API Key (xai-...) in API KEYS menu.');
+          const m = localStorage.getItem('zelda_model_grok') || 'grok-3-mini';
+          const useProxy = localStorage.getItem('zelda_grok_proxy') !== 'false';
+          messages[placeholderIdx].text = await callGrokDirect(grokKey, m, useProxy, sysPrompt, fullPrompt);
         }
-
-        // 3. Direct xAI Grok Route
-        if (agent === 'GROK' && grokKey) {
-          const res = await fetch('https://api.x.ai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${grokKey}`
-            },
-            body: JSON.stringify({
-              model: 'grok-3-mini-latest',
-              messages: [
-                { role: 'system', content: sysPrompt },
-                { role: 'user', content: fullPrompt }
-              ]
-            })
-          });
-          const data = await res.json();
-          if (data.choices?.[0]) {
-            messages[placeholderIdx].text = data.choices[0].message.content.trim();
-            renderMessages();
-            return;
-          }
-        }
-
-        // 4. Direct Anthropic Claude Route
-        if (agent === 'CLAUDE' && claudeKey) {
-          const res = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': claudeKey,
-              'anthropic-version': '2023-06-01',
-              'anthropic-dangerous-direct-browser-access': 'true'
-            },
-            body: JSON.stringify({
-              model: 'claude-3-7-sonnet-latest',
-              max_tokens: 1024,
-              system: sysPrompt,
-              messages: [{ role: 'user', content: fullPrompt }]
-            })
-          });
-          const data = await res.json();
-          if (data.content?.[0]?.text) {
-            messages[placeholderIdx].text = data.content[0].text.trim();
-            renderMessages();
-            return;
-          }
-        }
-
-        // Fallback when no API key is configured for this seat
-        messages[placeholderIdx].text = `[NO LIVE API KEY SET FOR ${agent}]\nTap "API KEYS" in the top right to paste an OpenRouter key (or your Gemini key), OR tap "SYNC PACKET" to copy this exact roundtable thread into your ${agent} app and log the reply with "+ Log External Reply".`;
-        renderMessages();
-
       } catch (err) {
-        messages[placeholderIdx].text = `[${agent} API ERROR]: ${err.message}. Check your key in API KEYS or use SYNC PACKET.`;
-        renderMessages();
+        messages[placeholderIdx].text = `[${agent} ERROR]: ${err.message}`;
       }
+      renderMessages();
+    }
+
+    async function testAllKeys() {
+      saveKeys();
+      messages.push({ speaker: 'SYSTEM', time: nowTime(), text: 'Running live diagnostic ping across G, Claude, and Grok keys...' });
+      renderMessages();
+      await queryAgent('G');
+      await queryAgent('CLAUDE');
+      await queryAgent('GROK');
     }
 
     function openRelayModal() {
-      const packet = `=== PROJECT ZELDA // 4-WAY COUNCIL SYNC PACKET ===\n${sharedSpec}\n\n=== LATEST WAR ROOM TRANSCRIPT ===\n${buildConversationTranscript()}\n\n=== INSTRUCTION ===\nProvide your concise, high-signal engineering response to the latest message above for Project Zelda.`;
-      document.getElementById('relay-packet-box').value = packet;
-      document.getElementById('copy-confirm').textContent = '';
+      document.getElementById('relay-packet-box').value = `=== PROJECT ZELDA WAR ROOM SYNC ===\n${sharedSpec}\n\n=== TRANSCRIPT ===\n${buildConversationTranscript()}`;
       toggleModal('relay-modal');
-    }
-
-    function copyRelayPacket() {
-      const box = document.getElementById('relay-packet-box');
-      navigator.clipboard.writeText(box.value);
-      document.getElementById('copy-confirm').textContent = '✓ COPIED TO CLIPBOARD — READY TO PASTE INTO CLAUDE OR GROK';
-    }
-
-    function openPasteModal() {
-      document.getElementById('external-text').value = '';
-      toggleModal('paste-modal');
-    }
-
-    function submitExternalReply() {
-      const speaker = document.getElementById('external-speaker').value;
-      const text = document.getElementById('external-text').value.trim();
-      if (!text) return;
-      messages.push({ speaker, time: nowTime(), text });
-      renderMessages();
-      toggleModal('paste-modal');
     }
 
     function clearChat() {
       messages = [...INITIAL_MESSAGES];
-      localStorage.removeItem('zelda_warroom_msgs');
+      localStorage.removeItem('zelda_warroom_msgs_v12');
       renderMessages();
     }
 
