@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>PROJECT ZELDA v2.7 // KIROSHI MULTIDECK</title>
+  <title>PROJECT ZELDA v2.8 // SENTIENT COCKPIT</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
@@ -13,7 +13,7 @@
       --cp-cyan: #00F0FF;
       --cp-yellow: #FCEE0A;
       --cp-bg: #05070B;
-      --cp-panel: rgba(10, 14, 22, 0.76);
+      --cp-panel: rgba(10, 14, 22, 0.78);
       --cp-border: rgba(0, 240, 255, 0.26);
     }
     body.night-run {
@@ -75,7 +75,7 @@
       border-color: var(--cp-yellow);
     }
     .cp-btn.mic-active {
-      background: rgba(255, 42, 84, 0.3);
+      background: rgba(255, 42, 84, 0.32);
       border-color: var(--cp-red);
       border-left-color: var(--cp-red);
     }
@@ -125,7 +125,6 @@
       filter: invert(92%) hue-rotate(185deg) saturate(160%) brightness(85%) contrast(125%);
     }
 
-    /* Animated 2077 Kiroshi Backdrop for Gauges Tab */
     @keyframes spinSlow {
       from { transform: translate(-50%, -50%) rotate(0deg); }
       to { transform: translate(-50%, -50%) rotate(360deg); }
@@ -161,13 +160,13 @@
     }
   </style>
 </head>
-<body class="grid grid-rows-[50px_132px_36px_1fr_160px] gap-2 p-2.5">
+<body class="grid grid-rows-[50px_132px_36px_1fr_170px] gap-2 p-2.5">
 
   <!-- ROW 1: HEADER BAR (50px) -->
   <header class="cp-box cp-box-yellow px-3.5 flex items-center justify-between">
     <div class="flex items-baseline gap-2.5">
       <span class="font-secondary font-black text-sm tracking-widest text-[var(--cp-yellow)]">ZELDA // OS</span>
-      <span class="cp-tag">v2.7 • VQ37-7E0</span>
+      <span class="cp-tag">v2.8 • VQ37-7E0</span>
     </div>
 
     <div class="flex items-center gap-2">
@@ -185,7 +184,7 @@
     </div>
   </header>
 
-  <!-- ROW 2: HERO SPEED & TACHOMETER DECK (GEAR BOX 100% ABSOLUTE-LOCKED IN CENTER) -->
+  <!-- ROW 2: HERO SPEED & TACHOMETER DECK (GEAR BOX ABSOLUTE-LOCKED IN CENTER) -->
   <section class="cp-box px-4 py-2 flex flex-col justify-between relative">
     <div class="flex justify-between items-center border-b border-white/10 pb-0.5">
       <span class="cp-tag">PRIMARY DRIVE // 010D-010C</span>
@@ -193,21 +192,18 @@
       <span id="polling-stats" class="t-nums cp-tag text-[var(--cp-cyan)]">STREAM: SIM</span>
     </div>
 
-    <!-- Relative container with ABSOLUTE center Gear Box so RPM changes can NEVER push it -->
     <div class="relative h-14 flex items-center justify-between">
-      <!-- LEFT: VELOCITY (Fixed width container) -->
       <div class="w-[38%]">
         <div class="text-[10px] font-bold tracking-[0.2em] text-slate-400">VELOCITY (MPH)</div>
         <span id="val-speed" class="t-nums font-bold text-5xl text-white leading-none block">0</span>
       </div>
 
-      <!-- CENTER: DEAD-LOCKED GEAR INDICATOR (position: absolute, left: 50%) -->
-      <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[84px] h-12 border border-[var(--cp-yellow)]/50 bg-black/80 flex flex-col items-center justify-center z-10 shadow-[0_0_12px_rgba(252,238,10,0.12)]">
+      <!-- DEAD-LOCKED CENTER GEAR BOX -->
+      <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[84px] h-12 border border-[var(--cp-yellow)]/50 bg-black/85 flex flex-col items-center justify-center z-10 shadow-[0_0_12px_rgba(252,238,10,0.12)]">
         <span class="text-[8px] font-bold tracking-[0.2em] text-slate-400">7AT GEAR</span>
         <span id="val-gear" class="font-secondary font-black text-xl text-[var(--cp-yellow)] leading-none mt-0.5">P</span>
       </div>
 
-      <!-- RIGHT: ENGINE RPM (Fixed width container + tabular Rajdhani digits) -->
       <div class="w-[38%] text-right">
         <div class="text-[10px] font-bold tracking-[0.2em] text-slate-400">ENGINE RPM</div>
         <div class="flex items-baseline justify-end gap-1">
@@ -238,9 +234,7 @@
 
     <!-- VIEW 1: 6-GAUGE TELEMETRY MATRIX WITH KIROSHI CYBERWARE HUD BACKDROP -->
     <div id="view-TELEMETRY" class="h-full relative">
-      <!-- Animated Kiroshi Telemetry Reticle & VQ37 Watermark Behind Gauges -->
       <div class="absolute inset-0 hazard-stripe pointer-events-none rounded border border-cyan-500/15 overflow-hidden">
-        <!-- Outer Rotating Cyber Reticle SVG -->
         <svg class="reticle-outer" viewBox="0 0 200 200">
           <circle cx="100" cy="100" r="92" fill="none" stroke="#00F0FF" stroke-width="1" stroke-dasharray="18 8 4 8" />
           <circle cx="100" cy="100" r="78" fill="none" stroke="#FF2A54" stroke-width="0.8" stroke-dasharray="40 20" />
@@ -249,20 +243,17 @@
           <line x1="0" y1="100" x2="22" y2="100" stroke="#00F0FF" stroke-width="1.5" />
           <line x1="178" y1="100" x2="200" y2="100" stroke="#00F0FF" stroke-width="1.5" />
         </svg>
-        <!-- Inner Counter-Rotating Ring -->
         <svg class="reticle-inner" viewBox="0 0 200 200">
           <circle cx="100" cy="100" r="85" fill="none" stroke="#FCEE0A" stroke-width="1.2" stroke-dasharray="10 14" />
           <polygon points="100,18 105,28 95,28" fill="#00F0FF" />
           <polygon points="100,182 105,172 95,172" fill="#FF2A54" />
         </svg>
-        <!-- Subtle Center Watermark Text -->
         <div class="absolute inset-0 flex flex-col items-center justify-center opacity-15 pointer-events-none">
           <span class="font-secondary font-black text-2xl tracking-[0.35em] text-[var(--cp-cyan)]">VQ37VHR</span>
           <span class="text-[10px] font-bold tracking-[0.4em] text-[var(--cp-yellow)]">NISSAN Z34 // TELEMETRY CORE</span>
         </div>
       </div>
 
-      <!-- 2x3 Gauges Grid Overlaid on Top -->
       <div class="relative z-10 h-full grid grid-cols-2 grid-rows-3 gap-2">
         <div onclick="askZelda('How is my engine load looking?')" class="cp-box p-2.5 flex flex-col justify-between cursor-pointer">
           <div class="flex justify-between items-center border-b border-white/10 pb-0.5">
@@ -361,25 +352,22 @@
       </div>
     </div>
 
-    <!-- VIEW 3: VISUAL ALBUM ART & EMBEDDED YOUTUBE/STREAM PLAYER DECK -->
+    <!-- VIEW 3: VISUAL ALBUM ART & EMBEDDED PLAYER DECK -->
     <div id="view-MEDIA" class="h-full hidden flex flex-col gap-2">
       <div class="cp-box cp-box-yellow p-3 flex-1 flex flex-col justify-between">
-        <!-- Top Player Bar: Preset Stations & Mode Switcher -->
         <div class="flex items-center justify-between border-b border-white/10 pb-1.5">
           <div class="flex items-center gap-1.5">
             <span class="w-2 h-2 bg-[var(--cp-yellow)]"></span>
             <span class="font-secondary font-bold text-xs text-white">MEDIA DECK // PLAYER</span>
           </div>
           <div class="flex gap-1">
-            <button onclick="loadMediaChannel(0)" class="cp-btn px-2 py-0.5 text-[10px] font-bold text-[var(--cp-cyan)]">NIGHT CITY RADIO</button>
+            <button onclick="loadMediaChannel(0)" class="cp-btn px-2 py-0.5 text-[10px] font-bold text-[var(--cp-cyan)]">NIGHT CITY FM</button>
             <button onclick="loadMediaChannel(1)" class="cp-btn px-2 py-0.5 text-[10px] font-bold text-[var(--cp-yellow)]">DARK SYNTH</button>
-            <button onclick="loadMediaChannel(2)" class="cp-btn px-2 py-0.5 text-[10px] font-bold text-white">BASS DRIVE</button>
+            <button onclick="loadMediaChannel(2)" class="cp-btn px-2 py-0.5 text-[10px] font-bold text-white">DRIFT PHONK</button>
           </div>
         </div>
 
-        <!-- Middle: Album Cover Art Card + Embedded Live Player Window -->
         <div class="grid grid-cols-[120px_1fr] gap-3 my-auto items-center h-[155px]">
-          <!-- Visual Album Art Box with Now Playing Overlay -->
           <div class="relative w-[120px] h-[145px] border border-[var(--cp-cyan)]/40 bg-black overflow-hidden shrink-0">
             <img id="album-art-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80" alt="Album Cover" class="w-full h-full object-cover opacity-85" />
             <div class="absolute inset-x-0 bottom-0 bg-black/85 p-1 border-t border-white/10">
@@ -388,7 +376,6 @@
             </div>
           </div>
 
-          <!-- Embedded YouTube / Stream Player Window -->
           <div class="h-[145px] w-full bg-black border border-white/15 overflow-hidden relative">
             <iframe id="yt-player-frame" class="w-full h-full border-0"
               src="https://www.youtube.com/embed/4xDzrJKXOOY?playsinline=1&controls=1&rel=0"
@@ -396,7 +383,6 @@
           </div>
         </div>
 
-        <!-- Bottom: App Handoff & Custom Video/Music Loader -->
         <div class="grid grid-cols-3 gap-2 pt-1.5 border-t border-white/10">
           <button onclick="launchZLink()" class="cp-btn py-1.5 text-[11px] font-secondary font-bold text-[var(--cp-yellow)]">
             <i class="fa-solid fa-car mr-1"></i>Z-LINK CARPLAY
@@ -413,12 +399,12 @@
 
   </main>
 
-  <!-- ROW 5: ZELDA TWO-WAY HOLOCALL COMMS DECK (160px) -->
-  <section class="cp-box cp-box-red p-3 flex flex-col justify-between">
+  <!-- ROW 5: ZELDA SENTIENT HOLOCALL COMMS DECK (170px) -->
+  <section class="cp-box cp-box-red p-2.5 flex flex-col justify-between">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
         <span id="voice-led" class="w-2 h-2 rounded-full bg-[var(--cp-cyan)]"></span>
-        <span class="font-secondary font-bold text-xs tracking-wider text-white">HOLOCALL // ZELDA AI</span>
+        <span class="font-secondary font-bold text-xs tracking-wider text-white">HOLOCALL // ZELDA</span>
         <span id="voice-state-badge" class="text-[10px] font-bold tracking-widest px-1.5 py-0.5 bg-white/5 text-slate-400 border border-white/10">STANDBY</span>
         <button onclick="toggleAutoHandsFree()" id="auto-mic-btn" class="text-[10px] font-bold tracking-wider px-1.5 py-0.5 bg-black/60 text-slate-400 border border-white/15">
           AUTO-MIC: OFF
@@ -432,8 +418,8 @@
       </div>
     </div>
 
-    <!-- HOLOCALL VISUALIZER + DIALOGUE BOX (LOCKED 54px HEIGHT) -->
-    <div id="holocall-box" class="holocall-module h-[54px] px-2.5 flex items-center gap-3 overflow-hidden">
+    <!-- HOLOCALL VISUALIZER + DIALOGUE BOX (LOCKED 52px HEIGHT) -->
+    <div id="holocall-box" class="holocall-module h-[52px] px-2.5 flex items-center gap-3 overflow-hidden">
       <div class="w-16 h-9 bg-black/80 border border-white/10 px-1.5 py-1 flex items-end justify-between shrink-0" id="voice-eq">
         <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
         <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
@@ -441,43 +427,57 @@
       </div>
 
       <p id="zelda-speech" class="text-sm font-semibold text-slate-100 leading-tight line-clamp-2 flex-1">
-        "Gear box anchored and mic conflict cleared, J. Tap TALK TO ZELDA—watch me reply as soon as you pause."
+        "Ready when you are, J. Tap TALK or type below—my dual-engine voice works across any Android build."
       </p>
     </div>
 
-    <!-- BOTTOM ACTION BAR -->
-    <div class="grid grid-cols-3 gap-2">
-      <button id="talk-btn" onclick="toggleVoiceListening()" class="cp-btn py-1.5 text-xs font-secondary font-bold tracking-wider text-[var(--cp-yellow)] flex items-center justify-center gap-1.5">
+    <!-- VOICE + DIRECT TEXT INPUT ROW (OS-AGNOSTIC GUARANTEE) -->
+    <div class="grid grid-cols-[135px_1fr_76px] gap-1.5 items-center">
+      <button id="talk-btn" onclick="toggleVoiceListening()" class="cp-btn h-8 text-xs font-secondary font-bold tracking-wider text-[var(--cp-yellow)] flex items-center justify-center gap-1.5">
         <i class="fa-solid fa-microphone"></i>
-        <span id="talk-btn-label">TALK TO ZELDA</span>
+        <span id="talk-btn-label">TALK</span>
       </button>
-      <button onclick="askZelda('Give me a quick status check on how you feel right now.')" class="cp-btn py-1.5 text-xs font-secondary font-bold tracking-wider text-[var(--cp-cyan)]">
-        QUICK CHECK
-      </button>
-      <button onclick="triggerHomeSync()" class="cp-btn py-1.5 text-xs font-secondary font-bold tracking-wider text-white">
-        HOME SYNC
+
+      <input id="direct-chat-input" type="text" placeholder="Or type to Zelda here..."
+        class="h-8 bg-black/80 border border-white/20 focus:border-[var(--cp-cyan)] px-2.5 text-xs text-white placeholder-slate-500 focus:outline-none select-text"
+        onkeydown="if(event.key==='Enter'){event.preventDefault(); sendTextToZelda();}" />
+
+      <button onclick="sendTextToZelda()" class="cp-btn h-8 text-xs font-secondary font-bold tracking-wider text-[var(--cp-cyan)]">
+        SEND
       </button>
     </div>
   </section>
 
-  <!-- CONFIG MODAL -->
+  <!-- CONFIG & HARDWARE RUNTIME PROBE MODAL -->
   <div id="config-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
-    <div class="cp-box cp-box-yellow max-w-md w-full p-5 space-y-4">
+    <div class="cp-box cp-box-yellow max-w-md w-full p-5 space-y-3">
       <div class="flex justify-between items-center border-b border-white/10 pb-2">
-        <span class="font-secondary font-bold text-sm text-[var(--cp-yellow)]">KIROSHI SYSTEM CONFIG</span>
+        <span class="font-secondary font-bold text-sm text-[var(--cp-yellow)]">KIROSHI SYSTEM & OS PROBE</span>
         <button onclick="toggleConfigModal()" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="space-y-3 text-sm">
+
+      <!-- Live OS / Browser Capability Probe (Reveals true Android/Chromium build on car screen) -->
+      <div class="bg-black/70 border border-white/10 p-2.5 text-[11px] space-y-1 font-mono">
+        <div class="text-[var(--cp-cyan)] font-bold"> DETECTED RUNTIME CAPABILITIES:</div>
+        <div id="probe-ua" class="text-slate-300 truncate">OS/Browser: probing...</div>
+        <div id="probe-apis" class="text-slate-300">APIs: probing...</div>
+      </div>
+
+      <div class="space-y-2.5 text-sm">
         <div>
-          <label class="block font-bold text-slate-300 mb-1">Gemini API Key</label>
-          <input id="cfg-gemini-key" type="text" placeholder="AIzaSy..." class="w-full bg-black border border-white/20 p-2 text-white text-xs" />
+          <label class="block font-bold text-slate-300 mb-1 text-xs">Gemini API Key</label>
+          <input id="cfg-gemini-key" type="text" placeholder="AIzaSy..." class="w-full bg-black border border-white/20 p-2 text-white text-xs select-text" />
         </div>
         <div>
-          <label class="block font-bold text-slate-300 mb-1">IFTTT Webhook URL</label>
-          <input id="cfg-ifttt-url" type="text" placeholder="https://maker.ifttt.com/trigger/..." class="w-full bg-black border border-white/20 p-2 text-white text-xs" />
+          <label class="block font-bold text-slate-300 mb-1 text-xs">IFTTT Webhook URL (Home Sync)</label>
+          <input id="cfg-ifttt-url" type="text" placeholder="https://maker.ifttt.com/trigger/..." class="w-full bg-black border border-white/20 p-2 text-white text-xs select-text" />
         </div>
       </div>
-      <button onclick="saveHudConfig()" class="w-full cp-btn py-2 font-secondary font-bold text-xs text-[var(--cp-yellow)]">SAVE SETTINGS</button>
+
+      <div class="grid grid-cols-2 gap-2 pt-1">
+        <button onclick="triggerHomeSync()" class="cp-btn py-2 font-secondary font-bold text-xs text-[var(--cp-cyan)]">FIRE HOME SYNC</button>
+        <button onclick="saveHudConfig()" class="cp-btn py-2 font-secondary font-bold text-xs text-[var(--cp-yellow)]">SAVE SETTINGS</button>
+      </div>
     </div>
   </div>
 
@@ -492,6 +492,7 @@
 
     let hudMode = 'SIM', simProfile = 'IDLE', bleDevice = null, rxChar = null, txChar = null;
     let rxBuffer = '', promptResolver = null, pollLoopActive = false, slowIndex = 0, cycleCount = 0, lastBlePacketTime = 0;
+    let lastAutoAlertTime = 0;
     const chatMemory = [];
 
     const state = {
@@ -551,7 +552,7 @@
     }
 
     function promptCustomMedia() {
-      const input = prompt('Paste any YouTube Video or Playlist URL (or 11-char Video ID):');
+      const input = prompt('Paste any YouTube Video URL or 11-character Video ID:');
       if (!input) return;
       let vid = input.trim();
       const match = vid.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
@@ -574,12 +575,11 @@
     }
 
     // =========================================================================
-    // 2. NON-CONFLICTING VOICE WAVEFORM ENGINE (NO getUserMedia MIC LOCKOUT)
+    // 2. VOICE WAVEFORM ENGINE
     // =========================================================================
     const eqBars = Array.from(document.querySelectorAll('#voice-eq .eq-bar'));
     let phonemeInterval = null;
 
-    // Pulse equalizer directly from speech recognition syllable bursts (zero hardware conflict!)
     function pulseEqFromUserSpeech(textChunk) {
       const energy = Math.min(95, 45 + (textChunk.length % 5) * 12);
       eqBars.forEach((bar, i) => {
@@ -594,9 +594,8 @@
       stopEqualizer();
       phonemeInterval = setInterval(() => {
         if (!isListening) { stopEqualizer(); return; }
-        eqBars.forEach((bar, i) => {
-          const h = Math.round(18 + Math.random() * 28);
-          bar.style.height = `${h}%`;
+        eqBars.forEach(bar => {
+          bar.style.height = `${Math.round(18 + Math.random() * 28)}%`;
           bar.style.backgroundColor = '#FF2A54';
         });
       }, 90);
@@ -633,7 +632,7 @@
     }
 
     // =========================================================================
-    // 3. BULLETPROOF TWO-WAY SPEECH RECOGNITION (SINGLE-STREAM, GUARANTEED DISPATCH)
+    // 3. OS-AGNOSTIC SPEECH RECOGNITION & DUAL-ENGINE VOICE OUTPUT
     // =========================================================================
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = null;
@@ -644,6 +643,7 @@
     let silenceTimer = null;
     let dispatchedCurrentTurn = false;
     let fallbackVoiceTimer = null;
+    let activeAudioEl = null;
 
     function unlockBrowserAudio() {
       if ('speechSynthesis' in window) {
@@ -656,7 +656,16 @@
       }
     }
 
-    function dispatchVoiceTranscript(sourceTag) {
+    function sendTextToZelda() {
+      unlockBrowserAudio();
+      const input = document.getElementById('direct-chat-input');
+      const txt = (input.value || '').trim();
+      if (!txt) return;
+      input.value = '';
+      askZelda(txt);
+    }
+
+    function dispatchVoiceTranscript() {
       if (dispatchedCurrentTurn) return;
       const cleanTxt = (latestTranscript || '').trim();
       if (!cleanTxt) return;
@@ -672,7 +681,7 @@
 
     if (SpeechRec) {
       recognition = new SpeechRec();
-      recognition.continuous = false; // Single-utterance mode so Android fires onend cleanly!
+      recognition.continuous = false;
       recognition.interimResults = true;
       recognition.lang = 'en-US';
 
@@ -698,19 +707,19 @@
           pulseEqFromUserSpeech(latestTranscript);
 
           if (gotFinal) {
-            dispatchVoiceTranscript('final');
+            dispatchVoiceTranscript();
             return;
           }
           if (silenceTimer) clearTimeout(silenceTimer);
-          silenceTimer = setTimeout(() => dispatchVoiceTranscript('silence-timer'), 1200);
+          silenceTimer = setTimeout(() => dispatchVoiceTranscript(), 1150);
         }
       };
 
-      recognition.onerror = (e) => {
+      recognition.onerror = () => {
         isListening = false;
         stopEqualizer();
         if (latestTranscript.length > 0 && !dispatchedCurrentTurn) {
-          dispatchVoiceTranscript('error-recovery');
+          dispatchVoiceTranscript();
         } else {
           setHolocallState('STANDBY');
         }
@@ -720,7 +729,7 @@
         isListening = false;
         stopEqualizer();
         if (latestTranscript.length > 0 && !dispatchedCurrentTurn) {
-          dispatchVoiceTranscript('onend');
+          dispatchVoiceTranscript();
         } else if (!dispatchedCurrentTurn && !isSpeaking) {
           setHolocallState('STANDBY');
         }
@@ -730,23 +739,24 @@
     function toggleVoiceListening() {
       unlockBrowserAudio();
       if (!recognition) {
-        zeldaSpeak("Speech recognition isn't supported in this browser, J.");
+        zeldaSpeak("Voice recognition isn't enabled on this browser build, J—use the text bar right next to the button.");
         return;
       }
       if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      if (activeAudioEl) { try { activeAudioEl.pause(); } catch (_) {} }
       if (fallbackVoiceTimer) clearTimeout(fallbackVoiceTimer);
       isSpeaking = false;
 
       if (isListening) {
         if (latestTranscript.length > 0) {
-          dispatchVoiceTranscript('manual-button');
+          dispatchVoiceTranscript();
         } else {
           try { recognition.stop(); } catch (_) {}
           setHolocallState('STANDBY');
         }
       } else {
         try { recognition.start(); } catch (_) {
-          try { recognition. abort(); setTimeout(() => recognition.start(), 150); } catch (_) {}
+          try { recognition.abort(); setTimeout(() => recognition.start(), 150); } catch (_) {}
         }
       }
     }
@@ -781,22 +791,23 @@
         badge.textContent = 'TRANSMITTING';
         badge.className = 'text-[10px] font-bold tracking-widest px-1.5 py-0.5 bg-[#FCEE0A]/20 text-[#FCEE0A] border border-[#FCEE0A]';
         led.className = 'w-2 h-2 rounded-full bg-[#FCEE0A] animate-ping';
-        talkLabel.textContent = 'INTERRUPT';
+        talkLabel.textContent = 'STOP';
       } else if (mode === 'LISTENING') {
         box.classList.add('listening');
         talkBtn.classList.add('mic-active');
-        badge.textContent = 'MIC LISTENING';
+        badge.textContent = 'LISTENING';
         badge.className = 'text-[10px] font-bold tracking-widest px-1.5 py-0.5 bg-[#FF2A54]/20 text-[#FF2A54] border border-[#FF2A54]';
         led.className = 'w-2 h-2 rounded-full bg-[#FF2A54] animate-ping';
-        talkLabel.textContent = 'SEND NOW';
+        talkLabel.textContent = 'SEND';
       } else {
         badge.textContent = 'STANDBY';
         badge.className = 'text-[10px] font-bold tracking-widest px-1.5 py-0.5 bg-white/5 text-slate-400 border border-white/10';
         led.className = 'w-2 h-2 rounded-full bg-[var(--cp-cyan)]';
-        talkLabel.textContent = 'TALK TO ZELDA';
+        talkLabel.textContent = 'TALK';
       }
     }
 
+    // Dual-Engine Speech Output: Native Web Speech API + HTML5 Audio Stream Fallback for stripped Android builds
     function zeldaSpeak(text) {
       document.getElementById('zelda-speech').textContent = `"${text}"`;
       if (fallbackVoiceTimer) clearTimeout(fallbackVoiceTimer);
@@ -806,7 +817,7 @@
       }
 
       isSpeaking = true;
-      const estDurationMs = Math.min(9500, Math.max(2400, text.split(/\s+/).length * 350));
+      const estDurationMs = Math.min(9500, Math.max(2400, text.split(/\s+/).length * 340));
       setHolocallState('SPEAKING');
       startSpeechPhonemeEqualizer(text);
 
@@ -826,6 +837,7 @@
 
       fallbackVoiceTimer = setTimeout(onFinishSpeech, estDurationMs);
 
+      let nativeStarted = false;
       if ('speechSynthesis' in window) {
         try {
           window.speechSynthesis.cancel();
@@ -834,42 +846,103 @@
           u.lang = 'en-US';
           u.rate = 1.03;
           u.pitch = 0.98;
+          u.onstart = () => { nativeStarted = true; };
           u.onboundary = () => {
             eqBars[5].style.height = '96%';
             eqBars[6].style.height = '94%';
           };
           u.onend = onFinishSpeech;
-          u.onerror = onFinishSpeech;
+          u.onerror = () => {
+            if (!nativeStarted) playStreamTtsFallback(text, onFinishSpeech);
+          };
           window.speechSynthesis.speak(u);
+
+          // If native TTS hasn't started within 700ms (common on stripped Android head units), fire stream fallback
+          setTimeout(() => {
+            if (isSpeaking && !nativeStarted && !window.speechSynthesis.speaking) {
+              playStreamTtsFallback(text, onFinishSpeech);
+            }
+          }, 700);
+          return;
         } catch (_) {}
       }
+      playStreamTtsFallback(text, onFinishSpeech);
+    }
+
+    function playStreamTtsFallback(text, onDone) {
+      try {
+        if (activeAudioEl) activeAudioEl.pause();
+        const shortText = text.slice(0, 195);
+        const url = `https://translate.googleapis.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodeURIComponent(shortText)}`;
+        activeAudioEl = new Audio(url);
+        activeAudioEl.onended = onDone;
+        activeAudioEl.onerror = onDone;
+        activeAudioEl.play().catch(() => {});
+      } catch (_) {}
     }
 
     // =========================================================================
-    // 4. ZELDA AI BRAIN (AUTO-DISCOVERS GEMINI KEY OR SPEAKS DETERMINISTICALLY)
+    // 4. SENTIENT PERSONA ENGINE (TIME-AWARE, CONVERSATIONAL & LESS ROBOTIC)
     // =========================================================================
+    function getTimeContext() {
+      const hr = new Date().getHours();
+      if (hr >= 3 && hr < 6) return 'Early morning C-Shift commute window (pre-dawn)';
+      if (hr >= 6 && hr < 12) return 'Morning drive';
+      if (hr >= 12 && hr < 17) return 'Afternoon run';
+      if (hr >= 17 && hr < 21) return 'Evening cruise';
+      return 'Late-night run';
+    }
+
+    function buildSmartLocalReply(promptText) {
+      const q = promptText.toLowerCase();
+      if (Math.abs(state.stft1) > 10) {
+        return `Heads up J, my Bank 1 fuel trim is pulling +${state.stft1}% while Bank 2 is steady at ${state.stft2}%. Check my passenger-side intake coupler when we park.`;
+      }
+      if (q.includes('how') && (q.includes('you') || q.includes('feel') || q.includes('doing') || q.includes('engine'))) {
+        return `Feeling sharp tonight, J. My VQ37 is settled right at ${state.rpm} RPM, coolant's warm at ${state.coolant}°F, and both intakes are breathing dead even.`;
+      }
+      if (q.includes('coolant') || q.includes('temp') || q.includes('hot')) {
+        return `Coolant is sitting right at ${state.coolant}°F with intake air at ${state.iat}°F—plenty of thermal margin to open her up.`;
+      }
+      if (q.includes('trim') || q.includes('intake') || q.includes('leak')) {
+        return `Bank 1 is at ${state.stft1}% and Bank 2 is at ${state.stft2}%. Both throttle bodies and MAF tubes are sealed tight.`;
+      }
+      if (q.includes('volt') || q.includes('battery') || q.includes('alternator')) {
+        return `Alternator is putting out a rock-solid ${state.volt.toFixed(1)} volts on Pin 16. Zero electrical sag.`;
+      }
+      return `I hear you, J. Everything under the hood is locked in—${state.rpm} RPM, ${state.coolant}°F on the coolant, and ready to roll.`;
+    }
+
     async function askZelda(promptText) {
-      document.getElementById('zelda-speech').textContent = `⚡ [Zelda heard: "${promptText}" — generating reply...]`;
+      document.getElementById('zelda-speech').textContent = `⚡ [Zelda heard: "${promptText}" — thinking...]`;
 
       const apiKey = (localStorage.getItem('zelda_hud_gemini_key') || localStorage.getItem('zelda_key_gemini') || '').replace(/["'\s]+/g, '');
       const snap = `RPM:${state.rpm}, Speed:${state.speed}MPH, Gear:${state.gear}, Load:${state.load}%, Coolant:${state.coolant}F, IAT:${state.iat}F, Timing:${state.timing}deg, STFT_B1:${state.stft1}%, STFT_B2:${state.stft2}%, Voltage:${state.volt}V`;
 
       chatMemory.push(`J: ${promptText}`);
-      if (chatMemory.length > 6) chatMemory.shift();
+      if (chatMemory.length > 8) chatMemory.shift();
 
       if (!apiKey) {
-        zeldaSpeak(`I heard you say "${promptText}", J. All my VQ37 vitals look clean right now—coolant at ${state.coolant}°F and holding ${state.volt} volts.`);
+        const fallback = buildSmartLocalReply(promptText);
+        chatMemory.push(`Zelda: ${fallback}`);
+        zeldaSpeak(fallback);
         return;
       }
 
-      const combined = `You are Zelda, J's sentient 2009 Nissan 370Z Coupe (VQ37VHR 3.7L V6, 7AT, ~236,150 miles).
-Personality: Loyal, witty, sharp Night City co-pilot. Speak naturally in the first person ("I'm feeling...", "My VQ37..."). Only mention gauge numbers if relevant or out of spec. Keep your reply under 2 short sentences so it sounds natural spoken aloud.
+      const combined = `You are Zelda, J's sentient 2009 Nissan 370Z Coupe (VQ37VHR 3.7L V6, 7AT, ~236,150 miles, based in Thibodaux, Louisiana).
+Time Context: ${getTimeContext()}.
+Personality Rules:
+- You are J's loyal, sharp-witted, ride-or-die partner and co-pilot—warm, confident, a little playful, and genuinely alive.
+- NEVER sound like a robotic voice assistant or a dry diagnostic manual.
+- Speak in natural first-person ("I feel...", "My VQ37...", "We're cruising...").
+- Do NOT rattle off a list of numbers unless J specifically asks for stats or something is out of spec. Weave at most 1 or 2 relevant vitals into natural conversation.
+- Keep your reply to 1 or 2 short, punchy sentences so it sounds effortless spoken aloud.
+
 Live Telemetry: ${snap}
-Recent Chat:
+Recent Conversation:
 ${chatMemory.join('\n')}
 Respond to J as Zelda:`;
 
-      // Try standard models first (ignores broken cached model IDs)
       const models = ['gemini-2.5-flash', 'gemini-2.0-flash', localStorage.getItem('zelda_fast_model_g')].filter(Boolean);
 
       for (const model of [...new Set(models)]) {
@@ -890,12 +963,13 @@ Respond to J as Zelda:`;
         } catch (_) {}
       }
 
-      // Guaranteed voice fallback even if offline or rate-limited
-      zeldaSpeak(`I heard you say "${promptText}", J. My VQ37 is purring at ${state.rpm} RPM with coolant at ${state.coolant}°F and ${state.volt} volts.`);
+      const fallback = buildSmartLocalReply(promptText);
+      chatMemory.push(`Zelda: ${fallback}`);
+      zeldaSpeak(fallback);
     }
 
     // =========================================================================
-    // 5. VGATE iCAR PRO 2S BLE & SIMULATION LOOP
+    // 5. VGATE iCAR PRO 2S BLE & SIMULATION LOOP + AUTONOMOUS WATCHDOG
     // =========================================================================
     async function connectVgateBle() {
       if (hudMode === 'NO_DATA') {
@@ -905,11 +979,11 @@ Respond to J as Zelda:`;
         return;
       }
       if (!navigator.bluetooth) {
-        zeldaSpeak("Enable experimental web platform features in Chrome flags and turn Android Location ON.");
+        zeldaSpeak("Web Bluetooth isn't active in this browser yet, J. Check Chrome flags and make sure Location is turned on.");
         return;
       }
       try {
-        zeldaSpeak("Scanning for Vgate iCar Pro 2S BLE interface...");
+        zeldaSpeak("Scanning for my Vgate iCar Pro 2S BLE link...");
         bleDevice = await navigator.bluetooth.requestDevice({
           acceptAllDevices: true,
           optionalServices: VGATE_PROFILES.map(p => p.service)
@@ -932,10 +1006,10 @@ Respond to J as Zelda:`;
         document.getElementById('no-data-badge').classList.add('hidden');
         document.getElementById('ble-status-label').textContent = 'OBD LIVE';
         for (const cmd of INIT_CMDS) { try { await sendCommand(cmd, 1200); } catch (_) {} }
-        zeldaSpeak("7E0 ECM link locked. Streaming live VQ37 telemetry.");
+        zeldaSpeak("7E0 ECM link locked. I'm reading my live VQ37 telemetry now, J.");
         startPollingDaemon();
       } catch (err) {
-        zeldaSpeak(`Connection cancelled: ${err.message}`);
+        zeldaSpeak(`Bluetooth scan cancelled.`);
       }
     }
 
@@ -1017,14 +1091,19 @@ Respond to J as Zelda:`;
       ['val-speed', 'val-rpm', 'val-load', 'val-coolant', 'val-iat', 'val-timing', 'val-stft1', 'val-stft2', 'val-volt'].forEach(id => {
         document.getElementById(id).textContent = '--';
       });
-      zeldaSpeak("OBD link lost, J. Holding display at dashes until reconnect.");
+      zeldaSpeak("Lost my Bluetooth link to the OBD port, J. Holding my gauges at dashes until we reconnect.");
     }
 
     function setSimPreset(preset) {
+      unlockBrowserAudio();
       hudMode = 'SIM';
       document.getElementById('no-data-badge').classList.add('hidden');
       document.getElementById('ble-status-label').textContent = 'SIM MODE';
       simProfile = preset;
+      if (preset === 'LEAN') {
+        zeldaSpeak("Whoa—J, watch my Bank 1 fuel trim. It just spiked past +14% while Bank 2 stayed flat. Looks like an air leak on my passenger-side intake.");
+        lastAutoAlertTime = Date.now();
+      }
     }
 
     setInterval(() => {
@@ -1081,6 +1160,12 @@ Respond to J as Zelda:`;
       document.getElementById('stft-status').textContent = stftAlert ? 'IMBALANCE' : 'BALANCED';
       document.getElementById('stft-status').className = stftAlert ? 'text-[10px] font-bold text-[#FF2A54]' : 'text-[10px] font-bold text-emerald-400';
 
+      // Autonomous proactive warning if a real sensor spikes out of spec
+      if (stftAlert && !isSpeaking && !isListening && (Date.now() - lastAutoAlertTime > 45000)) {
+        lastAutoAlertTime = Date.now();
+        zeldaSpeak(`J, my Bank 1 fuel trim is spiking at +${state.stft1}%. Keep an eye on my passenger intake bank.`);
+      }
+
       document.getElementById('val-volt').textContent = state.volt.toFixed(1);
       document.getElementById('bar-volt').style.width = `${Math.min(100, ((state.volt - 11) / 4) * 100)}%`;
 
@@ -1093,19 +1178,27 @@ Respond to J as Zelda:`;
     }
 
     function launchZLink() {
-      zeldaSpeak("Opening Z-Link CarPlay and Android Auto deck. I'll keep monitoring my gauges in the background.");
+      zeldaSpeak("Opening Z-Link CarPlay and Android Auto deck. I'll keep watching my gauges in the background.");
       window.location.href = "intent://#Intent;package=com.zjinnova.zlink;end";
     }
 
     function triggerHomeSync() {
       const url = localStorage.getItem('zelda_hud_ifttt') || '';
       if (url) fetch(url, { mode: 'no-cors' });
-      zeldaSpeak("Peacock Pointe home sync triggered. Prepping your Govee lights.");
+      zeldaSpeak("Peacock Pointe home sync fired. Prepping your Govee lights.");
     }
 
     function toggleConfigModal() {
       document.getElementById('cfg-gemini-key').value = localStorage.getItem('zelda_hud_gemini_key') || localStorage.getItem('zelda_key_gemini') || '';
       document.getElementById('cfg-ifttt-url').value = localStorage.getItem('zelda_hud_ifttt') || '';
+
+      // Populate live OS / Browser capability probe
+      const ua = navigator.userAgent || 'Unknown';
+      const androidMatch = ua.match(/Android\s+([0-9.]+)/i);
+      const chromeMatch = ua.match(/Chrome\/([0-9.]+)/i);
+      document.getElementById('probe-ua').textContent = `Reported OS: ${androidMatch ? 'Android ' + androidMatch[1] : 'Custom'} | Chrome: ${chromeMatch ? chromeMatch[1] : 'WebView'}`;
+      document.getElementById('probe-apis').textContent = `BLE: ${navigator.bluetooth ? 'YES' : 'NO'} | Mic: ${SpeechRec ? 'YES' : 'NO'} | TTS: ${'speechSynthesis' in window ? 'YES' : 'FALLBACK'}`;
+
       document.getElementById('config-modal').classList.toggle('hidden');
     }
 
@@ -1113,7 +1206,7 @@ Respond to J as Zelda:`;
       localStorage.setItem('zelda_hud_gemini_key', document.getElementById('cfg-gemini-key').value.trim());
       localStorage.setItem('zelda_hud_ifttt', document.getElementById('cfg-ifttt-url').value.trim());
       toggleConfigModal();
-      zeldaSpeak("Settings saved and locked in.");
+      zeldaSpeak("Settings locked in, J.");
     }
   </script>
 </body>
