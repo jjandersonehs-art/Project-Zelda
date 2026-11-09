@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>PROJECT ZELDA // NEURAL COUNCIL WAR ROOM v1.4</title>
+  <title>PROJECT ZELDA // NEURAL COUNCIL WAR ROOM v1.5 TURBO</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -46,20 +46,23 @@
           <h1 class="font-orbitron text-base md:text-lg font-black tracking-wider text-white">
             PROJECT ZELDA <span class="text-[#00F0FF]">// WAR ROOM</span>
           </h1>
-          <span class="text-[10px] font-mono-code bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 px-1.5 py-0.5 uppercase">
-            AUTO-MODEL v1.4
+          <span class="text-[10px] font-mono-code bg-[#00F0FF]/20 text-[#00F0FF] border border-[#00F0FF]/50 px-1.5 py-0.5 uppercase">
+            TURBO v1.5
           </span>
         </div>
         <p class="text-xs text-slate-400 tracking-wide">
-          YT7360B (AC8258) • LUZHENG CAN • VGATE iCAR PRO 2S (BLE 5.2)
+          CACHED ENDPOINTS • PARALLEL SWARM • YT7360B (AC8258)
         </p>
       </div>
     </div>
 
     <div class="flex items-center gap-2">
+      <button onclick="clearModelCache()" class="cyber-clip-sm bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 text-xs font-bold px-2.5 py-1.5 tracking-wider" title="Re-scan models if needed">
+        <i class="fa-solid fa-rotate"></i>
+      </button>
       <button onclick="openRelayModal()" class="cyber-clip-sm bg-slate-800 hover:bg-slate-700 border border-yellow-400/50 text-[#FCEE0A] text-xs font-bold px-3 py-1.5 tracking-wider flex items-center gap-1.5">
         <i class="fa-solid fa-share-nodes"></i>
-        <span>SYNC PACKET</span>
+        <span class="hidden sm:inline">SYNC PACKET</span>
       </button>
       <button onclick="toggleModal('settings-modal')" class="cyber-clip-sm bg-[#00F0FF] text-black font-orbitron font-bold text-xs px-3 py-1.5 tracking-wider flex items-center gap-1.5">
         <i class="fa-solid fa-key"></i>
@@ -71,8 +74,11 @@
   <!-- DISPATCH TARGET BAR -->
   <div class="bg-[#0B0D18] border-b border-slate-800 px-4 py-2 flex flex-wrap items-center justify-between gap-2 shrink-0 text-xs">
     <div class="flex items-center gap-1.5 flex-wrap">
-      <button onclick="setTarget('ROUNDTABLE')" id="target-ROUNDTABLE" class="target-btn px-2.5 py-1 font-bold tracking-wider bg-[#FCEE0A] text-black cyber-clip-sm">
-        ALL 3 (G → CLAUDE → GROK)
+      <button onclick="setTarget('PARALLEL')" id="target-PARALLEL" class="target-btn px-2.5 py-1 font-bold tracking-wider bg-[#FCEE0A] text-black cyber-clip-sm">
+        ⚡ ALL 3 PARALLEL (FASTEST)
+      </button>
+      <button onclick="setTarget('ROUNDTABLE')" id="target-ROUNDTABLE" class="target-btn px-2.5 py-1 font-bold tracking-wider bg-slate-900 text-slate-200 border border-slate-700 cyber-clip-sm">
+        🔗 CHAIN (G → CLAUDE → GROK)
       </button>
       <button onclick="setTarget('G')" id="target-G" class="target-btn px-2.5 py-1 font-bold tracking-wider bg-slate-900 text-cyan-400 border border-cyan-500/40 cyber-clip-sm">
         ONLY G
@@ -94,10 +100,10 @@
 
   <!-- QUICK PROMPTS -->
   <div class="bg-[#080911] border-t border-slate-800/80 px-4 py-1.5 flex items-center gap-2 overflow-x-auto shrink-0">
-    <button onclick="quickPrompt('Confirm you are online and state which model version you are running for Project Zelda.')" class="text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 px-2.5 py-1 rounded shrink-0">
-      ⚡ Roll Call Ping
+    <button onclick="quickPrompt('Give me a fast 2-sentence check-in with your cached model ID.')" class="text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 px-2.5 py-1 rounded shrink-0">
+      ⚡ Speed Ping
     </button>
-    <button onclick="quickPrompt('Review our YT7360B (AC8258) head unit specs and Vgate iCar Pro 2S BLE 5.2 polling loop. What edge cases should we lock down first?')" class="text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 px-2.5 py-1 rounded shrink-0">
+    <button onclick="quickPrompt('Review our YT7360B (AC8258) Android 10 head unit specs and Vgate iCar Pro 2S BLE 5.2 polling loop. What edge cases should we lock down first?')" class="text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 px-2.5 py-1 rounded shrink-0">
       🔧 AC8258 + Vgate 2S Audit
     </button>
     <button onclick="quickPrompt('Design Zelda Phase 2: How should her independent first-person persona and baseline anomaly detection work on the 13.6-inch screen?')" class="text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 px-2.5 py-1 rounded shrink-0">
@@ -123,40 +129,45 @@
     <div class="bg-[#0D101D] border border-[#00F0FF] cyber-clip max-w-lg w-full p-5 space-y-3">
       <div class="flex items-center justify-between border-b border-slate-800 pb-2">
         <h2 class="font-orbitron font-bold text-[#00F0FF] text-base">
-          <i class="fa-solid fa-key mr-2"></i>API KEYS (AUTO-MODEL DISCOVERY)
+          <i class="fa-solid fa-key mr-2"></i>API KEYS & CACHED MODELS
         </h2>
         <button onclick="toggleModal('settings-modal')" class="text-slate-400 hover:text-white">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
 
-      <p class="text-xs text-slate-300">
-        v1.4 automatically queries <code class="text-cyan-300">/v1/models</code> on each provider to discover the exact 2026 model IDs your keys have access to (Claude 5.5/5/4.6, Grok 4.7/4.3, Gemini 3.8/2.5).
-      </p>
-
       <div class="space-y-3 text-xs">
         <div class="p-2.5 bg-cyan-950/20 border border-cyan-500/30 space-y-1">
-          <label class="text-cyan-400 font-mono-code font-bold block">1. G // GEMINI API KEY (AIzaSy...)</label>
+          <div class="flex justify-between">
+            <label class="text-cyan-400 font-mono-code font-bold">1. G // GEMINI KEY</label>
+            <span id="cached-g" class="text-[10px] font-mono-code text-slate-400"></span>
+          </div>
           <input id="key-gemini" type="text" autocomplete="off" spellcheck="false" placeholder="AIzaSy..." class="w-full bg-black border border-slate-700 p-2 text-white font-mono-code text-xs" />
         </div>
 
         <div class="p-2.5 bg-amber-950/20 border border-amber-500/30 space-y-1">
-          <label class="text-amber-400 font-mono-code font-bold block">2. CLAUDE // ANTHROPIC API KEY (sk-ant-...)</label>
+          <div class="flex justify-between">
+            <label class="text-amber-400 font-mono-code font-bold">2. CLAUDE // ANTHROPIC KEY</label>
+            <span id="cached-claude" class="text-[10px] font-mono-code text-slate-400"></span>
+          </div>
           <input id="key-claude" type="text" autocomplete="off" spellcheck="false" placeholder="sk-ant-..." class="w-full bg-black border border-slate-700 p-2 text-white font-mono-code text-xs" />
         </div>
 
         <div class="p-2.5 bg-purple-950/20 border border-purple-500/30 space-y-1">
-          <label class="text-purple-400 font-mono-code font-bold block">3. GROK // xAI API KEY (xai-...)</label>
+          <div class="flex justify-between">
+            <label class="text-purple-400 font-mono-code font-bold">3. GROK // xAI KEY</label>
+            <span id="cached-grok" class="text-[10px] font-mono-code text-slate-400"></span>
+          </div>
           <input id="key-grok" type="text" autocomplete="off" spellcheck="false" placeholder="xai-..." class="w-full bg-black border border-slate-700 p-2 text-white font-mono-code text-xs" />
         </div>
       </div>
 
       <div class="flex justify-between items-center pt-2 border-t border-slate-800">
         <button onclick="testAllKeys()" class="cyber-clip-sm bg-[#FCEE0A] text-black font-orbitron font-bold px-3 py-2 text-xs">
-          <i class="fa-solid fa-bolt mr-1"></i>AUTO-DETECT MODELS & TEST ALL 3
+          <i class="fa-solid fa-bolt mr-1"></i>LOCK KEYS & PARALLEL PING
         </button>
         <button onclick="saveKeys()" class="cyber-clip-sm bg-[#00F0FF] text-black font-orbitron font-bold px-4 py-2 text-xs">
-          SAVE ONLY
+          SAVE
         </button>
       </div>
     </div>
@@ -187,13 +198,13 @@
     const INITIAL_MESSAGES = [
       {
         speaker: 'SYSTEM',
-        time: '17:08',
-        text: 'WAR ROOM v1.4 ONLINE (Dynamic /v1/models Auto-Discovery enabled for 2026 Claude 5.5/5/4.6, Grok 4.7/4.3, and Gemini 3.8/2.5 lineups). Tap API KEYS -> "AUTO-DETECT MODELS & TEST ALL 3".'
+        time: '18:16',
+        text: 'WAR ROOM v1.5 TURBO ONLINE.\n• Working model IDs are now cached in localStorage so /v1/models is only queried ONCE.\n• Default mode set to ⚡ ALL 3 PARALLEL so G, Claude, and Grok respond simultaneously in 2-4 seconds.\n• Switch to 🔗 CHAIN anytime you want sequential debate.'
       }
     ];
 
-    let dispatchTarget = 'ROUNDTABLE';
-    let messages = JSON.parse(localStorage.getItem('zelda_warroom_msgs_v14') || 'null') || INITIAL_MESSAGES;
+    let dispatchTarget = 'PARALLEL';
+    let messages = JSON.parse(localStorage.getItem('zelda_warroom_msgs_v15') || 'null') || INITIAL_MESSAGES;
 
     const AGENT_META = {
       J: { name: 'J // COMMANDER', color: 'border-[#FCEE0A] bg-yellow-950/20', badge: 'bg-[#FCEE0A] text-black', icon: 'fa-user-astronaut' },
@@ -204,17 +215,34 @@
     };
 
     function cleanKey(str) {
-      return (str || '').replace(/\s+/g, '').trim();
+      return (str || '').replace(/^Bearer\s+/i, '').replace(/["'\s]+/g, '').trim();
+    }
+
+    function updateCachedLabels() {
+      document.getElementById('cached-g').textContent = localStorage.getItem('zelda_fast_model_g') || 'auto';
+      document.getElementById('cached-claude').textContent = localStorage.getItem('zelda_fast_model_claude') || 'auto';
+      document.getElementById('cached-grok').textContent = localStorage.getItem('zelda_fast_model_grok') || 'auto';
+    }
+
+    function clearModelCache() {
+      localStorage.removeItem('zelda_fast_model_g');
+      localStorage.removeItem('zelda_fast_model_claude');
+      localStorage.removeItem('zelda_fast_model_grok');
+      updateCachedLabels();
+      messages.push({ speaker: 'SYSTEM', time: nowTime(), text: 'Model ID cache cleared. Next turn will re-discover fastest models.' });
+      renderMessages();
     }
 
     function init() {
       document.getElementById('key-gemini').value = cleanKey(localStorage.getItem('zelda_key_gemini'));
       document.getElementById('key-claude').value = cleanKey(localStorage.getItem('zelda_key_claude'));
       document.getElementById('key-grok').value = cleanKey(localStorage.getItem('zelda_key_grok'));
+      updateCachedLabels();
       renderMessages();
     }
 
     function toggleModal(id) {
+      updateCachedLabels();
       document.getElementById(id).classList.toggle('hidden');
     }
 
@@ -266,7 +294,7 @@
         `;
       }).join('');
       stream.scrollTop = stream.scrollHeight;
-      localStorage.setItem('zelda_warroom_msgs_v14', JSON.stringify(messages));
+      localStorage.setItem('zelda_warroom_msgs_v15', JSON.stringify(messages));
     }
 
     function quickPrompt(text) {
@@ -283,88 +311,85 @@
       messages.push({ speaker: 'J', time: nowTime(), text });
       renderMessages();
 
-      const sequence = dispatchTarget === 'ROUNDTABLE' ? ['G', 'CLAUDE', 'GROK'] : [dispatchTarget];
-      for (const agent of sequence) {
-        await queryAgent(agent);
+      if (dispatchTarget === 'PARALLEL') {
+        // Fire all 3 simultaneously for 3x faster turnaround
+        await Promise.all([
+          queryAgent('G'),
+          queryAgent('CLAUDE'),
+          queryAgent('GROK')
+        ]);
+      } else if (dispatchTarget === 'ROUNDTABLE') {
+        for (const agent of ['G', 'CLAUDE', 'GROK']) {
+          await queryAgent(agent);
+        }
+      } else {
+        await queryAgent(dispatchTarget);
       }
     }
 
     function buildConversationTranscript() {
-      return messages.slice(-8).map(m => `[${m.speaker}]: ${m.text}`).join('\n\n');
+      return messages
+        .filter(m => !m.text.startsWith('⚡ ['))
+        .slice(-6)
+        .map(m => `[${m.speaker}]: ${m.text}`)
+        .join('\n\n');
     }
 
     function buildCombinedPrompt(agent) {
       const roleMap = {
-        G: `You are G (Gemini), Lead Full-Stack & Telemetry Integrator for J's Project Zelda. Keep responses concise and tactical.`,
-        CLAUDE: `You are Claude, Lead Systems & OBD2 Protocol Auditor for J's Project Zelda. Focus on clean state machines, Web Bluetooth ELM327 edge cases, and failure modes.`,
-        GROK: `You are Grok, Lead Architect of Zelda's Independent AI Core and Night City attitude. Focus on making Zelda feel alive, sharp, and autonomous.`
+        G: `You are G (Gemini), Lead Full-Stack & Telemetry Integrator for J's Project Zelda. Keep responses concise (under 150 words) and tactical.`,
+        CLAUDE: `You are Claude, Lead Systems & OBD2 Protocol Auditor for J's Project Zelda. Focus on clean state machines, Web Bluetooth ELM327 edge cases, and failure modes. Keep responses concise (under 150 words).`,
+        GROK: `You are Grok, Lead Architect of Zelda's Independent AI Core and Night City attitude. Focus on making Zelda feel alive, sharp, and autonomous. Keep responses concise (under 150 words).`
       };
       return `${roleMap[agent]}\n\n${SHARED_SPEC}\n\n=== WAR ROOM TRANSCRIPT ===\n${buildConversationTranscript()}\n\nRespond next as ${agent} (do not prefix with [${agent}]):`;
     }
 
-    // =========================================================================
-    // 1. GEMINI AUTO-DISCOVERY CALLER (Queries /v1beta/models first!)
-    // =========================================================================
-    async function callGeminiAuto(apiKey, combinedPrompt) {
-      let candidateModels = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-2.0-flash'];
-      try {
-        const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
-        const listData = await listRes.json();
-        if (listData.models && Array.isArray(listData.models)) {
-          const liveFlashModels = listData.models
-            .filter(m => m.supportedGenerationMethods?.includes('generateContent') && m.name.includes('gemini'))
-            .map(m => m.name.replace('models/', ''))
-            .sort((a, b) => (b.includes('flash') ? 1 : -1));
-          if (liveFlashModels.length > 0) {
-            candidateModels = [...new Set([...liveFlashModels.slice(0, 4), ...candidateModels])];
+    // 1. TURBO GEMINI CALLER (Uses cached model first; skips /models list if cached)
+    async function callGeminiTurbo(apiKey, combinedPrompt) {
+      const cached = localStorage.getItem('zelda_fast_model_g');
+      let candidates = cached ? [cached] : ['gemini-2.5-flash', 'gemini-2.0-flash'];
+
+      if (!cached) {
+        try {
+          const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
+          const listData = await listRes.json();
+          if (listData.models) {
+            const flash = listData.models
+              .filter(m => m.supportedGenerationMethods?.includes('generateContent') && m.name.includes('flash') && !m.name.includes('thinking'))
+              .map(m => m.name.replace('models/', ''));
+            if (flash.length) candidates = [...new Set([...flash, ...candidates])];
           }
-        } else if (listData.error) {
-          throw new Error(`Gemini Key Error: ${listData.error.message}`);
-        }
-      } catch (e) {
-        if (e.message.startsWith('Gemini Key Error')) throw e;
+        } catch (_) {}
       }
 
-      const errors = [];
-      for (const model of candidateModels) {
-        try {
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: combinedPrompt }] }]
-            })
-          });
-          const data = await res.json();
-          if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
-            return data.candidates[0].content.parts[0].text.trim();
-          }
-          errors.push(`${model}: ${data.error?.message || res.status}`);
-        } catch (err) {
-          errors.push(`${model}: ${err.message}`);
+      for (const model of candidates) {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: combinedPrompt }] }],
+            generationConfig: { maxOutputTokens: 450 }
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+          localStorage.setItem('zelda_fast_model_g', model);
+          return data.candidates[0].content.parts[0].text.trim();
+        }
+        if (cached && model === cached) {
+          localStorage.removeItem('zelda_fast_model_g');
+          return callGeminiTurbo(apiKey, combinedPrompt);
         }
       }
-      throw new Error(errors.slice(0, 3).join(' | '));
+      throw new Error('Gemini model call failed. Tap Rotate icon to reset cache.');
     }
 
-    // =========================================================================
-    // 2. CLAUDE AUTO-DISCOVERY CALLER (Queries https://api.anthropic.com/v1/models first!)
-    // =========================================================================
-    async function callClaudeAuto(apiKey, combinedPrompt) {
-      // 2026 Current Lineup + Auto-Discovery from /v1/models
-      let candidateModels = [
-        'claude-sonnet-5-5',
-        'claude-sonnet-5',
-        'claude-opus-5-5',
-        'claude-opus-5',
-        'claude-sonnet-4-6',
-        'claude-opus-4-8',
-        'claude-haiku-5-5',
-        'claude-haiku-4-5'
-      ];
+    // 2. TURBO CLAUDE CALLER (Uses cached model first; prioritizes Haiku/Sonnet over slow Opus)
+    async function callClaudeTurbo(apiKey, combinedPrompt) {
+      const cached = localStorage.getItem('zelda_fast_model_claude');
+      let candidates = cached ? [cached] : [];
 
-      try {
+      if (!cached) {
         const listRes = await fetch('https://api.anthropic.com/v1/models', {
           method: 'GET',
           headers: {
@@ -374,114 +399,96 @@
           }
         });
         const listData = await listRes.json();
-        if (listData.data && Array.isArray(listData.data) && listData.data.length > 0) {
-          const discoveredIds = listData.data.map(m => m.id);
-          // Prefer sonnet or opus first
-          discoveredIds.sort((a, b) => (a.includes('sonnet') ? -1 : 1));
-          candidateModels = [...new Set([...discoveredIds, ...candidateModels])];
-        } else if (listData.error) {
-          throw new Error(`Anthropic Auth/Account Error: ${listData.error.message}`);
+        if (listData.data?.length) {
+          const ids = listData.data.map(m => m.id);
+          // Sort fast Sonnet/Haiku ahead of slow Opus
+          ids.sort((a, b) => {
+            const score = id => (id.includes('sonnet') ? 0 : id.includes('haiku') ? 1 : 2);
+            return score(a) - score(b);
+          });
+          candidates = ids;
         }
-      } catch (e) {
-        if (e.message.startsWith('Anthropic Auth')) throw e;
       }
 
-      const errors = [];
-      for (const model of candidateModels) {
-        try {
-          const res = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': apiKey,
-              'anthropic-version': '2023-06-01',
-              'anthropic-dangerous-direct-browser-access': 'true'
-            },
-            body: JSON.stringify({
-              model,
-              max_tokens: 900,
-              messages: [{ role: 'user', content: combinedPrompt }]
-            })
-          });
-          const data = await res.json();
-          if (res.ok && data.content?.[0]?.text) {
-            return data.content[0].text.trim();
-          }
-          const msg = data.error?.message || `HTTP ${res.status}`;
-          errors.push(`${model}: ${msg}`);
-          if (res.status === 401 || msg.toLowerCase().includes('credit balance')) {
-            throw new Error(msg);
-          }
-        } catch (err) {
-          if (err.message.toLowerCase().includes('credit balance')) throw err;
-          errors.push(`${model}: ${err.message}`);
+      for (const model of candidates) {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true'
+          },
+          body: JSON.stringify({
+            model,
+            max_tokens: 450,
+            messages: [{ role: 'user', content: combinedPrompt }]
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.content?.[0]?.text) {
+          localStorage.setItem('zelda_fast_model_claude', model);
+          return data.content[0].text.trim();
+        }
+        if (cached && model === cached) {
+          localStorage.removeItem('zelda_fast_model_claude');
+          return callClaudeTurbo(apiKey, combinedPrompt);
         }
       }
-      throw new Error(errors.slice(0, 4).join(' | '));
+      throw new Error('Claude call failed.');
     }
 
-    // =========================================================================
-    // 3. GROK AUTO-DISCOVERY CALLER (Queries https://api.x.ai/v1/models + 2026 Grok 4.7/4.3 IDs)
-    // =========================================================================
-    async function callGrokAuto(apiKey, combinedPrompt) {
-      let candidateModels = [
-        'grok-4.7',
-        'grok-4.6',
-        'grok-4.5',
-        'grok-4.3',
-        'grok-4.1-fast',
-        'grok-4',
-        'grok-3'
-      ];
+    // 3. TURBO GROK CALLER (Uses cached model first; avoids slow reasoning models)
+    async function callGrokTurbo(apiKey, combinedPrompt) {
+      const cached = localStorage.getItem('zelda_fast_model_grok');
+      let candidates = cached ? [cached] : [];
 
-      try {
-        const listRes = await fetch('https://api.x.ai/v1/models', {
-          method: 'GET',
-          headers: { 'Authorization': `Bearer ${apiKey}` }
-        });
-        const listData = await listRes.json();
-        if (listData.data && Array.isArray(listData.data) && listData.data.length > 0) {
-          const discovered = listData.data
-            .map(m => m.id)
-            .filter(id => !id.includes('image') && !id.includes('imagine'));
-          if (discovered.length > 0) {
-            candidateModels = [...new Set([...discovered, ...candidateModels])];
-          }
-        } else if (listData.error) {
-          throw new Error(`xAI Account Error: ${listData.error.message || JSON.stringify(listData.error)}`);
-        }
-      } catch (e) {
-        if (e.message.startsWith('xAI Account Error')) throw e;
-      }
-
-      const errors = [];
-      for (const model of candidateModels) {
+      if (!cached) {
         try {
-          const res = await fetch('https://api.x.ai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${apiKey}`
-            },
-            body: JSON.stringify({
-              model,
-              messages: [{ role: 'user', content: combinedPrompt }]
-            })
+          const listRes = await fetch('https://api.x.ai/v1/models', {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${apiKey}` }
           });
-          const data = await res.json();
-          if (res.ok && data.choices?.[0]?.message?.content) {
-            return data.choices[0].message.content.trim();
+          const listData = await listRes.json();
+          if (listData.data?.length) {
+            const ids = listData.data
+              .map(m => m.id)
+              .filter(id => !id.includes('image') && !id.includes('vision'));
+            // Prioritize non-reasoning / fast models first so it doesn't stall thinking
+            ids.sort((a, b) => {
+              const score = id => (id.includes('fast') || id.includes('non-reasoning') ? 0 : id.includes('mini') ? 2 : 1);
+              return score(a) - score(b);
+            });
+            candidates = ids;
           }
-          const msg = data.error?.message || data.error || `HTTP ${res.status}`;
-          errors.push(`${model}: ${msg}`);
-          if (res.status === 401 || res.status === 403 || String(msg).toLowerCase().includes('credit')) {
-            throw new Error(msg);
-          }
-        } catch (err) {
-          errors.push(`${model}: ${err.message}`);
+        } catch (_) {}
+        if (!candidates.length) candidates = ['grok-3-fast', 'grok-3', 'grok-4', 'grok-3-mini'];
+      }
+
+      for (const model of candidates) {
+        const res = await fetch('https://api.x.ai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model,
+            max_tokens: 450,
+            messages: [{ role: 'user', content: combinedPrompt }]
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.choices?.[0]?.message?.content) {
+          localStorage.setItem('zelda_fast_model_grok', model);
+          return data.choices[0].message.content.trim();
+        }
+        if (cached && model === cached) {
+          localStorage.removeItem('zelda_fast_model_grok');
+          return callGrokTurbo(apiKey, combinedPrompt);
         }
       }
-      throw new Error(errors.slice(0, 4).join(' | '));
+      throw new Error('Grok call failed.');
     }
 
     async function queryAgent(agent) {
@@ -489,43 +496,39 @@
       const claudeKey = cleanKey(localStorage.getItem('zelda_key_claude'));
       const grokKey = cleanKey(localStorage.getItem('zelda_key_grok'));
 
+      const startMs = Date.now();
+      const prompt = buildCombinedPrompt(agent);
+
       const placeholderIdx = messages.push({
         speaker: agent,
         time: nowTime(),
-        text: `⚡ [${agent} is querying /v1/models & generating response...]`
+        text: `⚡ [${agent} generating...]`
       }) - 1;
       renderMessages();
 
-      const prompt = buildCombinedPrompt(agent);
-
       try {
+        let reply = '';
         if (agent === 'G') {
-          if (!geminiKey) throw new Error('Gemini key box is empty. Tap API KEYS and paste your AIzaSy... key.');
-          messages[placeholderIdx].text = await callGeminiAuto(geminiKey, prompt);
+          reply = await callGeminiTurbo(geminiKey, prompt);
         } else if (agent === 'CLAUDE') {
-          if (!claudeKey) throw new Error('Claude key box is empty. Tap API KEYS and paste your sk-ant-... key.');
-          messages[placeholderIdx].text = await callClaudeAuto(claudeKey, prompt);
+          reply = await callClaudeTurbo(claudeKey, prompt);
         } else if (agent === 'GROK') {
-          if (!grokKey) throw new Error('Grok key box is empty. Tap API KEYS and paste your xai-... key.');
-          messages[placeholderIdx].text = await callGrokAuto(grokKey, prompt);
+          reply = await callGrokTurbo(grokKey, prompt);
         }
+        const elapsed = ((Date.now() - startMs) / 1000).toFixed(1);
+        messages[placeholderIdx].time = `${nowTime()} (${elapsed}s)`;
+        messages[placeholderIdx].text = reply;
       } catch (err) {
-        messages[placeholderIdx].text = `⚠️ [${agent} DIAGNOSTIC REPORT]:\n${err.message}`;
+        messages[placeholderIdx].text = `⚠️ [${agent}]: ${err.message}`;
       }
       renderMessages();
     }
 
     async function testAllKeys() {
       saveKeys();
-      messages.push({
-        speaker: 'J',
-        time: nowTime(),
-        text: 'Diagnostic Roll Call: State your active model name and confirm readiness for Project Zelda in 1 sentence.'
-      });
+      messages.push({ speaker: 'J', time: nowTime(), text: 'Speed check: Confirm online status in 1 sentence.' });
       renderMessages();
-      await queryAgent('G');
-      await queryAgent('CLAUDE');
-      await queryAgent('GROK');
+      await Promise.all([queryAgent('G'), queryAgent('CLAUDE'), queryAgent('GROK')]);
     }
 
     function openRelayModal() {
@@ -535,7 +538,7 @@
 
     function clearChat() {
       messages = [...INITIAL_MESSAGES];
-      localStorage.removeItem('zelda_warroom_msgs_v14');
+      localStorage.removeItem('zelda_warroom_msgs_v15');
       renderMessages();
     }
 
