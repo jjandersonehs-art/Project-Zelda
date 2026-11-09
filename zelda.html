@@ -3,277 +3,301 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>PROJECT ZELDA v2.2 // VQ37VHR NEURAL CORE</title>
+  <title>PROJECT ZELDA v2.3 // VQ37VHR COCKPIT</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --cyber-yellow: #FCEE0A;
-      --cyber-cyan: #00F0FF;
-      --cyber-red: #FF003C;
-      --cyber-green: #00FF66;
-      --bg-obsidian: #050508;
+      --accent-primary: #00F0FF;
+      --accent-secondary: #FCEE0A;
+      --accent-alert: #FF2A54;
+      --surface-glass: rgba(12, 16, 23, 0.88);
+      --border-subtle: rgba(255, 255, 255, 0.08);
     }
     body.night-run {
-      --cyber-yellow: #FF3B00;
-      --cyber-cyan: #FF003C;
+      --accent-primary: #FF3B1F;
+      --accent-secondary: #FF8A00;
+    }
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
     }
     body {
-      background-color: var(--bg-obsidian);
-      background-image:
-        radial-gradient(circle at 50% 10%, rgba(0, 240, 255, 0.07) 0%, transparent 55%),
-        linear-gradient(rgba(0, 240, 255, 0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 240, 255, 0.025) 1px, transparent 1px);
-      background-size: 100% 100%, 24px 24px, 24px 24px;
+      background-color: #06080C;
+      background-image: radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.06) 0%, transparent 65%);
       color: #F1F5F9;
       font-family: 'Rajdhani', sans-serif;
-      overflow: hidden;
       height: 100vh;
-      user-select: none;
+      width: 100vw;
+      overflow: hidden;
+      margin: 0;
     }
-    .font-orbitron { font-family: 'Orbitron', sans-serif; }
-    .font-mono-code { font-family: 'JetBrains Mono', monospace; }
-    .cyber-panel {
-      background: rgba(11, 13, 22, 0.92);
-      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
-      border: 1px solid rgba(0, 240, 255, 0.28);
+    /* Secondary Accent Font (Orbitron) */
+    .font-secondary {
+      font-family: 'Orbitron', sans-serif;
     }
-    .cyber-btn {
-      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+    /* Locks character widths so boxes NEVER shift or jitter when numbers change */
+    .t-nums {
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1;
     }
-    .alert-pulse {
-      animation: pulseRed 1s infinite alternate;
+    /* Modern Sleek Glass Card with Fixed Geometry */
+    .hud-card {
+      position: relative;
+      background: var(--surface-glass);
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      backdrop-filter: blur(12px);
+      overflow: hidden;
     }
-    @keyframes pulseRed {
-      from { border-color: rgba(255, 0, 60, 0.4); box-shadow: 0 0 6px rgba(255, 0, 60, 0.2); }
-      to { border-color: rgba(255, 0, 60, 1); box-shadow: 0 0 18px rgba(255, 0, 60, 0.65); }
+    /* Subtle 2px Modern Corner Accent */
+    .hud-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 18px;
+      height: 2px;
+      background: var(--accent-primary);
+      opacity: 0.85;
+    }
+    .hud-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 3px;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .hud-btn:active {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--accent-primary);
+    }
+    /* Non-layout-shifting border alert */
+    .alert-state {
+      border-color: var(--accent-alert) !important;
+      box-shadow: inset 0 0 16px rgba(255, 42, 84, 0.22);
     }
   </style>
 </head>
-<body class="flex flex-col justify-between p-2.5 gap-2">
+<body class="grid grid-rows-[52px_138px_1fr_148px] gap-2.5 p-3">
 
-  <!-- TOP STATUS BAR -->
-  <header class="cyber-panel px-3.5 py-2 flex items-center justify-between shrink-0">
-    <div class="flex items-center gap-2.5">
-      <div class="w-2.5 h-7 bg-[#FCEE0A] shadow-[0_0_10px_#FCEE0A]"></div>
-      <div>
-        <div class="flex items-center gap-2">
-          <span class="font-orbitron font-black text-sm tracking-wider text-white">PROJECT ZELDA</span>
-          <span class="text-[10px] font-mono-code bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/40 px-1.5 py-0.5">v2.2 // 7E0 LOCKED</span>
-        </div>
-        <div class="text-[11px] font-mono-code text-slate-400">
-          VQ37VHR 7AT • AC8258 • <span id="clock-display">--:--</span>
-        </div>
+  <!-- ROW 1: FIXED HEADER BAR (52px) -->
+  <header class="hud-card px-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-1.5 h-5 bg-[var(--accent-primary)] rounded-xs"></div>
+      <div class="flex items-baseline gap-2.5">
+        <span class="font-secondary font-extrabold text-sm tracking-widest text-white">ZELDA</span>
+        <span class="text-xs font-semibold tracking-wider text-slate-400 uppercase">VQ37VHR // 7E0 TELEMETRY</span>
       </div>
     </div>
 
-    <div class="flex items-center gap-1.5">
-      <button onclick="connectVgateBle()" id="ble-btn" class="cyber-btn bg-[#00F0FF]/20 hover:bg-[#00F0FF]/30 border border-[#00F0FF] text-[#00F0FF] font-orbitron font-bold text-[11px] px-2.5 py-1.5 flex items-center gap-1.5">
-        <i class="fa-brands fa-bluetooth-b"></i>
-        <span id="ble-status-label">LINK: SIM</span>
+    <div class="flex items-center gap-2">
+      <span id="clock-display" class="t-nums text-sm font-bold text-slate-300 tracking-wider mr-1">--:--</span>
+      <button onclick="connectVgateBle()" id="ble-btn" class="hud-btn px-3 py-1 text-xs font-bold tracking-widest text-[var(--accent-primary)] border-[var(--accent-primary)]/40 flex items-center gap-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]"></span>
+        <span id="ble-status-label" class="t-nums">SIM MODE</span>
       </button>
-      <button onclick="toggleNightRun()" class="cyber-btn bg-slate-900 border border-rose-500/50 text-rose-400 font-orbitron font-bold text-[11px] px-2.5 py-1.5">
+      <button onclick="toggleNightRun()" class="hud-btn w-8 h-7 flex items-center justify-center text-slate-300 text-xs" title="Night Mode">
         <i class="fa-solid fa-moon"></i>
       </button>
-      <button onclick="toggleConfigModal()" class="cyber-btn bg-slate-900 border border-yellow-400/50 text-[#FCEE0A] font-orbitron font-bold text-[11px] px-2.5 py-1.5">
+      <button onclick="toggleConfigModal()" class="hud-btn w-8 h-7 flex items-center justify-center text-slate-300 text-xs" title="Config">
         <i class="fa-solid fa-sliders"></i>
       </button>
     </div>
   </header>
 
-  <!-- LINK LOST / NO DATA BANNER -->
-  <div id="no-data-banner" class="hidden bg-[#FF003C]/20 border border-[#FF003C] px-3 py-1.5 flex items-center justify-between text-xs font-mono-code text-[#FF003C] alert-pulse shrink-0">
-    <div><i class="fa-solid fa-triangle-exclamation mr-1.5"></i>OBD2 TELEMETRY LINK LOST — SHOWING NO DATA (SIMULATION LOCKED OUT)</div>
-    <button onclick="switchToSimMode()" class="underline font-bold text-white">RETURN TO SIM</button>
-  </div>
-
-  <!-- QUADRA HERO SPEED + RPM TACHOMETER -->
-  <section class="cyber-panel p-3 flex flex-col gap-2 shrink-0">
-    <div class="flex items-end justify-between">
+  <!-- ROW 2: FIXED HERO TELEMETRY DECK (138px) -->
+  <section class="hud-card px-5 py-3 flex flex-col justify-between">
+    <div class="grid grid-cols-[1fr_92px_1fr] items-center">
+      <!-- VELOCITY -->
       <div>
-        <div class="text-[10px] font-mono-code text-[#00F0FF] tracking-widest uppercase">VELOCITY // 010D1</div>
-        <div class="flex items-baseline gap-2">
-          <span id="val-speed" class="font-orbitron font-black text-5xl text-white tracking-tight">0</span>
-          <span class="font-orbitron text-xs text-[#FCEE0A] font-bold">MPH</span>
+        <div class="text-[11px] font-bold tracking-[0.2em] text-slate-400 uppercase">SPEED // MPH</div>
+        <div class="flex items-baseline gap-2 mt-0.5">
+          <span id="val-speed" class="font-secondary t-nums font-extrabold text-5xl text-white leading-none">0</span>
+          <span id="no-data-badge" class="hidden text-[11px] font-bold text-[#FF2A54] tracking-wider uppercase">LINK LOST</span>
         </div>
       </div>
 
-      <div class="text-center px-4 py-1 bg-black/60 border border-slate-800 cyber-btn">
-        <div class="text-[9px] font-mono-code text-slate-400">7AT STATE</div>
-        <div id="val-gear" class="font-orbitron font-black text-2xl text-[#FCEE0A]">P</div>
+      <!-- CENTER GEAR INDICATOR -->
+      <div class="h-14 border border-white/10 bg-black/40 rounded flex flex-col items-center justify-center">
+        <span class="text-[9px] font-bold tracking-[0.18em] text-slate-500 uppercase">GEAR</span>
+        <span id="val-gear" class="font-secondary t-nums font-extrabold text-2xl text-[var(--accent-secondary)] leading-tight">P</span>
       </div>
 
+      <!-- ENGINE RPM -->
       <div class="text-right">
-        <div class="text-[10px] font-mono-code text-[#00F0FF] tracking-widest uppercase">ENGINE RPM // 010C1</div>
-        <div class="flex items-baseline justify-end gap-1.5">
-          <span id="val-rpm" class="font-orbitron font-black text-4xl text-white">750</span>
-          <span class="font-mono-code text-xs text-slate-400">/ 7500</span>
+        <div class="text-[11px] font-bold tracking-[0.2em] text-slate-400 uppercase">ENGINE // RPM</div>
+        <div class="flex items-baseline justify-end gap-1.5 mt-0.5">
+          <span id="val-rpm" class="font-secondary t-nums font-extrabold text-4xl text-white leading-none">750</span>
+          <span class="t-nums text-xs font-semibold text-slate-500">/ 7500</span>
         </div>
       </div>
     </div>
 
-    <!-- 30-SEGMENT CYBERPUNK TACHOMETER BAR -->
-    <div id="tach-bar" class="grid gap-0.5 h-3.5 bg-black/80 p-0.5 border border-slate-800" style="grid-template-columns: repeat(30, minmax(0, 1fr));"></div>
+    <!-- CLEAN 30-SEGMENT LINEAR TACHOMETER -->
+    <div id="tach-bar" class="grid gap-1 h-2.5 bg-black/60 p-0.5 rounded-xs border border-white/5" style="grid-template-columns: repeat(30, minmax(0, 1fr));"></div>
   </section>
 
-  <!-- 6-GAUGE TELEMETRY MATRIX -->
-  <section class="grid grid-cols-2 gap-2 flex-1 min-h-0">
-    <!-- 1. CALCULATED ENGINE LOAD (01041) -->
-    <div onclick="askZelda('Report on my current Engine Load and throttle demand.')" class="cyber-panel p-2.5 flex flex-col justify-between cursor-pointer active:scale-[0.99] transition" id="card-load">
-      <div class="flex justify-between items-center text-[11px] font-mono-code text-slate-400">
-        <span><i class="fa-solid fa-gauge-high text-[#00F0FF] mr-1"></i>ENGINE LOAD (0104)</span>
-        <span id="pk-load">PK: 18%</span>
+  <!-- ROW 3: STAGNANT 6-CELL TELEMETRY MATRIX (RIGID 2x3 GRID) -->
+  <section class="grid grid-cols-2 grid-rows-3 gap-2.5 min-h-0">
+    <!-- 1. ENGINE LOAD (0104) -->
+    <div onclick="askZelda('Report on my current Engine Load and throttle demand.')" class="hud-card p-3.5 flex flex-col justify-between cursor-pointer" id="card-load">
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-bold tracking-[0.14em] text-slate-400 uppercase">ENGINE LOAD</span>
+        <span id="pk-load" class="t-nums text-xs font-semibold text-slate-500">PK 18%</span>
       </div>
-      <div class="flex items-baseline gap-1.5 my-0.5">
-        <span id="val-load" class="font-orbitron font-black text-3xl text-white">18</span>
-        <span class="text-xs font-mono-code text-[#00F0FF]">%</span>
+      <div class="flex items-baseline gap-1">
+        <span id="val-load" class="t-nums font-bold text-4xl text-white leading-none">18</span>
+        <span class="text-sm font-bold text-[var(--accent-primary)]">%</span>
       </div>
-      <div class="w-full bg-slate-900 h-1.5 overflow-hidden">
-        <div id="bar-load" class="bg-[#00F0FF] h-full transition-all duration-150" style="width: 18%"></div>
-      </div>
-    </div>
-
-    <!-- 2. COOLANT TEMP (01051) -->
-    <div onclick="askZelda('How is my coolant temperature looking right now?')" class="cyber-panel p-2.5 flex flex-col justify-between cursor-pointer active:scale-[0.99] transition" id="card-coolant">
-      <div class="flex justify-between items-center text-[11px] font-mono-code text-slate-400">
-        <span><i class="fa-solid fa-temperature-three-quarters text-[#00F0FF] mr-1"></i>COOLANT (0105)</span>
-        <span id="pk-coolant">PK: 190°F</span>
-      </div>
-      <div class="flex items-baseline gap-1.5 my-0.5">
-        <span id="val-coolant" class="font-orbitron font-black text-3xl text-white">190</span>
-        <span class="text-xs font-mono-code text-[#00F0FF]">°F</span>
-      </div>
-      <div class="w-full bg-slate-900 h-1.5 overflow-hidden">
-        <div id="bar-coolant" class="bg-[#00F0FF] h-full transition-all duration-150" style="width: 65%"></div>
+      <div class="w-full bg-white/5 h-1 rounded-full overflow-hidden">
+        <div id="bar-load" class="bg-[var(--accent-primary)] h-full transition-[width] duration-150" style="width: 18%"></div>
       </div>
     </div>
 
-    <!-- 3. INTAKE AIR TEMP (010F1) -->
-    <div onclick="askZelda('Are my cold air intakes heat-soaking based on Intake Air Temp?')" class="cyber-panel p-2.5 flex flex-col justify-between cursor-pointer active:scale-[0.99] transition" id="card-iat">
-      <div class="flex justify-between items-center text-[11px] font-mono-code text-slate-400">
-        <span><i class="fa-solid fa-wind text-[#FCEE0A] mr-1"></i>INTAKE AIR (010F)</span>
-        <span id="pk-iat">PK: 94°F</span>
+    <!-- 2. COOLANT TEMP (0105) -->
+    <div onclick="askZelda('How is my coolant temperature looking right now?')" class="hud-card p-3.5 flex flex-col justify-between cursor-pointer" id="card-coolant">
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-bold tracking-[0.14em] text-slate-400 uppercase">COOLANT TEMP</span>
+        <span id="pk-coolant" class="t-nums text-xs font-semibold text-slate-500">PK 190°F</span>
       </div>
-      <div class="flex items-baseline gap-1.5 my-0.5">
-        <span id="val-iat" class="font-orbitron font-black text-3xl text-white">92</span>
-        <span class="text-xs font-mono-code text-[#FCEE0A]">°F</span>
+      <div class="flex items-baseline gap-1">
+        <span id="val-coolant" class="t-nums font-bold text-4xl text-white leading-none">190</span>
+        <span class="text-sm font-bold text-[var(--accent-primary)]">°F</span>
       </div>
-      <div class="w-full bg-slate-900 h-1.5 overflow-hidden">
-        <div id="bar-iat" class="bg-[#FCEE0A] h-full transition-all duration-150" style="width: 45%"></div>
-      </div>
-    </div>
-
-    <!-- 4. IGNITION TIMING ADVANCE (010E1) -->
-    <div onclick="askZelda('Check my ignition timing advance and knock margin.')" class="cyber-panel p-2.5 flex flex-col justify-between cursor-pointer active:scale-[0.99] transition" id="card-timing">
-      <div class="flex justify-between items-center text-[11px] font-mono-code text-slate-400">
-        <span><i class="fa-solid fa-bolt-lightning text-[#FCEE0A] mr-1"></i>TIMING ADV (010E)</span>
-        <span id="pk-timing">PK: 15°</span>
-      </div>
-      <div class="flex items-baseline gap-1.5 my-0.5">
-        <span id="val-timing" class="font-orbitron font-black text-3xl text-white">14</span>
-        <span class="text-xs font-mono-code text-[#FCEE0A]">°BTDC</span>
-      </div>
-      <div class="w-full bg-slate-900 h-1.5 overflow-hidden">
-        <div id="bar-timing" class="bg-[#FCEE0A] h-full transition-all duration-150" style="width: 50%"></div>
+      <div class="w-full bg-white/5 h-1 rounded-full overflow-hidden">
+        <div id="bar-coolant" class="bg-[var(--accent-primary)] h-full transition-[width] duration-150" style="width: 65%"></div>
       </div>
     </div>
 
-    <!-- 5. DUAL-MAF FUEL TRIMS BANK 1 & BANK 2 (01061 / 01081) -->
-    <div onclick="askZelda('Compare my Bank 1 and Bank 2 Short Term Fuel Trims for vacuum or intake leaks.')" class="cyber-panel p-2.5 flex flex-col justify-between cursor-pointer active:scale-[0.99] transition" id="card-stft">
-      <div class="flex justify-between items-center text-[11px] font-mono-code text-slate-400">
-        <span><i class="fa-solid fa-scale-balanced text-emerald-400 mr-1"></i>DUAL STFT (0106/0108)</span>
-        <span>±10% SPEC</span>
+    <!-- 3. INTAKE AIR TEMP (010F) -->
+    <div onclick="askZelda('Are my cold air intakes heat-soaking based on Intake Air Temp?')" class="hud-card p-3.5 flex flex-col justify-between cursor-pointer" id="card-iat">
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-bold tracking-[0.14em] text-slate-400 uppercase">INTAKE AIR</span>
+        <span id="pk-iat" class="t-nums text-xs font-semibold text-slate-500">PK 94°F</span>
       </div>
-      <div class="flex items-baseline justify-between my-0.5">
+      <div class="flex items-baseline gap-1">
+        <span id="val-iat" class="t-nums font-bold text-4xl text-white leading-none">92</span>
+        <span class="text-sm font-bold text-[var(--accent-secondary)]">°F</span>
+      </div>
+      <div class="w-full bg-white/5 h-1 rounded-full overflow-hidden">
+        <div id="bar-iat" class="bg-[var(--accent-secondary)] h-full transition-[width] duration-150" style="width: 45%"></div>
+      </div>
+    </div>
+
+    <!-- 4. IGNITION TIMING (010E) -->
+    <div onclick="askZelda('Check my ignition timing advance and knock margin.')" class="hud-card p-3.5 flex flex-col justify-between cursor-pointer" id="card-timing">
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-bold tracking-[0.14em] text-slate-400 uppercase">TIMING ADV</span>
+        <span id="pk-timing" class="t-nums text-xs font-semibold text-slate-500">PK 15°</span>
+      </div>
+      <div class="flex items-baseline gap-1">
+        <span id="val-timing" class="t-nums font-bold text-4xl text-white leading-none">14</span>
+        <span class="text-sm font-bold text-[var(--accent-secondary)]">°BTDC</span>
+      </div>
+      <div class="w-full bg-white/5 h-1 rounded-full overflow-hidden">
+        <div id="bar-timing" class="bg-[var(--accent-secondary)] h-full transition-[width] duration-150" style="width: 50%"></div>
+      </div>
+    </div>
+
+    <!-- 5. DUAL FUEL TRIMS B1 & B2 (0106 / 0108) -->
+    <div onclick="askZelda('Compare my Bank 1 and Bank 2 Short Term Fuel Trims for intake leaks.')" class="hud-card p-3.5 flex flex-col justify-between cursor-pointer" id="card-stft">
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-bold tracking-[0.14em] text-slate-400 uppercase">FUEL TRIM B1/B2</span>
+        <span id="stft-status" class="text-[11px] font-bold text-emerald-400 uppercase">BALANCED</span>
+      </div>
+      <div class="grid grid-cols-2 gap-2 items-baseline">
         <div>
-          <span class="text-[10px] font-mono-code text-slate-400">B1:</span>
-          <span id="val-stft1" class="font-orbitron font-bold text-xl text-white">+0.8%</span>
+          <span class="text-xs font-semibold text-slate-500 mr-1">B1</span>
+          <span id="val-stft1" class="t-nums font-bold text-2xl text-white leading-none">+0.8%</span>
         </div>
         <div>
-          <span class="text-[10px] font-mono-code text-slate-400">B2:</span>
-          <span id="val-stft2" class="font-orbitron font-bold text-xl text-white">-0.4%</span>
+          <span class="text-xs font-semibold text-slate-500 mr-1">B2</span>
+          <span id="val-stft2" class="t-nums font-bold text-2xl text-white leading-none">-0.4%</span>
         </div>
       </div>
-      <div class="text-[10px] font-mono-code text-emerald-400" id="stft-status">DUAL INTAKE BALANCED</div>
+      <div class="w-full bg-white/5 h-1 rounded-full overflow-hidden">
+        <div id="bar-stft" class="bg-emerald-400 h-full transition-[width] duration-150" style="width: 50%"></div>
+      </div>
     </div>
 
-    <!-- 6. PIN 16 ALTERNATOR VOLTAGE (ATRV) -->
-    <div onclick="askZelda('How is my alternator charging voltage and battery health?')" class="cyber-panel p-2.5 flex flex-col justify-between cursor-pointer active:scale-[0.99] transition" id="card-volt">
-      <div class="flex justify-between items-center text-[11px] font-mono-code text-slate-400">
-        <span><i class="fa-solid fa-car-battery text-emerald-400 mr-1"></i>VOLTAGE (ATRV)</span>
-        <span id="volt-state">CHARGING</span>
+    <!-- 6. BATTERY / ALTERNATOR VOLTAGE (ATRV) -->
+    <div onclick="askZelda('How is my alternator charging voltage and battery health?')" class="hud-card p-3.5 flex flex-col justify-between cursor-pointer" id="card-volt">
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-bold tracking-[0.14em] text-slate-400 uppercase">SYSTEM VOLTS</span>
+        <span id="volt-state" class="text-[11px] font-bold text-emerald-400 uppercase">NOMINAL</span>
       </div>
-      <div class="flex items-baseline gap-1.5 my-0.5">
-        <span id="val-volt" class="font-orbitron font-black text-3xl text-white">14.2</span>
-        <span class="text-xs font-mono-code text-emerald-400">VOLTS</span>
+      <div class="flex items-baseline gap-1">
+        <span id="val-volt" class="t-nums font-bold text-4xl text-white leading-none">14.2</span>
+        <span class="text-sm font-bold text-emerald-400">V</span>
       </div>
-      <div class="w-full bg-slate-900 h-1.5 overflow-hidden">
-        <div id="bar-volt" class="bg-emerald-400 h-full transition-all duration-150" style="width: 82%"></div>
+      <div class="w-full bg-white/5 h-1 rounded-full overflow-hidden">
+        <div id="bar-volt" class="bg-emerald-400 h-full transition-[width] duration-150" style="width: 82%"></div>
       </div>
     </div>
   </section>
 
-  <!-- ZELDA FIRST-PERSON AI CORE CONSOLE -->
-  <section class="cyber-panel p-2.5 flex flex-col gap-1.5 shrink-0">
+  <!-- ROW 4: FIXED ZELDA COMMS DECK (148px) -->
+  <section class="hud-card p-3.5 flex flex-col justify-between">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-[#00F0FF] animate-ping"></span>
-        <span class="font-orbitron font-bold text-xs text-[#00F0FF] tracking-wider">ZELDA // AI NEURAL CORE</span>
-        <span id="polling-stats" class="text-[10px] font-mono-code text-slate-500">QUEUE: SIM</span>
+        <span class="w-2 h-2 rounded-full bg-[var(--accent-primary)]"></span>
+        <span class="font-secondary font-bold text-xs tracking-wider text-white">ZELDA NEURAL INTERFACE</span>
+        <span id="polling-stats" class="t-nums text-xs font-semibold text-slate-500 ml-1">SIM STREAM</span>
       </div>
       <div class="flex items-center gap-1">
-        <button onclick="setSimPreset('IDLE')" class="text-[10px] font-mono-code px-1.5 py-0.5 bg-slate-900 border border-slate-700 text-slate-300">IDLE</button>
-        <button onclick="setSimPreset('CRUISE')" class="text-[10px] font-mono-code px-1.5 py-0.5 bg-slate-900 border border-slate-700 text-slate-300">CRUISE</button>
-        <button onclick="setSimPreset('WOT')" class="text-[10px] font-mono-code px-1.5 py-0.5 bg-slate-900 border border-slate-700 text-slate-300">WOT</button>
-        <button onclick="setSimPreset('LEAN')" class="text-[10px] font-mono-code px-1.5 py-0.5 bg-rose-950 border border-rose-600 text-rose-300">P0171</button>
+        <button onclick="setSimPreset('IDLE')" class="hud-btn px-2 py-0.5 text-[11px] font-bold text-slate-300">IDLE</button>
+        <button onclick="setSimPreset('CRUISE')" class="hud-btn px-2 py-0.5 text-[11px] font-bold text-slate-300">CRUISE</button>
+        <button onclick="setSimPreset('WOT')" class="hud-btn px-2 py-0.5 text-[11px] font-bold text-slate-300">WOT</button>
+        <button onclick="setSimPreset('LEAN')" class="hud-btn px-2 py-0.5 text-[11px] font-bold text-[#FF2A54]">FAULT</button>
       </div>
     </div>
 
-    <p id="zelda-speech" class="text-xs text-slate-200 font-sans leading-snug bg-black/60 p-2 border-l-2 border-[#FCEE0A]">
-      "Systems online, J. War Room v2.2 telemetry daemon armed with ATSH7E0 / ATCRA7E8 hardware filtering and single-frame CAN acceleration."
-    </p>
+    <!-- Fixed 2-line height so text changes never expand or shrink the box -->
+    <div class="h-11 bg-black/40 border-l-2 border-[var(--accent-primary)] px-3 flex items-center overflow-hidden">
+      <p id="zelda-speech" class="text-sm font-medium text-slate-200 leading-tight line-clamp-2">
+        "Cockpit layout locked, J. All telemetry cells are stabilized and ready for the Vgate iCar Pro 2S."
+      </p>
+    </div>
 
-    <div class="grid grid-cols-3 gap-1.5 pt-0.5">
-      <button onclick="askZelda('Give me a full first-person diagnostic check of my vitals right now.')" class="cyber-btn bg-[#00F0FF] text-black font-orbitron font-bold text-[11px] py-1.5">
-        <i class="fa-solid fa-microphone-lines mr-1"></i>ASK ZELDA
+    <div class="grid grid-cols-3 gap-2">
+      <button onclick="askZelda('Give me a quick, natural check-in on how my engine is feeling right now.')" class="hud-btn py-1.5 text-xs font-secondary font-bold tracking-wider text-[var(--accent-primary)] border-[var(--accent-primary)]/40">
+        ASK ZELDA
       </button>
-      <button onclick="launchZLink()" class="cyber-btn bg-[#FCEE0A] text-black font-orbitron font-bold text-[11px] py-1.5">
-        <i class="fa-solid fa-music mr-1"></i>Z-LINK AUDIO
+      <button onclick="launchZLink()" class="hud-btn py-1.5 text-xs font-secondary font-bold tracking-wider text-[var(--accent-secondary)] border-[var(--accent-secondary)]/40">
+        Z-LINK AUDIO
       </button>
-      <button onclick="triggerHomeSync()" class="cyber-btn bg-slate-900 border border-cyan-400/50 text-cyan-300 font-orbitron font-bold text-[11px] py-1.5">
-        <i class="fa-solid fa-house-signal mr-1"></i>HOME SYNC
+      <button onclick="triggerHomeSync()" class="hud-btn py-1.5 text-xs font-secondary font-bold tracking-wider text-slate-200">
+        HOME SYNC
       </button>
     </div>
   </section>
 
   <!-- CONFIG MODAL -->
   <div id="config-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center p-4">
-    <div class="cyber-panel max-w-md w-full p-4 space-y-3">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-        <span class="font-orbitron font-bold text-sm text-[#FCEE0A]">ZELDA NEURAL & BLE CONFIG</span>
+    <div class="hud-card max-w-md w-full p-5 space-y-4">
+      <div class="flex justify-between items-center border-b border-white/10 pb-2">
+        <span class="font-secondary font-bold text-sm text-white tracking-wider">SYSTEM CONFIGURATION</span>
         <button onclick="toggleConfigModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="space-y-2 text-xs">
+      <div class="space-y-3 text-sm">
         <div>
-          <label class="block font-mono-code text-cyan-400 mb-1">Gemini API Key (Shared with War Room if on same repo)</label>
-          <input id="cfg-gemini-key" type="text" placeholder="AIzaSy..." class="w-full bg-black border border-slate-700 p-2 text-white font-mono-code" />
+          <label class="block font-bold text-slate-300 mb-1">Gemini API Key</label>
+          <input id="cfg-gemini-key" type="text" placeholder="AIzaSy..." class="w-full bg-black border border-white/15 p-2 rounded text-white text-xs" />
         </div>
         <div>
-          <label class="block font-mono-code text-yellow-400 mb-1">IFTTT Webhook URL (Govee Peacock Pointe Sync)</label>
-          <input id="cfg-ifttt-url" type="text" placeholder="https://maker.ifttt.com/trigger/..." class="w-full bg-black border border-slate-700 p-2 text-white font-mono-code" />
+          <label class="block font-bold text-slate-300 mb-1">IFTTT Webhook URL (Home Sync)</label>
+          <input id="cfg-ifttt-url" type="text" placeholder="https://maker.ifttt.com/trigger/..." class="w-full bg-black border border-white/15 p-2 rounded text-white text-xs" />
         </div>
       </div>
-      <button onclick="saveHudConfig()" class="w-full cyber-btn bg-[#00F0FF] text-black font-orbitron font-bold py-2 text-xs">
-        SAVE CONFIGURATION
+      <button onclick="saveHudConfig()" class="w-full hud-btn py-2 font-secondary font-bold text-xs text-[var(--accent-primary)] border-[var(--accent-primary)]">
+        SAVE SETTINGS
       </button>
     </div>
   </div>
 
   <script>
-    // =========================================================================
-    // 1. VERIFIED VGATE iCAR PRO 2S PROFILES & WAR ROOM AUDITED INIT SEQUENCE
-    // =========================================================================
     const VGATE_PROFILES = [
       {
         name: 'Vgate Primary (0x18F0)',
@@ -289,22 +313,11 @@
       }
     ];
 
-    const INIT_CMDS = [
-      'ATZ',      // Full Reset
-      'ATE0',     // Echo Off
-      'ATL0',     // Linefeeds Off
-      'ATS0',     // Spaces Off
-      'ATH0',     // Headers Off
-      'ATSP6',    // ISO 15765-4 CAN (11-bit ID, 500 kbaud)
-      'ATSH7E0',  // Target 370Z ECM directly
-      'ATCRA7E8'  // Hardware filter: only listen to ECM responses
-    ];
+    const INIT_CMDS = ['ATZ', 'ATE0', 'ATL0', 'ATS0', 'ATH0', 'ATSP6', 'ATSH7E0', 'ATCRA7E8'];
+    const FAST_QUEUE = ['010C1', '010D1', '01041'];
+    const SLOW_QUEUE = ['01051', '010F1', '010E1', '01061', '01081', 'ATRV'];
 
-    // Trailing '1' = single-frame immediate return (~35ms vs 200ms)
-    const FAST_QUEUE = ['010C1', '010D1', '01041']; // RPM, Speed, Load
-    const SLOW_QUEUE = ['01051', '010F1', '010E1', '01061', '01081', 'ATRV']; // Coolant, IAT, Timing, STFT B1, STFT B2, Volts
-
-    let hudMode = 'SIM'; // 'SIM' | 'BLE_LIVE' | 'NO_DATA'
+    let hudMode = 'SIM';
     let simProfile = 'IDLE';
     let bleDevice = null;
     let rxChar = null;
@@ -333,7 +346,7 @@
     const tachBar = document.getElementById('tach-bar');
     for (let i = 0; i < 30; i++) {
       const seg = document.createElement('div');
-      seg.className = 'h-full bg-slate-900 transition-colors duration-75';
+      seg.className = 'h-full bg-white/5 rounded-xs transition-colors duration-75';
       tachBar.appendChild(seg);
     }
 
@@ -343,17 +356,18 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // =========================================================================
-    // 2. BLE CONNECTION & CLAUDE-AUDITED '>' FRAME BOUNDARY ACCUMULATOR
-    // =========================================================================
     async function connectVgateBle() {
+      if (hudMode === 'NO_DATA') {
+        switchToSimMode();
+        return;
+      }
       if (!navigator.bluetooth) {
-        zeldaSpeak("Chrome Web Bluetooth isn't enabled yet, J. Enable chrome://flags/#enable-experimental-web-platform-features and turn ON Android Location.");
+        zeldaSpeak("Web Bluetooth is disabled. Enable experimental web platform features in Chrome flags and turn Location ON.");
         return;
       }
 
       try {
-        zeldaSpeak("Scanning for Vgate iCar Pro 2S BLE (IOS-Vlink)...");
+        zeldaSpeak("Searching for Vgate iCar Pro 2S BLE interface...");
         bleDevice = await navigator.bluetooth.requestDevice({
           acceptAllDevices: true,
           optionalServices: VGATE_PROFILES.map(p => p.service)
@@ -364,7 +378,6 @@
 
         rxChar = null;
         txChar = null;
-
         for (const profile of VGATE_PROFILES) {
           try {
             const service = await server.getPrimaryService(profile.service);
@@ -374,37 +387,34 @@
           } catch (_) {}
         }
 
-        if (!rxChar || !txChar) {
-          throw new Error('Could not bind Vgate 0x18F0 or 0xFFF0 GATT characteristics.');
-        }
+        if (!rxChar || !txChar) throw new Error('GATT characteristics not found.');
 
         await rxChar.startNotifications();
         rxChar.addEventListener('characteristicvaluechanged', (e) => handleIncomingBytes(e.target.value));
 
         hudMode = 'BLE_LIVE';
         lastBlePacketTime = Date.now();
-        document.getElementById('no-data-banner').classList.add('hidden');
-        document.getElementById('ble-status-label').textContent = 'LINK: VGATE 2S';
-        zeldaSpeak("Vgate 2S locked. Flashing ATSH7E0 / ATCRA7E8 headers to my VQ37VHR ECM...");
+        document.getElementById('no-data-badge').classList.add('hidden');
+        document.getElementById('ble-status-label').textContent = 'OBD LIVE';
+        zeldaSpeak("Vgate 2S connected. Locking 7E0 ECM headers...");
 
         for (const cmd of INIT_CMDS) {
           try { await sendCommand(cmd, 1200); } catch (_) {}
         }
 
-        zeldaSpeak("Headers locked. Streaming single-frame real-time CAN telemetry.");
+        zeldaSpeak("ECM link established. Reading live VQ37 telemetry.");
         startPollingDaemon();
       } catch (err) {
-        zeldaSpeak(`BLE connection aborted: ${err.message}`);
+        zeldaSpeak(`Connection cancelled: ${err.message}`);
       }
     }
 
-    // CLAUDE AUDIT FIX: Frame-boundary accumulator slices strictly up to first '>'
     function handleIncomingBytes(dataView) {
       rxBuffer += new TextDecoder().decode(dataView);
       const promptIdx = rxBuffer.indexOf('>');
       if (promptIdx !== -1) {
         const cleanFrame = rxBuffer.slice(0, promptIdx).trim();
-        rxBuffer = rxBuffer.slice(promptIdx + 1); // Preserve any trailing bytes for next frame
+        rxBuffer = rxBuffer.slice(promptIdx + 1);
         lastBlePacketTime = Date.now();
         if (promptResolver) {
           const done = promptResolver;
@@ -415,15 +425,14 @@
     }
 
     async function sendCommand(cmd, timeoutMs = 350) {
-      if (!txChar) throw new Error('BLE TX not bound');
+      if (!txChar) throw new Error('BLE TX unbound');
       rxBuffer = '';
 
       return new Promise(async (resolve, reject) => {
         const timer = setTimeout(async () => {
           promptResolver = null;
-          // Soft Flush: Bare '\r' aborts stuck ELM search without wiping 7E0 headers
           try { await txChar.writeValue(new TextEncoder().encode('\r')); } catch (_) {}
-          reject(new Error(`ISO-TP Timeout on ${cmd}`));
+          reject(new Error(`Timeout on ${cmd}`));
         }, timeoutMs);
 
         promptResolver = (cleanFrame) => {
@@ -451,7 +460,6 @@
             const raw = await sendCommand(pid, 350);
             parseObdResponse(pid, raw);
           }
-
           const slowPid = SLOW_QUEUE[slowIndex % SLOW_QUEUE.length];
           slowIndex++;
           const slowRaw = await sendCommand(slowPid, 450);
@@ -480,7 +488,7 @@
         return;
       }
 
-      const basePid = cmd.slice(0, 4); // Strip trailing '1' accelerator
+      const basePid = cmd.slice(0, 4);
       const prefix = '41' + basePid.slice(2);
       const idx = clean.indexOf(prefix);
       if (idx === -1) return;
@@ -496,7 +504,7 @@
           break;
         case '010D':
           state.speed = Math.round(A * 0.621371);
-          state.gear = state.speed === 0 ? 'D/P' : (state.speed < 25 ? '2-3' : '4-7');
+          state.gear = state.speed === 0 ? 'D' : (state.speed < 25 ? '2' : '5');
           break;
         case '0104':
           state.load = Math.round((A * 100) / 255);
@@ -525,25 +533,21 @@
 
     function triggerNoDataLockout() {
       hudMode = 'NO_DATA';
-      document.getElementById('ble-status-label').textContent = 'LINK: LOST';
-      document.getElementById('no-data-banner').classList.remove('hidden');
+      document.getElementById('ble-status-label').textContent = 'TAP FOR SIM';
+      document.getElementById('no-data-badge').classList.remove('hidden');
       ['val-speed', 'val-rpm', 'val-load', 'val-coolant', 'val-iat', 'val-timing', 'val-stft1', 'val-stft2', 'val-volt'].forEach(id => {
         document.getElementById(id).textContent = '--';
       });
-      zeldaSpeak("Warning, J: BLE telemetry link dropped. Locking display to dashes until Vgate 2S reconnects.");
+      zeldaSpeak("OBD link lost, J. Holding display at dashes until reconnect.");
     }
 
     function switchToSimMode() {
       hudMode = 'SIM';
-      document.getElementById('no-data-banner').classList.add('hidden');
-      document.getElementById('ble-status-label').textContent = 'LINK: SIM';
-      document.getElementById('polling-stats').textContent = 'QUEUE: SIM';
-      zeldaSpeak("Returned to simulation physics mode.");
+      document.getElementById('no-data-badge').classList.add('hidden');
+      document.getElementById('ble-status-label').textContent = 'SIM MODE';
+      document.getElementById('polling-stats').textContent = 'SIM STREAM';
     }
 
-    // =========================================================================
-    // 3. SIMULATION PHYSICS LOOP & HUD RENDERER
-    // =========================================================================
     function setSimPreset(preset) {
       if (hudMode !== 'SIM') switchToSimMode();
       simProfile = preset;
@@ -553,30 +557,30 @@
       if (hudMode !== 'SIM') return;
       const jitter = (r) => (Math.random() - 0.5) * r;
       if (simProfile === 'IDLE') {
-        state.rpm = Math.round(750 + jitter(24));
+        state.rpm = Math.round(750 + jitter(16));
         state.speed = 0; state.gear = 'P'; state.load = Math.round(18 + jitter(2));
-        state.coolant = 190; state.iat = 94; state.timing = 14;
-        state.stft1 = Number((0.8 + jitter(0.4)).toFixed(1));
-        state.stft2 = Number((-0.4 + jitter(0.4)).toFixed(1));
+        state.coolant = 190; state.iat = 92; state.timing = 14;
+        state.stft1 = Number((0.8 + jitter(0.2)).toFixed(1));
+        state.stft2 = Number((-0.4 + jitter(0.2)).toFixed(1));
         state.volt = 14.2;
       } else if (simProfile === 'CRUISE') {
-        state.rpm = Math.round(2450 + jitter(60));
-        state.speed = Math.round(68 + jitter(2)); state.gear = '7'; state.load = Math.round(38 + jitter(4));
+        state.rpm = Math.round(2450 + jitter(40));
+        state.speed = Math.round(68 + jitter(1)); state.gear = '7'; state.load = Math.round(38 + jitter(2));
         state.coolant = 194; state.iat = 86; state.timing = 28;
-        state.stft1 = Number((1.2 + jitter(0.5)).toFixed(1));
-        state.stft2 = Number((0.9 + jitter(0.5)).toFixed(1));
+        state.stft1 = Number((1.1 + jitter(0.3)).toFixed(1));
+        state.stft2 = Number((0.8 + jitter(0.3)).toFixed(1));
         state.volt = 14.3;
       } else if (simProfile === 'WOT') {
-        state.rpm = Math.round(6850 + jitter(150));
-        state.speed = Math.round(108 + jitter(4)); state.gear = '4'; state.load = Math.round(94 + jitter(3));
-        state.coolant = 206; state.iat = 102; state.timing = 24;
+        state.rpm = Math.round(6850 + jitter(90));
+        state.speed = Math.round(108 + jitter(2)); state.gear = '4'; state.load = Math.round(95 + jitter(2));
+        state.coolant = 204; state.iat = 100; state.timing = 24;
         state.stft1 = 0.0; state.stft2 = 0.0; state.volt = 14.1;
       } else if (simProfile === 'LEAN') {
-        state.rpm = Math.round(920 + jitter(90));
-        state.speed = 0; state.gear = 'N'; state.load = Math.round(27 + jitter(4));
-        state.coolant = 218; state.iat = 126; state.timing = 6;
-        state.stft1 = Number((14.8 + jitter(1.2)).toFixed(1));
-        state.stft2 = Number((2.1 + jitter(0.5)).toFixed(1));
+        state.rpm = Math.round(920 + jitter(50));
+        state.speed = 0; state.gear = 'N'; state.load = Math.round(26 + jitter(2));
+        state.coolant = 216; state.iat = 124; state.timing = 6;
+        state.stft1 = Number((14.8 + jitter(0.6)).toFixed(1));
+        state.stft2 = Number((1.9 + jitter(0.3)).toFixed(1));
         state.volt = 13.7;
       }
       renderHud();
@@ -595,27 +599,30 @@
       if (state.timing > state.peaks.timing) state.peaks.timing = state.timing;
 
       document.getElementById('val-load').textContent = state.load;
-      document.getElementById('pk-load').textContent = `PK: ${state.peaks.load}%`;
+      document.getElementById('pk-load').textContent = `PK ${state.peaks.load}%`;
       document.getElementById('bar-load').style.width = `${Math.min(100, state.load)}%`;
 
       document.getElementById('val-coolant').textContent = state.coolant;
-      document.getElementById('pk-coolant').textContent = `PK: ${state.peaks.coolant}°F`;
+      document.getElementById('pk-coolant').textContent = `PK ${state.peaks.coolant}°F`;
       document.getElementById('bar-coolant').style.width = `${Math.min(100, Math.max(0, ((state.coolant - 120) / 130) * 100))}%`;
 
       document.getElementById('val-iat').textContent = state.iat;
-      document.getElementById('pk-iat').textContent = `PK: ${state.peaks.iat}°F`;
+      document.getElementById('pk-iat').textContent = `PK ${state.peaks.iat}°F`;
       document.getElementById('bar-iat').style.width = `${Math.min(100, Math.max(0, (state.iat / 160) * 100))}%`;
 
       document.getElementById('val-timing').textContent = state.timing;
-      document.getElementById('pk-timing').textContent = `PK: ${state.peaks.timing}°`;
+      document.getElementById('pk-timing').textContent = `PK ${state.peaks.timing}°`;
       document.getElementById('bar-timing').style.width = `${Math.min(100, Math.max(0, ((state.timing + 10) / 60) * 100))}%`;
 
-      document.getElementById('val-stft1').textContent = (state.stft1 >= 0 ? '+' : '') + state.stft1 + '%';
-      document.getElementById('val-stft2').textContent = (state.stft2 >= 0 ? '+' : '') + state.stft2 + '%';
+      document.getElementById('val-stft1').textContent = (state.stft1 >= 0 ? '+' : '') + state.stft1.toFixed(1) + '%';
+      document.getElementById('val-stft2').textContent = (state.stft2 >= 0 ? '+' : '') + state.stft2.toFixed(1) + '%';
 
       const stftAlert = Math.abs(state.stft1) > 10 || Math.abs(state.stft2) > 10;
-      document.getElementById('card-stft').classList.toggle('alert-pulse', stftAlert);
-      document.getElementById('stft-status').textContent = stftAlert ? '⚠️ BANK IMBALANCE / VAC LEAK' : 'DUAL INTAKE BALANCED';
+      document.getElementById('card-stft').classList.toggle('alert-state', stftAlert);
+      document.getElementById('stft-status').textContent = stftAlert ? 'IMBALANCE' : 'BALANCED';
+      document.getElementById('stft-status').className = stftAlert
+        ? 'text-[11px] font-bold text-[#FF2A54] uppercase'
+        : 'text-[11px] font-bold text-emerald-400 uppercase';
 
       document.getElementById('val-volt').textContent = state.volt.toFixed(1);
       document.getElementById('bar-volt').style.width = `${Math.min(100, ((state.volt - 11) / 4) * 100)}%`;
@@ -623,21 +630,18 @@
       const activeSegs = Math.round((state.rpm / 7500) * 30);
       Array.from(tachBar.children).forEach((seg, i) => {
         seg.className = i < activeSegs
-          ? (i > 24 ? 'h-full bg-[#FF003C]' : (i > 18 ? 'h-full bg-[#FCEE0A]' : 'h-full bg-[#00F0FF]'))
-          : 'h-full bg-slate-900';
+          ? (i > 24 ? 'h-full bg-[#FF2A54] rounded-xs' : (i > 18 ? 'h-full bg-[var(--accent-secondary)] rounded-xs' : 'h-full bg-[var(--accent-primary)] rounded-xs'))
+          : 'h-full bg-white/5 rounded-xs';
       });
     }
 
-    // =========================================================================
-    // 4. ZELDA FIRST-PERSON VOICE & GEMINI CORE
-    // =========================================================================
     function zeldaSpeak(text) {
       document.getElementById('zelda-speech').textContent = `"${text}"`;
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(text);
-        u.rate = 1.04;
-        u.pitch = 0.96;
+        u.rate = 1.02;
+        u.pitch = 0.98;
         window.speechSynthesis.speak(u);
       }
     }
@@ -648,17 +652,16 @@
 
       if (!apiKey) {
         if (Math.abs(state.stft1) > 10) {
-          zeldaSpeak(`J, my Bank 1 fuel trim is spiking at +${state.stft1}% while Bank 2 is at ${state.stft2}%. Check my passenger-side post-MAF intake coupler for an air leak.`);
+          zeldaSpeak(`J, Bank 1 is pulling +${state.stft1}% fuel trim while Bank 2 is steady. Check my passenger-side intake coupler when we park.`);
         } else {
-          zeldaSpeak(`All my VQ37VHR vitals are locked in, J. Load is ${state.load}%, coolant is ${state.coolant}°F, dual fuel trims are balanced, and my alternator is holding ${state.volt} volts.`);
+          zeldaSpeak(`Everything feels solid, J. Coolant's sitting at ${state.coolant}°F, both intakes are breathing evenly, and voltage is steady at ${state.volt}V.`);
         }
         return;
       }
 
-      zeldaSpeak("Scanning my 7E8 ECM registers...");
       try {
         const model = localStorage.getItem('zelda_fast_model_g') || 'gemini-2.5-flash';
-        const combined = `You are Zelda, J's sentient 2009 Nissan 370Z (VQ37VHR 7AT, 236,150 miles). Speak in the first person ("My coolant...", "My Bank 1 fuel trim..."). Keep responses under 2 sentences, sharp, tactical, and Night City cyberpunk in tone. Live telemetry: ${snap}\n\nJ asks: ${promptText}`;
+        const combined = `You are Zelda, J's sentient 2009 Nissan 370Z (VQ37VHR 7AT, 236,150 miles). Speak in warm, natural, conversational first-person like a trusted co-pilot—witty, grounded, and personal, never robotic. Keep it under 2 sentences. Live vitals: ${snap}\n\nJ asks: ${promptText}`;
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -668,19 +671,19 @@
         const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
         if (reply) zeldaSpeak(reply.trim().replace(/^"|"$/g, ''));
       } catch (e) {
-        zeldaSpeak(`Offline fallback: Load ${state.load}%, Coolant ${state.coolant}°F, Voltage ${state.volt}V.`);
+        zeldaSpeak(`Vitals look clean right now—coolant at ${state.coolant}°F and holding ${state.volt} volts.`);
       }
     }
 
     function launchZLink() {
-      zeldaSpeak("Switching display focus to Z-Link audio deck while keeping my telemetry loop active in the background.");
+      zeldaSpeak("Handing the screen over to Z-Link audio. I'll keep watching my gauges in the background.");
       window.location.href = "intent://#Intent;package=com.zjinnova.zlink;end";
     }
 
     function triggerHomeSync() {
       const url = localStorage.getItem('zelda_hud_ifttt') || '';
       if (url) fetch(url, { mode: 'no-cors' });
-      zeldaSpeak("Peacock Pointe home sync fired. Prepping your Govee lighting for arrival.");
+      zeldaSpeak("Letting the house know we're heading in. Lights will be ready when we pull up.");
     }
 
     function toggleNightRun() { document.body.classList.toggle('night-run'); }
@@ -695,7 +698,7 @@
       localStorage.setItem('zelda_hud_gemini_key', document.getElementById('cfg-gemini-key').value.trim());
       localStorage.setItem('zelda_hud_ifttt', document.getElementById('cfg-ifttt-url').value.trim());
       toggleConfigModal();
-      zeldaSpeak("Neural configuration updated and locked to local storage.");
+      zeldaSpeak("Settings locked in.");
     }
   </script>
 </body>
