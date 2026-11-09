@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>PROJECT ZELDA v2.6 // KIROSHI MULTIDECK</title>
+  <title>PROJECT ZELDA v2.7 // KIROSHI MULTIDECK</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
@@ -13,27 +13,25 @@
       --cp-cyan: #00F0FF;
       --cp-yellow: #FCEE0A;
       --cp-bg: #05070B;
-      --cp-panel: rgba(12, 16, 24, 0.88);
-      --cp-border: rgba(0, 240, 255, 0.24);
+      --cp-panel: rgba(10, 14, 22, 0.76);
+      --cp-border: rgba(0, 240, 255, 0.26);
     }
     body.night-run {
       --cp-cyan: #FF3B1F;
       --cp-yellow: #FF8A00;
-      --cp-border: rgba(255, 59, 31, 0.3);
+      --cp-border: rgba(255, 59, 31, 0.32);
     }
     * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
 
-    /* Layered Cyberpunk 2077 Kiroshi HUD Background (Circuit + Hex + Crimson Glow) */
     body {
       background-color: var(--cp-bg);
       background-image:
-        radial-gradient(circle at 15% 8%, rgba(255, 42, 84, 0.16) 0%, transparent 45%),
-        radial-gradient(circle at 85% 50%, rgba(0, 240, 255, 0.11) 0%, transparent 50%),
-        radial-gradient(circle at 50% 95%, rgba(252, 238, 10, 0.06) 0%, transparent 40%),
-        linear-gradient(135deg, rgba(255, 42, 84, 0.03) 25%, transparent 25%, transparent 50%, rgba(0, 240, 255, 0.03) 50%, rgba(0, 240, 255, 0.03) 75%, transparent 75%, transparent),
-        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-      background-size: 100% 100%, 100% 100%, 100% 100%, 64px 64px, 32px 32px, 32px 32px;
+        radial-gradient(circle at 15% 8%, rgba(255, 42, 84, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 85% 50%, rgba(0, 240, 255, 0.14) 0%, transparent 50%),
+        radial-gradient(circle at 50% 95%, rgba(252, 238, 10, 0.08) 0%, transparent 40%),
+        linear-gradient(rgba(0, 240, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.035) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 28px 28px, 28px 28px;
       color: #F1F5F9;
       font-family: 'Rajdhani', sans-serif;
       height: 100vh;
@@ -50,7 +48,7 @@
       border: 1px solid var(--cp-border);
       border-left: 3px solid var(--cp-cyan);
       clip-path: polygon(0 0, calc(100% - 11px) 0, 100% 11px, 100% 100%, 0 100%);
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(6px);
       overflow: hidden;
     }
     .cp-box-yellow { border-left-color: var(--cp-yellow); }
@@ -59,30 +57,29 @@
     .cp-tag {
       font-size: 9px;
       letter-spacing: 0.16em;
-      color: rgba(148, 163, 184, 0.65);
+      color: rgba(148, 163, 184, 0.7);
       font-weight: 700;
       text-transform: uppercase;
     }
 
     .cp-btn {
       position: relative;
-      background: rgba(0, 240, 255, 0.06);
-      border: 1px solid rgba(0, 240, 255, 0.25);
+      background: rgba(0, 240, 255, 0.07);
+      border: 1px solid rgba(0, 240, 255, 0.28);
       border-left: 3px solid var(--cp-yellow);
       clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%);
       transition: background 0.12s ease, border-color 0.12s ease;
     }
     .cp-btn:active {
-      background: rgba(252, 238, 10, 0.22);
+      background: rgba(252, 238, 10, 0.25);
       border-color: var(--cp-yellow);
     }
     .cp-btn.mic-active {
-      background: rgba(255, 42, 84, 0.28);
+      background: rgba(255, 42, 84, 0.3);
       border-color: var(--cp-red);
       border-left-color: var(--cp-red);
     }
 
-    /* 2077 Top Deck Navigation Tabs */
     .cp-tab {
       background: rgba(12, 16, 24, 0.85);
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -105,27 +102,62 @@
 
     .holocall-module {
       border: 1px solid rgba(0, 240, 255, 0.25);
-      background: rgba(4, 6, 10, 0.82);
+      background: rgba(4, 6, 10, 0.85);
       transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
     .holocall-module.speaking {
       border-color: var(--cp-yellow);
-      box-shadow: inset 0 0 14px rgba(252, 238, 10, 0.2);
+      box-shadow: inset 0 0 14px rgba(252, 238, 10, 0.22);
     }
     .holocall-module.listening {
       border-color: var(--cp-red);
-      box-shadow: inset 0 0 16px rgba(255, 42, 84, 0.28);
+      box-shadow: inset 0 0 16px rgba(255, 42, 84, 0.3);
     }
     .eq-bar {
       width: 3.5px;
-      height: 12%;
+      height: 14%;
       background: rgba(0, 240, 255, 0.35);
       border-radius: 1px;
-      transition: height 0.05s linear, background-color 0.1s ease;
+      transition: height 0.06s linear, background-color 0.1s ease;
     }
-    /* Inverted dark radar filter for embedded map */
+
     .cyber-map {
       filter: invert(92%) hue-rotate(185deg) saturate(160%) brightness(85%) contrast(125%);
+    }
+
+    /* Animated 2077 Kiroshi Backdrop for Gauges Tab */
+    @keyframes spinSlow {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    @keyframes spinReverse {
+      from { transform: translate(-50%, -50%) rotate(360deg); }
+      to { transform: translate(-50%, -50%) rotate(0deg); }
+    }
+    .reticle-outer {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 310px; height: 310px;
+      animation: spinSlow 36s linear infinite;
+      pointer-events: none;
+      opacity: 0.22;
+    }
+    .reticle-inner {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 210px; height: 210px;
+      animation: spinReverse 22s linear infinite;
+      pointer-events: none;
+      opacity: 0.26;
+    }
+    .hazard-stripe {
+      background: repeating-linear-gradient(
+        -45deg,
+        rgba(252, 238, 10, 0.07),
+        rgba(252, 238, 10, 0.07) 8px,
+        transparent 8px,
+        transparent 16px
+      );
     }
   </style>
 </head>
@@ -135,7 +167,7 @@
   <header class="cp-box cp-box-yellow px-3.5 flex items-center justify-between">
     <div class="flex items-baseline gap-2.5">
       <span class="font-secondary font-black text-sm tracking-widest text-[var(--cp-yellow)]">ZELDA // OS</span>
-      <span class="cp-tag">v2.6 • VQ37-7E0</span>
+      <span class="cp-tag">v2.7 • VQ37-7E0</span>
     </div>
 
     <div class="flex items-center gap-2">
@@ -153,29 +185,33 @@
     </div>
   </header>
 
-  <!-- ROW 2: ALWAYS-VISIBLE HERO SPEED & TACHOMETER DECK (132px) -->
-  <section class="cp-box px-4 py-2 flex flex-col justify-between">
+  <!-- ROW 2: HERO SPEED & TACHOMETER DECK (GEAR BOX 100% ABSOLUTE-LOCKED IN CENTER) -->
+  <section class="cp-box px-4 py-2 flex flex-col justify-between relative">
     <div class="flex justify-between items-center border-b border-white/10 pb-0.5">
       <span class="cp-tag">PRIMARY DRIVE // 010D-010C</span>
       <span id="no-data-badge" class="hidden text-[10px] font-bold text-[var(--cp-red)] tracking-widest">! LINK LOST</span>
       <span id="polling-stats" class="t-nums cp-tag text-[var(--cp-cyan)]">STREAM: SIM</span>
     </div>
 
-    <div class="grid grid-cols-[1fr_84px_1fr] items-center">
-      <div>
+    <!-- Relative container with ABSOLUTE center Gear Box so RPM changes can NEVER push it -->
+    <div class="relative h-14 flex items-center justify-between">
+      <!-- LEFT: VELOCITY (Fixed width container) -->
+      <div class="w-[38%]">
         <div class="text-[10px] font-bold tracking-[0.2em] text-slate-400">VELOCITY (MPH)</div>
-        <span id="val-speed" class="font-secondary t-nums font-black text-5xl text-white leading-none">0</span>
+        <span id="val-speed" class="t-nums font-bold text-5xl text-white leading-none block">0</span>
       </div>
 
-      <div class="h-11 border border-[var(--cp-yellow)]/40 bg-black/60 flex flex-col items-center justify-center">
-        <span class="text-[8px] font-bold tracking-[0.2em] text-slate-400">GEAR</span>
-        <span id="val-gear" class="font-secondary t-nums font-black text-xl text-[var(--cp-yellow)] leading-none">P</span>
+      <!-- CENTER: DEAD-LOCKED GEAR INDICATOR (position: absolute, left: 50%) -->
+      <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[84px] h-12 border border-[var(--cp-yellow)]/50 bg-black/80 flex flex-col items-center justify-center z-10 shadow-[0_0_12px_rgba(252,238,10,0.12)]">
+        <span class="text-[8px] font-bold tracking-[0.2em] text-slate-400">7AT GEAR</span>
+        <span id="val-gear" class="font-secondary font-black text-xl text-[var(--cp-yellow)] leading-none mt-0.5">P</span>
       </div>
 
-      <div class="text-right">
+      <!-- RIGHT: ENGINE RPM (Fixed width container + tabular Rajdhani digits) -->
+      <div class="w-[38%] text-right">
         <div class="text-[10px] font-bold tracking-[0.2em] text-slate-400">ENGINE RPM</div>
         <div class="flex items-baseline justify-end gap-1">
-          <span id="val-rpm" class="font-secondary t-nums font-black text-4xl text-white leading-none">750</span>
+          <span id="val-rpm" class="t-nums font-bold text-4xl text-white leading-none inline-block w-[86px] text-right">750</span>
           <span class="t-nums text-xs font-bold text-slate-500">/7500</span>
         </div>
       </div>
@@ -184,7 +220,7 @@
     <div id="tach-bar" class="grid gap-1 h-2 bg-black/80 p-0.5 border border-white/10" style="grid-template-columns: repeat(30, minmax(0, 1fr));"></div>
   </section>
 
-  <!-- ROW 3: CYBERPUNK 2077 SUB-MENU TAB BAR (36px - ZERO SCROLLING NEEDED) -->
+  <!-- ROW 3: CYBERPUNK 2077 SUB-MENU TAB BAR (36px) -->
   <nav class="grid grid-cols-3 gap-2">
     <button onclick="switchDeckTab('TELEMETRY')" id="tab-TELEMETRY" class="cp-tab active font-secondary font-bold text-[11px] tracking-wider flex items-center justify-center gap-1.5">
       <i class="fa-solid fa-microchip text-[10px]"></i><span>01 // GAUGES</span>
@@ -193,85 +229,112 @@
       <i class="fa-solid fa-location-crosshairs text-[10px]"></i><span>02 // NAV RADAR</span>
     </button>
     <button onclick="switchDeckTab('MEDIA')" id="tab-MEDIA" class="cp-tab font-secondary font-bold text-[11px] tracking-wider flex items-center justify-center gap-1.5">
-      <i class="fa-solid fa-sliders text-[10px]"></i><span>03 // AUDIO DECK</span>
+      <i class="fa-solid fa-compact-disc text-[10px]"></i><span>03 // AUDIO DECK</span>
     </button>
   </nav>
 
-  <!-- ROW 4: DYNAMIC CENTER STAGE (SWAPS CLEANLY WITHOUT SCROLLING) -->
-  <main class="min-h-0 relative">
+  <!-- ROW 4: DYNAMIC CENTER STAGE -->
+  <main class="min-h-0 relative overflow-hidden">
 
-    <!-- VIEW 1: 6-GAUGE TELEMETRY MATRIX -->
-    <div id="view-TELEMETRY" class="h-full grid grid-cols-2 grid-rows-3 gap-2">
-      <div onclick="askZelda('How is my engine load looking?')" class="cp-box p-2.5 flex flex-col justify-between cursor-pointer">
-        <div class="flex justify-between items-center border-b border-white/5 pb-0.5">
-          <span class="text-xs font-bold tracking-[0.14em] text-[var(--cp-cyan)]">ENGINE LOAD</span>
-          <span id="pk-load" class="t-nums text-[11px] font-bold text-slate-400">PK 18%</span>
+    <!-- VIEW 1: 6-GAUGE TELEMETRY MATRIX WITH KIROSHI CYBERWARE HUD BACKDROP -->
+    <div id="view-TELEMETRY" class="h-full relative">
+      <!-- Animated Kiroshi Telemetry Reticle & VQ37 Watermark Behind Gauges -->
+      <div class="absolute inset-0 hazard-stripe pointer-events-none rounded border border-cyan-500/15 overflow-hidden">
+        <!-- Outer Rotating Cyber Reticle SVG -->
+        <svg class="reticle-outer" viewBox="0 0 200 200">
+          <circle cx="100" cy="100" r="92" fill="none" stroke="#00F0FF" stroke-width="1" stroke-dasharray="18 8 4 8" />
+          <circle cx="100" cy="100" r="78" fill="none" stroke="#FF2A54" stroke-width="0.8" stroke-dasharray="40 20" />
+          <line x1="100" y1="0" x2="100" y2="22" stroke="#FCEE0A" stroke-width="1.5" />
+          <line x1="100" y1="178" x2="100" y2="200" stroke="#FCEE0A" stroke-width="1.5" />
+          <line x1="0" y1="100" x2="22" y2="100" stroke="#00F0FF" stroke-width="1.5" />
+          <line x1="178" y1="100" x2="200" y2="100" stroke="#00F0FF" stroke-width="1.5" />
+        </svg>
+        <!-- Inner Counter-Rotating Ring -->
+        <svg class="reticle-inner" viewBox="0 0 200 200">
+          <circle cx="100" cy="100" r="85" fill="none" stroke="#FCEE0A" stroke-width="1.2" stroke-dasharray="10 14" />
+          <polygon points="100,18 105,28 95,28" fill="#00F0FF" />
+          <polygon points="100,182 105,172 95,172" fill="#FF2A54" />
+        </svg>
+        <!-- Subtle Center Watermark Text -->
+        <div class="absolute inset-0 flex flex-col items-center justify-center opacity-15 pointer-events-none">
+          <span class="font-secondary font-black text-2xl tracking-[0.35em] text-[var(--cp-cyan)]">VQ37VHR</span>
+          <span class="text-[10px] font-bold tracking-[0.4em] text-[var(--cp-yellow)]">NISSAN Z34 // TELEMETRY CORE</span>
         </div>
-        <div class="flex items-baseline justify-between">
-          <div><span id="val-load" class="t-nums font-bold text-3xl text-white leading-none">18</span><span class="text-xs font-bold text-[var(--cp-cyan)] ml-1">%</span></div>
-          <span class="cp-tag">0104</span>
-        </div>
-        <div class="w-full bg-black/70 h-1.5 border border-white/10 overflow-hidden"><div id="bar-load" class="bg-[var(--cp-cyan)] h-full" style="width: 18%"></div></div>
       </div>
 
-      <div onclick="askZelda('How is my coolant temperature?')" class="cp-box p-2.5 flex flex-col justify-between cursor-pointer">
-        <div class="flex justify-between items-center border-b border-white/5 pb-0.5">
-          <span class="text-xs font-bold tracking-[0.14em] text-[var(--cp-cyan)]">COOLANT TEMP</span>
-          <span id="pk-coolant" class="t-nums text-[11px] font-bold text-slate-400">PK 190°F</span>
+      <!-- 2x3 Gauges Grid Overlaid on Top -->
+      <div class="relative z-10 h-full grid grid-cols-2 grid-rows-3 gap-2">
+        <div onclick="askZelda('How is my engine load looking?')" class="cp-box p-2.5 flex flex-col justify-between cursor-pointer">
+          <div class="flex justify-between items-center border-b border-white/10 pb-0.5">
+            <span class="text-xs font-bold tracking-[0.14em] text-[var(--cp-cyan)]">ENGINE LOAD</span>
+            <span id="pk-load" class="t-nums text-[11px] font-bold text-slate-400">PK 18%</span>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <div><span id="val-load" class="t-nums font-bold text-3xl text-white leading-none">18</span><span class="text-xs font-bold text-[var(--cp-cyan)] ml-1">%</span></div>
+            <span class="cp-tag">0104</span>
+          </div>
+          <div class="w-full bg-black/70 h-1.5 border border-white/10 overflow-hidden"><div id="bar-load" class="bg-[var(--cp-cyan)] h-full" style="width: 18%"></div></div>
         </div>
-        <div class="flex items-baseline justify-between">
-          <div><span id="val-coolant" class="t-nums font-bold text-3xl text-white leading-none">190</span><span class="text-xs font-bold text-[var(--cp-cyan)] ml-1">°F</span></div>
-          <span class="cp-tag">0105</span>
-        </div>
-        <div class="w-full bg-black/70 h-1.5 border border-white/10 overflow-hidden"><div id="bar-coolant" class="bg-[var(--cp-cyan)] h-full" style="width: 65%"></div></div>
-      </div>
 
-      <div onclick="askZelda('Check my intake air temperature for heat soak.')" class="cp-box cp-box-yellow p-2.5 flex flex-col justify-between cursor-pointer">
-        <div class="flex justify-between items-center border-b border-white/5 pb-0.5">
-          <span class="text-xs font-bold tracking-[0.14em] text-[var(--cp-yellow)]">INTAKE AIR</span>
-          <span id="pk-iat" class="t-nums text-[11px] font-bold text-slate-400">PK 94°F</span>
+        <div onclick="askZelda('How is my coolant temperature?')" class="cp-box p-2.5 flex flex-col justify-between cursor-pointer">
+          <div class="flex justify-between items-center border-b border-white/10 pb-0.5">
+            <span class="text-xs font-bold tracking-[0.14em] text-[var(--cp-cyan)]">COOLANT TEMP</span>
+            <span id="pk-coolant" class="t-nums text-[11px] font-bold text-slate-400">PK 190°F</span>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <div><span id="val-coolant" class="t-nums font-bold text-3xl text-white leading-none">190</span><span class="text-xs font-bold text-[var(--cp-cyan)] ml-1">°F</span></div>
+            <span class="cp-tag">0105</span>
+          </div>
+          <div class="w-full bg-black/70 h-1.5 border border-white/10 overflow-hidden"><div id="bar-coolant" class="bg-[var(--cp-cyan)] h-full" style="width: 65%"></div></div>
         </div>
-        <div class="flex items-baseline justify-between">
-          <div><span id="val-iat" class="t-nums font-bold text-3xl text-white leading-none">92</span><span class="text-xs font-bold text-[var(--cp-yellow)] ml-1">°F</span></div>
-          <span class="cp-tag">010F</span>
-        </div>
-        <div class="w-full bg-black/70 h-1.5 border border-white/10 overflow-hidden"><div id="bar-iat" class="bg-[var(--cp-yellow)] h-full" style="width: 45%"></div></div>
-      </div>
 
-      <div onclick="askZelda('How is my ignition timing advance?')" class="cp-box cp-box-yellow p-2.5 flex flex-col justify-between cursor-pointer">
-        <div class="flex justify-between items-center border-b border-white/5 pb-0.5">
-          <span class="text-xs font-bold tracking-[0.14em] text-[var(--cp-yellow)]">TIMING ADV</span>
-          <span id="pk-timing" class="t-nums text-[11px] font-bold text-slate-400">PK 15°</span>
+        <div onclick="askZelda('Check my intake air temperature for heat soak.')" class="cp-box cp-box-yellow p-2.5 flex flex-col justify-between cursor-pointer">
+          <div class="flex justify-between items-center border-b border-white/10 pb-0.5">
+            <span class="text-xs font-bold tracking-[0.14em] text-[var(--cp-yellow)]">INTAKE AIR</span>
+            <span id="pk-iat" class="t-nums text-[11px] font-bold text-slate-400">PK 94°F</span>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <div><span id="val-iat" class="t-nums font-bold text-3xl text-white leading-none">92</span><span class="text-xs font-bold text-[var(--cp-yellow)] ml-1">°F</span></div>
+            <span class="cp-tag">010F</span>
+          </div>
+          <div class="w-full bg-black/70 h-1.5 border border-white/10 overflow-hidden"><div id="bar-iat" class="bg-[var(--cp-yellow)] h-full" style="width: 45%"></div></div>
         </div>
-        <div class="flex items-baseline justify-between">
-          <div><span id="val-timing" class="t-nums font-bold text-3xl text-white leading-none">14</span><span class="text-xs font-bold text-[var(--cp-yellow)] ml-1">°BTDC</span></div>
-          <span class="cp-tag">010E</span>
-        </div>
-        <div class="w-full bg-black/70 h-1.5 border border-white/10 overflow-hidden"><div id="bar-timing" class="bg-[var(--cp-yellow)] h-full" style="width: 50%"></div></div>
-      </div>
 
-      <div onclick="askZelda('Compare my Bank 1 and Bank 2 fuel trims.')" class="cp-box p-2.5 flex flex-col justify-between cursor-pointer" id="card-stft">
-        <div class="flex justify-between items-center border-b border-white/5 pb-0.5">
-          <span class="text-xs font-bold tracking-[0.14em] text-[var(--cp-cyan)]">DUAL TRIM B1/B2</span>
-          <span id="stft-status" class="text-[10px] font-bold text-emerald-400">BALANCED</span>
+        <div onclick="askZelda('How is my ignition timing advance?')" class="cp-box cp-box-yellow p-2.5 flex flex-col justify-between cursor-pointer">
+          <div class="flex justify-between items-center border-b border-white/10 pb-0.5">
+            <span class="text-xs font-bold tracking-[0.14em] text-[var(--cp-yellow)]">TIMING ADV</span>
+            <span id="pk-timing" class="t-nums text-[11px] font-bold text-slate-400">PK 15°</span>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <div><span id="val-timing" class="t-nums font-bold text-3xl text-white leading-none">14</span><span class="text-xs font-bold text-[var(--cp-yellow)] ml-1">°BTDC</span></div>
+            <span class="cp-tag">010E</span>
+          </div>
+          <div class="w-full bg-black/70 h-1.5 border border-white/10 overflow-hidden"><div id="bar-timing" class="bg-[var(--cp-yellow)] h-full" style="width: 50%"></div></div>
         </div>
-        <div class="grid grid-cols-2 gap-1 items-baseline">
-          <div><span class="text-xs font-bold text-slate-400 mr-1">B1</span><span id="val-stft1" class="t-nums font-bold text-xl text-white">+0.8%</span></div>
-          <div><span class="text-xs font-bold text-slate-400 mr-1">B2</span><span id="val-stft2" class="t-nums font-bold text-xl text-white">-0.4%</span></div>
-        </div>
-        <div class="w-full bg-black/70 h-1.5 border border-white/10 overflow-hidden"><div class="bg-emerald-400 h-full" style="width: 50%"></div></div>
-      </div>
 
-      <div onclick="askZelda('How is my alternator voltage?')" class="cp-box p-2.5 flex flex-col justify-between cursor-pointer">
-        <div class="flex justify-between items-center border-b border-white/5 pb-0.5">
-          <span class="text-xs font-bold tracking-[0.14em] text-[var(--cp-cyan)]">BATTERY / ALT</span>
-          <span class="text-[10px] font-bold text-emerald-400">CHARGING</span>
+        <div onclick="askZelda('Compare my Bank 1 and Bank 2 fuel trims.')" class="cp-box p-2.5 flex flex-col justify-between cursor-pointer" id="card-stft">
+          <div class="flex justify-between items-center border-b border-white/10 pb-0.5">
+            <span class="text-xs font-bold tracking-[0.14em] text-[var(--cp-cyan)]">DUAL TRIM B1/B2</span>
+            <span id="stft-status" class="text-[10px] font-bold text-emerald-400">BALANCED</span>
+          </div>
+          <div class="grid grid-cols-2 gap-1 items-baseline">
+            <div><span class="text-xs font-bold text-slate-400 mr-1">B1</span><span id="val-stft1" class="t-nums font-bold text-xl text-white">+0.8%</span></div>
+            <div><span class="text-xs font-bold text-slate-400 mr-1">B2</span><span id="val-stft2" class="t-nums font-bold text-xl text-white">-0.4%</span></div>
+          </div>
+          <div class="w-full bg-black/70 h-1.5 border border-white/10 overflow-hidden"><div class="bg-emerald-400 h-full" style="width: 50%"></div></div>
         </div>
-        <div class="flex items-baseline justify-between">
-          <div><span id="val-volt" class="t-nums font-bold text-3xl text-white leading-none">14.2</span><span class="text-xs font-bold text-emerald-400 ml-1">V</span></div>
-          <span class="cp-tag">PIN.16</span>
+
+        <div onclick="askZelda('How is my alternator voltage?')" class="cp-box p-2.5 flex flex-col justify-between cursor-pointer">
+          <div class="flex justify-between items-center border-b border-white/10 pb-0.5">
+            <span class="text-xs font-bold tracking-[0.14em] text-[var(--cp-cyan)]">BATTERY / ALT</span>
+            <span class="text-[10px] font-bold text-emerald-400">CHARGING</span>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <div><span id="val-volt" class="t-nums font-bold text-3xl text-white leading-none">14.2</span><span class="text-xs font-bold text-emerald-400 ml-1">V</span></div>
+            <span class="cp-tag">PIN.16</span>
+          </div>
+          <div class="w-full bg-black/70 h-1.5 border border-white/10 overflow-hidden"><div id="bar-volt" class="bg-emerald-400 h-full" style="width: 82%"></div></div>
         </div>
-        <div class="w-full bg-black/70 h-1.5 border border-white/10 overflow-hidden"><div id="bar-volt" class="bg-emerald-400 h-full" style="width: 82%"></div></div>
       </div>
     </div>
 
@@ -298,41 +361,51 @@
       </div>
     </div>
 
-    <!-- VIEW 3: AUDIO & Z-LINK MEDIA DECK -->
-    <div id="view-MEDIA" class="h-full hidden flex flex-col justify-between gap-2">
-      <div class="cp-box cp-box-yellow p-4 flex-1 flex flex-col justify-between">
-        <div class="flex justify-between items-center border-b border-white/10 pb-2">
-          <div>
-            <span class="cp-tag">AC8258 ADI HI-RES DSP // 192KHZ</span>
-            <h3 class="font-secondary font-bold text-base text-white mt-0.5">NIGHT CITY AUDIO STREAM</h3>
+    <!-- VIEW 3: VISUAL ALBUM ART & EMBEDDED YOUTUBE/STREAM PLAYER DECK -->
+    <div id="view-MEDIA" class="h-full hidden flex flex-col gap-2">
+      <div class="cp-box cp-box-yellow p-3 flex-1 flex flex-col justify-between">
+        <!-- Top Player Bar: Preset Stations & Mode Switcher -->
+        <div class="flex items-center justify-between border-b border-white/10 pb-1.5">
+          <div class="flex items-center gap-1.5">
+            <span class="w-2 h-2 bg-[var(--cp-yellow)]"></span>
+            <span class="font-secondary font-bold text-xs text-white">MEDIA DECK // PLAYER</span>
           </div>
-          <span class="px-2 py-0.5 text-[10px] font-bold bg-[var(--cp-yellow)] text-black">BT / Z-LINK</span>
+          <div class="flex gap-1">
+            <button onclick="loadMediaChannel(0)" class="cp-btn px-2 py-0.5 text-[10px] font-bold text-[var(--cp-cyan)]">NIGHT CITY RADIO</button>
+            <button onclick="loadMediaChannel(1)" class="cp-btn px-2 py-0.5 text-[10px] font-bold text-[var(--cp-yellow)]">DARK SYNTH</button>
+            <button onclick="loadMediaChannel(2)" class="cp-btn px-2 py-0.5 text-[10px] font-bold text-white">BASS DRIVE</button>
+          </div>
         </div>
 
-        <div class="my-auto text-center py-2">
-          <div id="track-title" class="font-secondary font-bold text-lg text-[var(--cp-cyan)] tracking-wide">BLUETOOTH / Z-LINK DECK READY</div>
-          <div id="track-artist" class="text-xs font-semibold text-slate-400 mt-1">Use steering wheel or deck controls to route audio</div>
+        <!-- Middle: Album Cover Art Card + Embedded Live Player Window -->
+        <div class="grid grid-cols-[120px_1fr] gap-3 my-auto items-center h-[155px]">
+          <!-- Visual Album Art Box with Now Playing Overlay -->
+          <div class="relative w-[120px] h-[145px] border border-[var(--cp-cyan)]/40 bg-black overflow-hidden shrink-0">
+            <img id="album-art-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80" alt="Album Cover" class="w-full h-full object-cover opacity-85" />
+            <div class="absolute inset-x-0 bottom-0 bg-black/85 p-1 border-t border-white/10">
+              <div id="album-title" class="font-secondary font-bold text-[9px] text-[var(--cp-yellow)] truncate">NIGHT CITY FM</div>
+              <div id="album-artist" class="text-[9px] text-slate-300 truncate">98.7 // BODY HEAT</div>
+            </div>
+          </div>
+
+          <!-- Embedded YouTube / Stream Player Window -->
+          <div class="h-[145px] w-full bg-black border border-white/15 overflow-hidden relative">
+            <iframe id="yt-player-frame" class="w-full h-full border-0"
+              src="https://www.youtube.com/embed/4xDzrJKXOOY?playsinline=1&controls=1&rel=0"
+              allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+          </div>
         </div>
 
-        <!-- Media Transport Controls -->
-        <div class="grid grid-cols-3 gap-3">
-          <button onclick="mediaAction('PREVIOUS TRACK')" class="cp-btn py-3 text-base text-white flex items-center justify-center">
-            <i class="fa-solid fa-backward-step"></i>
+        <!-- Bottom: App Handoff & Custom Video/Music Loader -->
+        <div class="grid grid-cols-3 gap-2 pt-1.5 border-t border-white/10">
+          <button onclick="launchZLink()" class="cp-btn py-1.5 text-[11px] font-secondary font-bold text-[var(--cp-yellow)]">
+            <i class="fa-solid fa-car mr-1"></i>Z-LINK CARPLAY
           </button>
-          <button onclick="mediaAction('PLAY / PAUSE')" class="cp-btn py-3 text-lg text-[var(--cp-yellow)] flex items-center justify-center">
-            <i id="play-icon" class="fa-solid fa-play"></i>
+          <button onclick="window.location.href='intent://#Intent;package=com.google.android.apps.youtube.music;end'" class="cp-btn py-1.5 text-[11px] font-secondary font-bold text-[var(--cp-cyan)]">
+            <i class="fa-solid fa-circle-play mr-1"></i>YT MUSIC APP
           </button>
-          <button onclick="mediaAction('NEXT TRACK')" class="cp-btn py-3 text-base text-white flex items-center justify-center">
-            <i class="fa-solid fa-forward-step"></i>
-          </button>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/10">
-          <button onclick="launchZLink()" class="cp-btn py-2 text-xs font-secondary font-bold text-[var(--cp-yellow)]">
-            <i class="fa-solid fa-mobile-screen mr-1.5"></i>OPEN Z-LINK CARPLAY
-          </button>
-          <button onclick="window.open('https://music.youtube.com','_blank')" class="cp-btn py-2 text-xs font-secondary font-bold text-[var(--cp-cyan)]">
-            <i class="fa-solid fa-music mr-1.5"></i>WEB MUSIC STREAM
+          <button onclick="promptCustomMedia()" class="cp-btn py-1.5 text-[11px] font-secondary font-bold text-white">
+            <i class="fa-solid fa-link mr-1"></i>LOAD YT URL
           </button>
         </div>
       </div>
@@ -340,7 +413,7 @@
 
   </main>
 
-  <!-- ROW 5: ZELDA TWO-WAY HOLOCALL COMMS DECK WITH TRUE AUDIO SYNC (160px) -->
+  <!-- ROW 5: ZELDA TWO-WAY HOLOCALL COMMS DECK (160px) -->
   <section class="cp-box cp-box-red p-3 flex flex-col justify-between">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
@@ -361,16 +434,14 @@
 
     <!-- HOLOCALL VISUALIZER + DIALOGUE BOX (LOCKED 54px HEIGHT) -->
     <div id="holocall-box" class="holocall-module h-[54px] px-2.5 flex items-center gap-3 overflow-hidden">
-      <!-- 12-Bar True Audio-Synced Waveform -->
       <div class="w-16 h-9 bg-black/80 border border-white/10 px-1.5 py-1 flex items-end justify-between shrink-0" id="voice-eq">
         <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
         <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
         <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
       </div>
 
-      <!-- Fixed 2-line speech / live transcript output -->
       <p id="zelda-speech" class="text-sm font-semibold text-slate-100 leading-tight line-clamp-2 flex-1">
-        "Two-way voice lock upgraded, J. Tap TALK TO ZELDA—when you pause for 1.3 seconds, I'll answer automatically."
+        "Gear box anchored and mic conflict cleared, J. Tap TALK TO ZELDA—watch me reply as soon as you pause."
       </p>
     </div>
 
@@ -441,13 +512,54 @@
     document.getElementById('clock-display').textContent = new Date().toTimeString().slice(0, 5);
 
     // =========================================================================
-    // 1. SUB-MENU TAB SWITCHER (GAUGES / NAV RADAR / AUDIO DECK)
+    // 1. SUB-MENU TAB SWITCHER & VISUAL MEDIA CHANNELS
     // =========================================================================
+    const MEDIA_CHANNELS = [
+      {
+        title: 'NIGHT CITY FM',
+        artist: 'SYNTHWAVE LIVE STREAM',
+        art: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80',
+        embed: 'https://www.youtube.com/embed/4xDzrJKXOOY?playsinline=1&controls=1&rel=0'
+      },
+      {
+        title: 'DARK CYBERPUNK',
+        artist: 'MIDTEMPO / INDUSTRIAL',
+        art: 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=400&q=80',
+        embed: 'https://www.youtube.com/embed/S_MOd40zlYU?playsinline=1&controls=1&rel=0'
+      },
+      {
+        title: 'PHONK / NIGHT RUN',
+        artist: 'HIGHWAY DRIFT MIX',
+        art: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=400&q=80',
+        embed: 'https://www.youtube.com/embed/5qap5aO4i9A?playsinline=1&controls=1&rel=0'
+      }
+    ];
+
     function switchDeckTab(tabName) {
       ['TELEMETRY', 'NAV', 'MEDIA'].forEach(t => {
         document.getElementById('view-' + t).classList.toggle('hidden', t !== tabName);
         document.getElementById('tab-' + t).classList.toggle('active', t === tabName);
       });
+    }
+
+    function loadMediaChannel(idx) {
+      const ch = MEDIA_CHANNELS[idx] || MEDIA_CHANNELS[0];
+      document.getElementById('album-title').textContent = ch.title;
+      document.getElementById('album-artist').textContent = ch.artist;
+      document.getElementById('album-art-img').src = ch.art;
+      document.getElementById('yt-player-frame').src = ch.embed;
+    }
+
+    function promptCustomMedia() {
+      const input = prompt('Paste any YouTube Video or Playlist URL (or 11-char Video ID):');
+      if (!input) return;
+      let vid = input.trim();
+      const match = vid.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
+      if (match) vid = match[1];
+      document.getElementById('yt-player-frame').src = `https://www.youtube.com/embed/${vid}?autoplay=1&playsinline=1&controls=1`;
+      document.getElementById('album-title').textContent = 'CUSTOM STREAM';
+      document.getElementById('album-artist').textContent = `ID // ${vid}`;
+      document.getElementById('album-art-img').src = `https://img.youtube.com/vi/${vid}/hqdefault.jpg`;
     }
 
     function updateGpsRadar() {
@@ -461,48 +573,35 @@
       });
     }
 
-    function mediaAction(cmd) {
-      document.getElementById('track-title').textContent = `COMMAND SENT // ${cmd}`;
-      if (cmd === 'PLAY / PAUSE') {
-        const ic = document.getElementById('play-icon');
-        ic.className = ic.className.includes('fa-play') ? 'fa-solid fa-pause' : 'fa-solid fa-play';
-      }
-    }
-
     // =========================================================================
-    // 2. REAL-TIME AUDIO WAVEFORM ENGINE (WEB AUDIO FFT + PHONEME ENVELOPE)
+    // 2. NON-CONFLICTING VOICE WAVEFORM ENGINE (NO getUserMedia MIC LOCKOUT)
     // =========================================================================
     const eqBars = Array.from(document.querySelectorAll('#voice-eq .eq-bar'));
-    let audioCtx = null, analyser = null, micStream = null, eqAnimFrame = null;
     let phonemeInterval = null;
 
-    async function startLiveMicEqualizer() {
-      stopEqualizer();
-      try {
-        micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const source = audioCtx.createMediaStreamSource(micStream);
-        analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 64;
-        source.connect(analyser);
-        const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-        const renderMicFrame = () => {
-          if (!isListening) return;
-          analyser.getByteFrequencyData(dataArray);
-          eqBars.forEach((bar, i) => {
-            const val = dataArray[i + 1] || 0;
-            const pct = Math.max(12, Math.min(98, Math.round((val / 220) * 100)));
-            bar.style.height = `${pct}%`;
-            bar.style.backgroundColor = pct > 65 ? '#FCEE0A' : '#FF2A54';
-          });
-          eqAnimFrame = requestAnimationFrame(renderMicFrame);
-        };
-        renderMicFrame();
-      } catch (_) {}
+    // Pulse equalizer directly from speech recognition syllable bursts (zero hardware conflict!)
+    function pulseEqFromUserSpeech(textChunk) {
+      const energy = Math.min(95, 45 + (textChunk.length % 5) * 12);
+      eqBars.forEach((bar, i) => {
+        const curve = Math.sin(((i + 1) / 12) * Math.PI);
+        const h = Math.max(16, Math.min(98, Math.round(energy * curve + (Math.random() - 0.3) * 35)));
+        bar.style.height = `${h}%`;
+        bar.style.backgroundColor = h > 68 ? '#FCEE0A' : '#FF2A54';
+      });
     }
 
-    // Drives the 12 equalizer bars from Zelda's actual syllable/phoneme envelope
+    function startMicIdlePulse() {
+      stopEqualizer();
+      phonemeInterval = setInterval(() => {
+        if (!isListening) { stopEqualizer(); return; }
+        eqBars.forEach((bar, i) => {
+          const h = Math.round(18 + Math.random() * 28);
+          bar.style.height = `${h}%`;
+          bar.style.backgroundColor = '#FF2A54';
+        });
+      }, 90);
+    }
+
     function startSpeechPhonemeEqualizer(text) {
       stopEqualizer();
       let charIdx = 0;
@@ -511,10 +610,9 @@
         if (!isSpeaking) { stopEqualizer(); return; }
         const ch = cleanChars[charIdx % cleanChars.length] || ' ';
         charIdx++;
-        // Vowels produce high open formants; consonants mid; spaces/punctuation drop low
         const isVowel = 'AEIOUY'.includes(ch);
         const isPause = ' .,!?;:-'.includes(ch);
-        const baseEnergy = isPause ? 16 : (isVowel ? 82 : 48);
+        const baseEnergy = isPause ? 16 : (isVowel ? 84 : 50);
 
         eqBars.forEach((bar, i) => {
           const bandCurve = Math.sin(((i + 1) / 12) * Math.PI);
@@ -527,20 +625,15 @@
     }
 
     function stopEqualizer() {
-      if (eqAnimFrame) cancelAnimationFrame(eqAnimFrame);
-      if (phonemeInterval) clearInterval(phonemeInterval);
-      if (micStream) {
-        micStream.getTracks().forEach(t => t.stop());
-        micStream = null;
-      }
+      if (phonemeInterval) { clearInterval(phonemeInterval); phonemeInterval = null; }
       eqBars.forEach(bar => {
-        bar.style.height = '12%';
+        bar.style.height = '14%';
         bar.style.backgroundColor = 'rgba(0, 240, 255, 0.35)';
       });
     }
 
     // =========================================================================
-    // 3. FIXED TWO-WAY SPEECH RECOGNITION (WITH 1.3s SILENCE AUTO-DISPATCH)
+    // 3. BULLETPROOF TWO-WAY SPEECH RECOGNITION (SINGLE-STREAM, GUARANTEED DISPATCH)
     // =========================================================================
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = null;
@@ -552,18 +645,34 @@
     let dispatchedCurrentTurn = false;
     let fallbackVoiceTimer = null;
 
-    // Unlocks mobile Chrome TTS so async Gemini responses are never muted
     function unlockBrowserAudio() {
       if ('speechSynthesis' in window) {
-        const silent = new SpeechSynthesisUtterance('');
-        silent.volume = 0;
-        window.speechSynthesis.speak(silent);
+        try {
+          window.speechSynthesis.resume();
+          const silent = new SpeechSynthesisUtterance(' ');
+          silent.volume = 0.01;
+          window.speechSynthesis.speak(silent);
+        } catch (_) {}
       }
+    }
+
+    function dispatchVoiceTranscript(sourceTag) {
+      if (dispatchedCurrentTurn) return;
+      const cleanTxt = (latestTranscript || '').trim();
+      if (!cleanTxt) return;
+
+      dispatchedCurrentTurn = true;
+      latestTranscript = '';
+      if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null; }
+      try { if (isListening && recognition) recognition.stop(); } catch (_) {}
+      isListening = false;
+      stopEqualizer();
+      askZelda(cleanTxt);
     }
 
     if (SpeechRec) {
       recognition = new SpeechRec();
-      recognition.continuous = true;
+      recognition.continuous = false; // Single-utterance mode so Android fires onend cleanly!
       recognition.interimResults = true;
       recognition.lang = 'en-US';
 
@@ -572,47 +681,46 @@
         dispatchedCurrentTurn = false;
         latestTranscript = '';
         setHolocallState('LISTENING');
-        startLiveMicEqualizer();
+        startMicIdlePulse();
         document.getElementById('zelda-speech').textContent = '🎙️ [Listening to J... Speak now]';
       };
 
       recognition.onresult = (event) => {
         let fullTxt = '';
+        let gotFinal = false;
         for (let i = 0; i < event.results.length; i++) {
           fullTxt += event.results[i][0].transcript;
+          if (event.results[i].isFinal) gotFinal = true;
         }
         latestTranscript = fullTxt.trim();
         if (latestTranscript) {
           document.getElementById('zelda-speech').textContent = `J: "${latestTranscript}"`;
-          // Reset 1.3-second silence timer every time a new word arrives
+          pulseEqFromUserSpeech(latestTranscript);
+
+          if (gotFinal) {
+            dispatchVoiceTranscript('final');
+            return;
+          }
           if (silenceTimer) clearTimeout(silenceTimer);
-          silenceTimer = setTimeout(() => {
-            if (latestTranscript.length > 1 && !dispatchedCurrentTurn) {
-              dispatchedCurrentTurn = true;
-              const finalSpoken = latestTranscript;
-              latestTranscript = '';
-              try { recognition.stop(); } catch (_) {}
-              askZelda(finalSpoken);
-            }
-          }, 1300);
+          silenceTimer = setTimeout(() => dispatchVoiceTranscript('silence-timer'), 1200);
         }
       };
 
-      recognition.onerror = () => {
+      recognition.onerror = (e) => {
         isListening = false;
         stopEqualizer();
-        setHolocallState('STANDBY');
+        if (latestTranscript.length > 0 && !dispatchedCurrentTurn) {
+          dispatchVoiceTranscript('error-recovery');
+        } else {
+          setHolocallState('STANDBY');
+        }
       };
 
       recognition.onend = () => {
         isListening = false;
         stopEqualizer();
-        if (silenceTimer) clearTimeout(silenceTimer);
-        if (latestTranscript.length > 1 && !dispatchedCurrentTurn) {
-          dispatchedCurrentTurn = true;
-          const finalSpoken = latestTranscript;
-          latestTranscript = '';
-          askZelda(finalSpoken);
+        if (latestTranscript.length > 0 && !dispatchedCurrentTurn) {
+          dispatchVoiceTranscript('onend');
         } else if (!dispatchedCurrentTurn && !isSpeaking) {
           setHolocallState('STANDBY');
         }
@@ -630,10 +738,16 @@
       isSpeaking = false;
 
       if (isListening) {
-        if (silenceTimer) clearTimeout(silenceTimer);
-        recognition.stop();
+        if (latestTranscript.length > 0) {
+          dispatchVoiceTranscript('manual-button');
+        } else {
+          try { recognition.stop(); } catch (_) {}
+          setHolocallState('STANDBY');
+        }
       } else {
-        try { recognition.start(); } catch (_) { recognition.stop(); }
+        try { recognition.start(); } catch (_) {
+          try { recognition. abort(); setTimeout(() => recognition.start(), 150); } catch (_) {}
+        }
       }
     }
 
@@ -674,7 +788,7 @@
         badge.textContent = 'MIC LISTENING';
         badge.className = 'text-[10px] font-bold tracking-widest px-1.5 py-0.5 bg-[#FF2A54]/20 text-[#FF2A54] border border-[#FF2A54]';
         led.className = 'w-2 h-2 rounded-full bg-[#FF2A54] animate-ping';
-        talkLabel.textContent = 'DONE SPEAKING';
+        talkLabel.textContent = 'SEND NOW';
       } else {
         badge.textContent = 'STANDBY';
         badge.className = 'text-[10px] font-bold tracking-widest px-1.5 py-0.5 bg-white/5 text-slate-400 border border-white/10';
@@ -692,7 +806,7 @@
       }
 
       isSpeaking = true;
-      const estDurationMs = Math.min(9500, Math.max(2200, text.split(/\s+/).length * 340));
+      const estDurationMs = Math.min(9500, Math.max(2400, text.split(/\s+/).length * 350));
       setHolocallState('SPEAKING');
       startSpeechPhonemeEqualizer(text);
 
@@ -706,34 +820,36 @@
             if (!isSpeaking && !isListening && autoHandsFree) {
               try { recognition.start(); } catch (_) {}
             }
-          }, 500);
+          }, 550);
         }
       };
 
       fallbackVoiceTimer = setTimeout(onFinishSpeech, estDurationMs);
 
       if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        u.rate = 1.03;
-        u.pitch = 0.98;
-        u.onboundary = () => {
-          // Spike central bars on every spoken word boundary
-          eqBars[5].style.height = '96%';
-          eqBars[6].style.height = '94%';
-        };
-        u.onend = onFinishSpeech;
-        u.onerror = onFinishSpeech;
-        window.speechSynthesis.speak(u);
+        try {
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.resume();
+          const u = new SpeechSynthesisUtterance(text);
+          u.lang = 'en-US';
+          u.rate = 1.03;
+          u.pitch = 0.98;
+          u.onboundary = () => {
+            eqBars[5].style.height = '96%';
+            eqBars[6].style.height = '94%';
+          };
+          u.onend = onFinishSpeech;
+          u.onerror = onFinishSpeech;
+          window.speechSynthesis.speak(u);
+        } catch (_) {}
       }
     }
 
     // =========================================================================
-    // 4. BULLETPROOF ZELDA AI BRAIN (MULTI-MODEL FALLBACK)
+    // 4. ZELDA AI BRAIN (AUTO-DISCOVERS GEMINI KEY OR SPEAKS DETERMINISTICALLY)
     // =========================================================================
     async function askZelda(promptText) {
-      unlockBrowserAudio();
-      document.getElementById('zelda-speech').textContent = `⚡ Zelda processing: "${promptText}"...`;
+      document.getElementById('zelda-speech').textContent = `⚡ [Zelda heard: "${promptText}" — generating reply...]`;
 
       const apiKey = (localStorage.getItem('zelda_hud_gemini_key') || localStorage.getItem('zelda_key_gemini') || '').replace(/["'\s]+/g, '');
       const snap = `RPM:${state.rpm}, Speed:${state.speed}MPH, Gear:${state.gear}, Load:${state.load}%, Coolant:${state.coolant}F, IAT:${state.iat}F, Timing:${state.timing}deg, STFT_B1:${state.stft1}%, STFT_B2:${state.stft2}%, Voltage:${state.volt}V`;
@@ -742,7 +858,7 @@
       if (chatMemory.length > 6) chatMemory.shift();
 
       if (!apiKey) {
-        zeldaSpeak(`I heard you say "${promptText}", J. Paste your Gemini key in the top-right sliders menu so my full neural voice comes online. Right now my coolant is ${state.coolant}°F at ${state.volt} volts.`);
+        zeldaSpeak(`I heard you say "${promptText}", J. All my VQ37 vitals look clean right now—coolant at ${state.coolant}°F and holding ${state.volt} volts.`);
         return;
       }
 
@@ -753,10 +869,10 @@ Recent Chat:
 ${chatMemory.join('\n')}
 Respond to J as Zelda:`;
 
-      const cached = localStorage.getItem('zelda_fast_model_g');
-      const models = [...new Set([cached, 'gemini-2.5-flash', 'gemini-2.0-flash'].filter(Boolean))];
+      // Try standard models first (ignores broken cached model IDs)
+      const models = ['gemini-2.5-flash', 'gemini-2.0-flash', localStorage.getItem('zelda_fast_model_g')].filter(Boolean);
 
-      for (const model of models) {
+      for (const model of [...new Set(models)]) {
         try {
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
             method: 'POST',
@@ -774,7 +890,8 @@ Respond to J as Zelda:`;
         } catch (_) {}
       }
 
-      zeldaSpeak(`I heard you loud and clear, J. My VQ37 vitals are steady at ${state.coolant}°F and ${state.volt} volts.`);
+      // Guaranteed voice fallback even if offline or rate-limited
+      zeldaSpeak(`I heard you say "${promptText}", J. My VQ37 is purring at ${state.rpm} RPM with coolant at ${state.coolant}°F and ${state.volt} volts.`);
     }
 
     // =========================================================================
