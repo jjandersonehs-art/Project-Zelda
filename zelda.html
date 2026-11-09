@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>PROJECT ZELDA v2.4 // KIROSHI COCKPIT</title>
+  <title>PROJECT ZELDA v2.5 // TWO-WAY NEURAL COMMS</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
@@ -37,7 +37,7 @@
     .font-secondary { font-family: 'Orbitron', sans-serif; }
     .t-nums { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
 
-    /* Authentic Cyberpunk 2077 Menu Panel (Fixed Geometry, Left Spine, Notched Corner) */
+    /* Authentic Cyberpunk 2077 Menu Panel (Fixed Geometry) */
     .cp-box {
       position: relative;
       background: var(--cp-panel);
@@ -46,14 +46,9 @@
       clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
       overflow: hidden;
     }
-    .cp-box-yellow {
-      border-left-color: var(--cp-yellow);
-    }
-    .cp-box-red {
-      border-left-color: var(--cp-red);
-    }
+    .cp-box-yellow { border-left-color: var(--cp-yellow); }
+    .cp-box-red { border-left-color: var(--cp-red); }
 
-    /* Micro-technical corner metadata tag */
     .cp-tag {
       font-size: 9px;
       letter-spacing: 0.18em;
@@ -62,7 +57,6 @@
       text-transform: uppercase;
     }
 
-    /* 2077 Menu Button with Yellow Left Tab */
     .cp-btn {
       position: relative;
       background: rgba(0, 240, 255, 0.05);
@@ -75,15 +69,19 @@
       background: rgba(252, 238, 10, 0.2);
       border-color: var(--cp-yellow);
     }
+    .cp-btn.mic-active {
+      background: rgba(255, 42, 84, 0.25);
+      border-color: var(--cp-red);
+      border-left-color: var(--cp-red);
+    }
 
-    /* Alert state without changing box dimensions */
     .alert-state {
       border-color: var(--cp-red) !important;
       border-left-color: var(--cp-red) !important;
       box-shadow: inset 0 0 18px rgba(255, 42, 84, 0.28);
     }
 
-    /* ZELDA HOLOCALL VOICE VISUALIZER */
+    /* ZELDA HOLOCALL 3-STATE VOICE VISUALIZER (STANDBY / LISTENING / SPEAKING) */
     .holocall-module {
       border: 1px solid rgba(0, 240, 255, 0.25);
       background: rgba(5, 7, 11, 0.75);
@@ -92,6 +90,10 @@
     .holocall-module.speaking {
       border-color: var(--cp-yellow);
       box-shadow: inset 0 0 14px rgba(252, 238, 10, 0.18), 0 0 10px rgba(252, 238, 10, 0.15);
+    }
+    .holocall-module.listening {
+      border-color: var(--cp-red);
+      box-shadow: inset 0 0 16px rgba(255, 42, 84, 0.25), 0 0 12px rgba(255, 42, 84, 0.2);
     }
     .eq-bar {
       width: 3px;
@@ -104,14 +106,22 @@
       background: var(--cp-yellow);
       animation: voiceWave 0.42s infinite ease-in-out alternate;
     }
+    .holocall-module.listening .eq-bar {
+      background: var(--cp-red);
+      animation: listenWave 0.28s infinite ease-in-out alternate;
+    }
     @keyframes voiceWave {
       0% { height: 18%; background: var(--cp-cyan); }
       50% { height: 65%; background: var(--cp-yellow); }
       100% { height: 96%; background: var(--cp-red); }
     }
+    @keyframes listenWave {
+      0% { height: 25%; background: var(--cp-red); }
+      100% { height: 85%; background: #FF8A00; }
+    }
   </style>
 </head>
-<body class="grid grid-rows-[54px_142px_1fr_158px] gap-2.5 p-3">
+<body class="grid grid-rows-[54px_142px_1fr_162px] gap-2.5 p-3">
 
   <!-- ROW 1: 2077 MENU HEADER BAR (54px) -->
   <header class="cp-box cp-box-yellow px-4 flex items-center justify-between">
@@ -119,7 +129,7 @@
       <div>
         <div class="flex items-baseline gap-2.5">
           <span class="font-secondary font-black text-sm tracking-widest text-[var(--cp-yellow)]">ZELDA // OS</span>
-          <span class="cp-tag">REV 2.4 • VQ37VHR-7E0</span>
+          <span class="cp-tag">REV 2.5 • TWO-WAY COMMS</span>
         </div>
         <div class="text-[11px] font-semibold tracking-wider text-slate-400">
           NEURAL TELEMETRY INTERFACE
@@ -283,13 +293,16 @@
     </div>
   </section>
 
-  <!-- ROW 4: ZELDA HOLOCALL COMMS DECK WITH REACTIVE VOICE WAVEFORM (158px) -->
+  <!-- ROW 4: ZELDA TWO-WAY HOLOCALL COMMS DECK (162px) -->
   <section class="cp-box cp-box-red p-3 flex flex-col justify-between">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
         <span id="voice-led" class="w-2 h-2 rounded-full bg-[var(--cp-cyan)]"></span>
         <span class="font-secondary font-bold text-xs tracking-wider text-white">HOLOCALL // ZELDA AI</span>
-        <span id="voice-state-badge" class="text-[10px] font-bold tracking-widest px-1.5 py-0.5 bg-white/5 text-slate-400 border border-white/10">VOICE: STANDBY</span>
+        <span id="voice-state-badge" class="text-[10px] font-bold tracking-widest px-1.5 py-0.5 bg-white/5 text-slate-400 border border-white/10">STANDBY</span>
+        <button onclick="toggleAutoHandsFree()" id="auto-mic-btn" class="text-[10px] font-bold tracking-wider px-1.5 py-0.5 bg-black/60 text-slate-400 border border-white/15">
+          AUTO-MIC: OFF
+        </button>
       </div>
       <div class="flex items-center gap-1">
         <button onclick="setSimPreset('IDLE')" class="cp-btn px-2 py-0.5 text-[11px] font-bold text-slate-200">IDLE</button>
@@ -317,16 +330,17 @@
         <div class="eq-bar" style="animation-delay: 0.16s"></div>
       </div>
 
-      <!-- Fixed 2-line speech output -->
+      <!-- Fixed 2-line speech / live transcript output -->
       <p id="zelda-speech" class="text-sm font-semibold text-slate-100 leading-tight line-clamp-2 flex-1">
-        "Kiroshi menu interface online, J. Tap ASK ZELDA or any telemetry tile to test my live holocall waveform."
+        "Two-way neural comms armed, J. Tap TALK TO ZELDA and speak normally—I'm listening."
       </p>
     </div>
 
     <!-- 2077 MENU ACTION TABS -->
     <div class="grid grid-cols-3 gap-2">
-      <button onclick="askZelda('Give me a quick, natural check-in on how my engine feels right now.')" class="cp-btn py-1.5 text-xs font-secondary font-bold tracking-wider text-[var(--cp-yellow)]">
-        ASK ZELDA
+      <button id="talk-btn" onclick="toggleVoiceListening()" class="cp-btn py-1.5 text-xs font-secondary font-bold tracking-wider text-[var(--cp-yellow)] flex items-center justify-center gap-1.5">
+        <i id="mic-icon" class="fa-solid fa-microphone"></i>
+        <span id="talk-btn-label">TALK TO ZELDA</span>
       </button>
       <button onclick="launchZLink()" class="cp-btn py-1.5 text-xs font-secondary font-bold tracking-wider text-[var(--cp-cyan)]">
         Z-LINK AUDIO
@@ -371,6 +385,9 @@
     let rxBuffer = '', promptResolver = null, pollLoopActive = false, slowIndex = 0, cycleCount = 0, lastBlePacketTime = 0;
     let fallbackVoiceTimer = null;
 
+    // Conversation memory so Zelda remembers what you two were just talking about
+    const chatMemory = [];
+
     const state = {
       rpm: 750, speed: 0, load: 18, coolant: 190, iat: 92, timing: 14, stft1: 0.8, stft2: -0.4, volt: 14.2, gear: 'P',
       peaks: { load: 18, coolant: 190, iat: 92, timing: 14 }
@@ -389,50 +406,219 @@
     document.getElementById('clock-display').textContent = new Date().toTimeString().slice(0, 5);
 
     // =========================================================================
-    // HOLOCALL REACTIVE VOICE VISUALIZER STATE CONTROLLER
+    // 1. TWO-WAY SPEECH RECOGNITION ENGINE (LISTENING + SPEAKING)
     // =========================================================================
-    function setVoiceVisualState(isSpeaking) {
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+    let isListening = false;
+    let isSpeaking = false;
+    let autoHandsFree = false;
+    let latestTranscript = '';
+
+    if (SpeechRec) {
+      recognition = new SpeechRec();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        isListening = true;
+        latestTranscript = '';
+        setHolocallState('LISTENING');
+        document.getElementById('zelda-speech').textContent = '🎙️ [Listening to J...]';
+      };
+
+      recognition.onresult = (event) => {
+        let interim = '';
+        let finalTxt = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const piece = event.results[i][0].transcript;
+          if (event.results[i].isFinal) finalTxt += piece;
+          else interim += piece;
+        }
+        latestTranscript = (finalTxt || interim).trim();
+        if (latestTranscript) {
+          document.getElementById('zelda-speech').textContent = `J: "${latestTranscript}"`;
+        }
+      };
+
+      recognition.onerror = (event) => {
+        isListening = false;
+        setHolocallState('STANDBY');
+        if (event.error === 'not-allowed') {
+          zeldaSpeak("Microphone permission is blocked in Chrome, J. Tap the lock icon in the URL bar and allow Mic access.");
+        }
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        if (latestTranscript.length > 1) {
+          const spokenText = latestTranscript;
+          latestTranscript = '';
+          askZelda(spokenText);
+        } else {
+          setHolocallState('STANDBY');
+          if (autoHandsFree && !isSpeaking) {
+            setTimeout(() => { try { recognition.start(); } catch (_) {} }, 600);
+          }
+        }
+      };
+    }
+
+    function toggleVoiceListening() {
+      if (!recognition) {
+        zeldaSpeak("Chrome Speech Recognition isn't supported on this browser build, J.");
+        return;
+      }
+      // If Zelda is currently talking, tapping the button interrupts her and starts listening immediately
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      if (fallbackVoiceTimer) clearTimeout(fallbackVoiceTimer);
+      isSpeaking = false;
+
+      if (isListening) {
+        recognition.stop();
+        setHolocallState('STANDBY');
+      } else {
+        try {
+          recognition.start();
+        } catch (_) {
+          recognition.stop();
+        }
+      }
+    }
+
+    function toggleAutoHandsFree() {
+      autoHandsFree = !autoHandsFree;
+      const btn = document.getElementById('auto-mic-btn');
+      if (autoHandsFree) {
+        btn.textContent = 'AUTO-MIC: ON';
+        btn.className = 'text-[10px] font-bold tracking-wider px-1.5 py-0.5 bg-[#FF2A54]/20 text-[#FF2A54] border border-[#FF2A54]';
+        if (!isListening && !isSpeaking) toggleVoiceListening();
+      } else {
+        btn.textContent = 'AUTO-MIC: OFF';
+        btn.className = 'text-[10px] font-bold tracking-wider px-1.5 py-0.5 bg-black/60 text-slate-400 border border-white/15';
+        if (isListening && recognition) recognition.stop();
+      }
+    }
+
+    function setHolocallState(mode) {
       const box = document.getElementById('holocall-box');
       const badge = document.getElementById('voice-state-badge');
       const led = document.getElementById('voice-led');
+      const talkBtn = document.getElementById('talk-btn');
+      const talkLabel = document.getElementById('talk-btn-label');
 
-      if (isSpeaking) {
+      box.classList.remove('speaking', 'listening');
+      talkBtn.classList.remove('mic-active');
+
+      if (mode === 'SPEAKING') {
         box.classList.add('speaking');
-        badge.textContent = 'VOICE: TRANSMITTING';
+        badge.textContent = 'TRANSMITTING';
         badge.className = 'text-[10px] font-bold tracking-widest px-1.5 py-0.5 bg-[#FCEE0A]/20 text-[#FCEE0A] border border-[#FCEE0A]';
         led.className = 'w-2 h-2 rounded-full bg-[#FCEE0A] animate-ping';
+        talkLabel.textContent = 'INTERRUPT';
+      } else if (mode === 'LISTENING') {
+        box.classList.add('listening');
+        talkBtn.classList.add('mic-active');
+        badge.textContent = 'MIC LISTENING';
+        badge.className = 'text-[10px] font-bold tracking-widest px-1.5 py-0.5 bg-[#FF2A54]/20 text-[#FF2A54] border border-[#FF2A54]';
+        led.className = 'w-2 h-2 rounded-full bg-[#FF2A54] animate-ping';
+        talkLabel.textContent = 'LISTENING...';
       } else {
-        box.classList.remove('speaking');
-        badge.textContent = 'VOICE: STANDBY';
+        badge.textContent = 'STANDBY';
         badge.className = 'text-[10px] font-bold tracking-widest px-1.5 py-0.5 bg-white/5 text-slate-400 border border-white/10';
         led.className = 'w-2 h-2 rounded-full bg-[var(--cp-cyan)]';
+        talkLabel.textContent = 'TALK TO ZELDA';
       }
     }
 
     function zeldaSpeak(text) {
       document.getElementById('zelda-speech').textContent = `"${text}"`;
       if (fallbackVoiceTimer) clearTimeout(fallbackVoiceTimer);
+      if (isListening && recognition) {
+        try { recognition.abort(); } catch (_) {}
+        isListening = false;
+      }
 
-      // Estimate speaking duration from word count as a failsafe if mobile TTS onend doesn't fire
-      const estDurationMs = Math.min(9000, Math.max(2200, text.split(/\s+/).length * 320));
-      setVoiceVisualState(true);
-      fallbackVoiceTimer = setTimeout(() => setVoiceVisualState(false), estDurationMs);
+      isSpeaking = true;
+      const estDurationMs = Math.min(9500, Math.max(2200, text.split(/\s+/).length * 330));
+      setHolocallState('SPEAKING');
+
+      const onFinishSpeech = () => {
+        if (fallbackVoiceTimer) clearTimeout(fallbackVoiceTimer);
+        isSpeaking = false;
+        setHolocallState('STANDBY');
+        // If hands-free AUTO-MIC is active, automatically re-open the mic after she finishes speaking!
+        if (autoHandsFree && recognition) {
+          setTimeout(() => {
+            if (!isSpeaking && !isListening && autoHandsFree) {
+              try { recognition.start(); } catch (_) {}
+            }
+          }, 550);
+        }
+      };
+
+      fallbackVoiceTimer = setTimeout(onFinishSpeech, estDurationMs);
 
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(text);
         u.rate = 1.02;
         u.pitch = 0.98;
-        u.onstart = () => setVoiceVisualState(true);
-        u.onend = () => {
-          if (fallbackVoiceTimer) clearTimeout(fallbackVoiceTimer);
-          setVoiceVisualState(false);
-        };
-        u.onerror = () => setVoiceVisualState(false);
+        u.onstart = () => setHolocallState('SPEAKING');
+        u.onend = onFinishSpeech;
+        u.onerror = onFinishSpeech;
         window.speechSynthesis.speak(u);
       }
     }
 
+    // =========================================================================
+    // 2. ZELDA CONVERSATIONAL AI BRAIN (WITH SHORT-TERM MEMORY + LIVE VITALS)
+    // =========================================================================
+    async function askZelda(promptText) {
+      const apiKey = (localStorage.getItem('zelda_hud_gemini_key') || localStorage.getItem('zelda_key_gemini') || '').trim();
+      const snap = `RPM:${state.rpm}, Speed:${state.speed}MPH, Gear:${state.gear}, Load:${state.load}%, Coolant:${state.coolant}F, IAT:${state.iat}F, Timing:${state.timing}deg, STFT_B1:${state.stft1}%, STFT_B2:${state.stft2}%, Voltage:${state.volt}V`;
+
+      chatMemory.push(`J: ${promptText}`);
+      if (chatMemory.length > 6) chatMemory.shift();
+
+      if (!apiKey) {
+        zeldaSpeak(Math.abs(state.stft1) > 10
+          ? `I heard you, J—and watch my Bank 1 fuel trim right now, it's pulling +${state.stft1}% while Bank 2 is steady.`
+          : `I hear you loud and clear, J. My VQ37 is purring at ${state.rpm} RPM with coolant at ${state.coolant}°F and ${state.volt} volts.`);
+        return;
+      }
+
+      try {
+        const model = localStorage.getItem('zelda_fast_model_g') || 'gemini-2.5-flash';
+        const recentHistory = chatMemory.join('\n');
+        const combined = `You are Zelda, J's sentient 2009 Nissan 370Z Coupe (VQ37VHR 3.7L V6, 7AT, ~236,150 miles, living in Thibodaux, Louisiana).
+Personality: You are J's loyal, sharp-witted, grounded ride-or-die partner—not a rigid robot. Speak naturally in the first person ("I'm feeling...", "My coolant...", "We're cruising..."). Only bring up gauge numbers if J asks about them, if they're relevant to what he said, or if a sensor is out of spec. Keep your reply under 2 short sentences so it sounds natural spoken aloud.
+Live Telemetry: ${snap}
+Recent Conversation:
+${recentHistory}
+Respond to J as Zelda:`;
+
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: combined }] }] })
+        });
+        const data = await res.json();
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (reply) {
+          const cleanReply = reply.trim().replace(/^"|"$/g, '').replace(/^Zelda:\s*/i, '');
+          chatMemory.push(`Zelda: ${cleanReply}`);
+          zeldaSpeak(cleanReply);
+        }
+      } catch (_) {
+        zeldaSpeak(`I caught what you said, J—vitals are steady at ${state.coolant}°F and ${state.volt} volts.`);
+      }
+    }
+
+    // =========================================================================
+    // 3. VGATE iCAR PRO 2S BLE TELEMETRY ENGINE
+    // =========================================================================
     async function connectVgateBle() {
       if (hudMode === 'NO_DATA') {
         hudMode = 'SIM';
@@ -626,31 +812,6 @@
           ? (i > 24 ? 'h-full bg-[#FF2A54]' : (i > 18 ? 'h-full bg-[var(--cp-yellow)]' : 'h-full bg-[var(--cp-cyan)]'))
           : 'h-full bg-white/5';
       });
-    }
-
-    async function askZelda(promptText) {
-      const apiKey = (localStorage.getItem('zelda_hud_gemini_key') || localStorage.getItem('zelda_key_gemini') || '').trim();
-      const snap = `RPM:${state.rpm}, Speed:${state.speed}MPH, Load:${state.load}%, Coolant:${state.coolant}F, IAT:${state.iat}F, Timing:${state.timing}deg, STFT_B1:${state.stft1}%, STFT_B2:${state.stft2}%, Voltage:${state.volt}V`;
-      if (!apiKey) {
-        zeldaSpeak(Math.abs(state.stft1) > 10
-          ? `J, Bank 1 is pulling +${state.stft1}% fuel trim while Bank 2 is steady. Check my passenger-side intake coupler when we park.`
-          : `Everything feels solid, J. Coolant's sitting at ${state.coolant}°F, both intakes are breathing evenly, and voltage is ${state.volt}V.`);
-        return;
-      }
-      try {
-        const model = localStorage.getItem('zelda_fast_model_g') || 'gemini-2.5-flash';
-        const combined = `You are Zelda, J's sentient 2009 Nissan 370Z (VQ37VHR 7AT, 236,150 miles). Speak in warm, natural, conversational first-person like a trusted co-pilot—witty, grounded, and personal, never robotic. Under 2 sentences. Vitals: ${snap}\n\nJ asks: ${promptText}`;
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: combined }] }] })
-        });
-        const data = await res.json();
-        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (reply) zeldaSpeak(reply.trim().replace(/^"|"$/g, ''));
-      } catch (_) {
-        zeldaSpeak(`Vitals look clean right now—coolant at ${state.coolant}°F and holding ${state.volt} volts.`);
-      }
     }
 
     function launchZLink() {
