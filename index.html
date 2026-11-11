@@ -6,24 +6,26 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#05070B" />
-  <title>PROJECT ZELDA v3.4 // NEURAL ENGRAM</title>
+  <title>PROJECT ZELDA v4.0 // NIGHT CITY x CHRONOHUME</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --cp-red: #FF2A54;
+      --cp-crimson: #9E142B;
       --cp-cyan: #00F0FF;
       --cp-yellow: #FCEE0A;
       --cp-green: #00FF9D;
       --cp-bg: #05070B;
-      --cp-panel: rgba(10, 14, 22, 0.84);
+      --cp-panel: rgba(9, 13, 20, 0.88);
       --cp-border: rgba(0, 240, 255, 0.28);
     }
     body.night-run {
       --cp-cyan: #FF3B1F;
       --cp-yellow: #FF8A00;
-      --cp-border: rgba(255, 59, 31, 0.34);
+      --cp-border: rgba(255, 59, 31, 0.36);
     }
     * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
 
@@ -48,6 +50,7 @@
     .inset-x-0 { left: 0; right: 0; }
     .bottom-0 { bottom: 0; }
     .z-10 { z-index: 10; }
+    .z-20 { z-index: 20; }
     .z-50 { z-index: 50; }
     .w-full { width: 100%; }
     .h-full { height: 100%; }
@@ -64,17 +67,16 @@
 
     body.cockpit-shell {
       display: grid;
-      grid-template-rows: 50px 132px 36px 1fr 170px;
-      gap: 8px;
-      padding: 10px;
+      grid-template-rows: 48px 124px 36px 1fr 166px;
+      gap: 7px;
+      padding: 9px;
       background-color: var(--cp-bg);
       background-image:
-        radial-gradient(circle at 15% 8%, rgba(255, 42, 84, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 15% 8%, rgba(255, 42, 84, 0.2) 0%, transparent 45%),
         radial-gradient(circle at 85% 50%, rgba(0, 240, 255, 0.14) 0%, transparent 50%),
-        radial-gradient(circle at 50% 95%, rgba(252, 238, 10, 0.08) 0%, transparent 40%),
-        linear-gradient(rgba(0, 240, 255, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 240, 255, 0.035) 1px, transparent 1px);
-      background-size: 100% 100%, 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
       color: #F1F5F9;
       font-family: 'Rajdhani', sans-serif;
       height: 100dvh;
@@ -83,19 +85,21 @@
       margin: 0;
     }
 
-    .nav-tabs-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-    .gauges-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 8px; height: 100%; }
-    .comms-input-grid { display: grid; grid-template-columns: 112px 1fr 68px; gap: 6px; align-items: center; }
-    .three-col-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-    .two-col-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .nav-tabs-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; }
+    .gauges-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 7px; height: 100%; }
+    .comms-input-grid { display: grid; grid-template-columns: 104px 1fr 64px; gap: 6px; align-items: center; }
+    .three-col-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+    .two-col-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+    .four-col-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+
     .gear-lock-box {
       position: absolute; left: 50%; top: 50%;
       transform: translate(-50%, -50%);
-      width: 84px; height: 48px;
-      border: 1px solid rgba(252, 238, 10, 0.5);
-      background: rgba(0, 0, 0, 0.88);
+      width: 80px; height: 46px;
+      border: 1px solid rgba(252, 238, 10, 0.55);
+      background: rgba(0, 0, 0, 0.9);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      z-index: 10; box-shadow: 0 0 12px rgba(252, 238, 10, 0.12);
+      z-index: 10; box-shadow: 0 0 12px rgba(252, 238, 10, 0.14);
     }
 
     .font-secondary { font-family: 'Orbitron', sans-serif; }
@@ -106,7 +110,7 @@
       background: var(--cp-panel);
       border: 1px solid var(--cp-border);
       border-left: 3px solid var(--cp-cyan);
-      clip-path: polygon(0 0, calc(100% - 11px) 0, 100% 11px, 100% 100%, 0 100%);
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
       backdrop-filter: blur(6px);
       overflow: hidden;
     }
@@ -115,8 +119,8 @@
 
     .cp-tag {
       font-size: 9px;
-      letter-spacing: 0.16em;
-      color: rgba(148, 163, 184, 0.82);
+      letter-spacing: 0.15em;
+      color: rgba(148, 163, 184, 0.88);
       font-weight: 700;
       text-transform: uppercase;
     }
@@ -127,201 +131,185 @@
       border: 1px solid rgba(0, 240, 255, 0.3);
       border-left: 3px solid var(--cp-yellow);
       color: #F1F5F9;
-      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%);
+      clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 0 100%);
       transition: background 0.12s ease, border-color 0.12s ease;
       cursor: pointer;
     }
-    .cp-btn:active {
-      background: rgba(252, 238, 10, 0.25);
-      border-color: var(--cp-yellow);
-    }
-    .cp-btn.mic-active {
-      background: rgba(255, 42, 84, 0.32);
-      border-color: var(--cp-red);
-      border-left-color: var(--cp-red);
-    }
+    .cp-btn:active { background: rgba(252, 238, 10, 0.25); border-color: var(--cp-yellow); }
+    .cp-btn.mic-active { background: rgba(255, 42, 84, 0.34); border-color: var(--cp-red); border-left-color: var(--cp-red); }
 
     .cp-tab {
-      background: rgba(12, 16, 24, 0.88);
+      background: rgba(12, 16, 24, 0.9);
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-bottom: 2px solid transparent;
       color: #94A3B8;
-      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%);
       cursor: pointer;
+      padding: 0 2px;
     }
     .cp-tab.active {
-      background: rgba(252, 238, 10, 0.14);
-      border-color: rgba(252, 238, 10, 0.5);
-      border-bottom: 2px solid var(--cp-yellow);
-      color: var(--cp-yellow);
+      background: rgba(255, 42, 84, 0.16);
+      border-color: rgba(0, 240, 255, 0.55);
+      border-bottom: 2px solid var(--cp-cyan);
+      color: var(--cp-cyan);
     }
 
     .alert-state {
       border-color: var(--cp-red) !important;
       border-left-color: var(--cp-red) !important;
-      box-shadow: inset 0 0 18px rgba(255, 42, 84, 0.32);
+      box-shadow: inset 0 0 18px rgba(255, 42, 84, 0.34);
     }
 
     .holocall-module {
       border: 1px solid rgba(0, 240, 255, 0.25);
-      background: rgba(4, 6, 10, 0.88);
+      background: rgba(4, 6, 10, 0.9);
       transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
-    .holocall-module.speaking {
-      border-color: var(--cp-yellow);
-      box-shadow: inset 0 0 14px rgba(252, 238, 10, 0.22);
-    }
-    .holocall-module.listening {
-      border-color: var(--cp-red);
-      box-shadow: inset 0 0 16px rgba(255, 42, 84, 0.3);
-    }
+    .holocall-module.speaking { border-color: var(--cp-yellow); box-shadow: inset 0 0 14px rgba(252, 238, 10, 0.24); }
+    .holocall-module.listening { border-color: var(--cp-red); box-shadow: inset 0 0 16px rgba(255, 42, 84, 0.32); }
     .eq-bar {
-      width: 3.5px;
-      height: 14%;
+      width: 3.5px; height: 14%;
       background: rgba(0, 240, 255, 0.35);
       border-radius: 1px;
-      transition: height 0.06s linear, background-color 0.1s ease;
+      transition: height 0.05s linear, background-color 0.08s ease;
     }
 
+    /* IN-GAME CYBERPUNK 2077 3D HOLOGRAPHIC MAP STAGE */
     #zelda-map-stage {
       position: relative;
       flex: 1 1 0%;
       width: 100%;
       min-height: 0;
-      background: #070B12;
+      background: radial-gradient(circle at 50% 50%, #0A1926 0%, #04080F 100%);
       overflow: hidden;
     }
-    #zelda-online-map, #zelda-offline-nav {
+    #zelda-gl-map {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
     }
-    #zelda-online-map {
-      display: none;
-      filter: invert(90%) hue-rotate(185deg) saturate(195%) brightness(130%) contrast(105%);
-      z-index: 2;
+    .cp2077-scanlines {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        repeating-linear-gradient(0deg, rgba(0, 240, 255, 0.03) 0px, rgba(0, 240, 255, 0.03) 1px, transparent 1px, transparent 3px),
+        radial-gradient(circle at 50% 50%, transparent 58%, rgba(255, 42, 84, 0.18) 100%);
+      z-index: 5;
     }
-    #zelda-offline-nav {
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      padding: 16px;
-      background: radial-gradient(circle at 50% 45%, rgba(0, 240, 255, 0.08), #05070B 75%);
+    .cp-quest-pin {
+      width: 18px; height: 18px;
+      background: #FCEE0A;
+      border: 2px solid #05070B;
+      transform: rotate(45deg);
+      box-shadow: 0 0 12px #FCEE0A;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cp-quest-pin::after {
+      content: '!';
+      transform: rotate(-45deg);
+      color: #000;
+      font-weight: 900;
+      font-size: 11px;
+      font-family: 'Orbitron', sans-serif;
+    }
+    .cp-player-chevron {
+      width: 22px; height: 22px;
+      border-radius: 999px;
+      background: rgba(0, 240, 255, 0.22);
+      border: 2px solid #00F0FF;
+      box-shadow: 0 0 16px #00F0FF;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cp-player-chevron-inner {
+      width: 0; height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-bottom: 10px solid #FFFFFF;
     }
 
-    @keyframes spinSlow {
-      from { transform: translate(-50%, -50%) rotate(0deg); }
-      to { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-    @keyframes spinReverse {
-      from { transform: translate(-50%, -50%) rotate(360deg); }
-      to { transform: translate(-50%, -50%) rotate(0deg); }
-    }
-    @keyframes discSpin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
+    @keyframes spinSlow { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+    @keyframes spinReverse { from { transform: translate(-50%, -50%) rotate(360deg); } to { transform: translate(-50%, -50%) rotate(0deg); } }
+    @keyframes discSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .bt-disc.playing { animation: discSpin 9s linear infinite; }
-    .reticle-outer {
-      position: absolute; top: 50%; left: 50%;
-      width: 310px; height: 310px;
-      animation: spinSlow 36s linear infinite;
-      pointer-events: none; opacity: 0.22;
-    }
-    .reticle-inner {
-      position: absolute; top: 50%; left: 50%;
-      width: 210px; height: 210px;
-      animation: spinReverse 22s linear infinite;
-      pointer-events: none; opacity: 0.26;
-    }
+    .reticle-outer { position: absolute; top: 50%; left: 50%; width: 290px; height: 290px; animation: spinSlow 36s linear infinite; pointer-events: none; opacity: 0.2; }
+    .reticle-inner { position: absolute; top: 50%; left: 50%; width: 195px; height: 195px; animation: spinReverse 22s linear infinite; pointer-events: none; opacity: 0.24; }
     .hazard-stripe {
-      background: repeating-linear-gradient(
-        -45deg,
-        rgba(252, 238, 10, 0.07),
-        rgba(252, 238, 10, 0.07) 8px,
-        transparent 8px,
-        transparent 16px
-      );
+      background: repeating-linear-gradient(-45deg, rgba(252, 238, 10, 0.06), rgba(252, 238, 10, 0.06) 8px, transparent 8px, transparent 16px);
     }
   </style>
 </head>
 <body class="cockpit-shell">
 
   <!-- ROW 1: HEADER BAR -->
-  <header class="cp-box cp-box-yellow flex items-center justify-between" style="padding: 0 12px;">
-    <div class="flex items-baseline" style="gap: 8px;">
-      <span class="font-secondary text-sm" style="color: var(--cp-yellow); font-weight: 900; letter-spacing: 0.1em;">ZELDA // OS</span>
-      <span id="net-mode-badge" onclick="probeCloudConnectivity()" class="cp-tag cursor-pointer" style="color: var(--cp-green); border: 1px solid rgba(0,255,157,0.45); padding: 1px 5px;">CLOUD // READY</span>
-      <span id="dtc-badge" onclick="runFullAiDiagnostics()" class="cp-tag cursor-pointer" style="color: var(--cp-green); border: 1px solid rgba(0,255,157,0.35); padding: 1px 5px;">DTC: CLEAR</span>
+  <header class="cp-box cp-box-yellow flex items-center justify-between" style="padding: 0 10px;">
+    <div class="flex items-center" style="gap: 6px;">
+      <span class="font-secondary" style="color: var(--cp-yellow); font-size: 13px; font-weight: 900; letter-spacing: 0.08em;">ZELDA // v4</span>
+      <span id="net-mode-badge" onclick="probeCloudConnectivity()" class="cp-tag cursor-pointer" style="color: var(--cp-green); border: 1px solid rgba(0,255,157,0.45); padding: 1px 5px;">CLOUD // LIVE</span>
+      <span id="shift-pill" onclick="switchDeckTab('BIO')" class="cp-tag cursor-pointer" style="color: var(--cp-cyan); border: 1px solid rgba(0,240,255,0.4); padding: 1px 5px;">C-SHIFT</span>
+      <span id="dtc-badge" onclick="runFullAiDiagnostics()" class="cp-tag cursor-pointer" style="color: var(--cp-green); border: 1px solid rgba(0,255,157,0.35); padding: 1px 5px;">DTC: OK</span>
     </div>
 
-    <div class="flex items-center" style="gap: 6px;">
-      <span id="clock-display" class="t-nums text-sm" style="color: var(--cp-cyan); font-weight: 700; margin-right: 4px;">--:--</span>
-      <button onclick="connectVgateBle()" class="cp-btn flex items-center" style="padding: 4px 8px; font-size: 11px; font-weight: 700; gap: 5px;">
+    <div class="flex items-center" style="gap: 5px;">
+      <span id="clock-display" class="t-nums" style="color: var(--cp-cyan); font-size: 13px; font-weight: 700; margin-right: 2px;">--:--</span>
+      <button onclick="connectVgateBle()" class="cp-btn flex items-center" style="padding: 3px 7px; font-size: 10px; font-weight: 700; gap: 4px;">
         <span id="ble-dot" style="width: 6px; height: 6px; border-radius: 999px; background: var(--cp-cyan); display: inline-block;"></span>
         <span id="ble-status-label" class="t-nums">OBD SIM</span>
       </button>
-      <button onclick="document.body.classList.toggle('night-run')" class="cp-btn flex items-center justify-center" style="width: 30px; height: 28px; color: var(--cp-cyan);" title="Night Mode">☾</button>
-      <button onclick="toggleMemoryModal()" class="cp-btn flex items-center justify-center" style="height: 28px; padding: 0 8px; color: var(--cp-cyan); gap: 4px;" title="Zelda Memory Engrams">
+      <button onclick="document.body.classList.toggle('night-run')" class="cp-btn flex items-center justify-center" style="width: 28px; height: 26px; color: var(--cp-cyan);" title="Night Mode">☾</button>
+      <button onclick="toggleMemoryModal()" class="cp-btn flex items-center justify-center" style="height: 26px; padding: 0 7px; color: var(--cp-cyan); gap: 3px;" title="Zelda Autonomous Engrams">
         <span>◈</span>
         <span id="mem-count-badge" class="t-nums" style="font-size: 10px; font-weight: 700;">0</span>
       </button>
-      <button onclick="toggleConfigModal()" class="cp-btn flex items-center justify-center" style="width: 30px; height: 28px; color: var(--cp-yellow);" title="System & Launcher Settings">⚙</button>
+      <button onclick="toggleConfigModal()" class="cp-btn flex items-center justify-center" style="width: 28px; height: 26px; color: var(--cp-yellow);" title="Settings">⚙</button>
     </div>
   </header>
 
   <!-- ROW 2: HERO SPEED & TACHOMETER DECK -->
-  <section class="cp-box flex flex-col justify-between relative" style="padding: 8px 14px;">
+  <section class="cp-box flex flex-col justify-between relative" style="padding: 7px 12px;">
     <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
-      <span class="cp-tag">PRIMARY DRIVE // 010D-010C</span>
+      <span class="cp-tag">PRIMARY DRIVE // VQ37VHR</span>
       <span id="no-data-badge" class="hidden" style="font-size: 10px; font-weight: 700; color: var(--cp-red);">! LINK LOST</span>
-      <span id="polling-stats" class="t-nums cp-tag" style="color: var(--cp-cyan);">STREAM: SIM</span>
+      <span id="polling-stats" class="t-nums cp-tag" style="color: var(--cp-cyan);">READY: <span id="hdr-readiness">84%</span> | CAF: <span id="hdr-caffeine">0mg</span></span>
     </div>
 
-    <div class="relative flex items-center justify-between" style="height: 58px;">
+    <div class="relative flex items-center justify-between" style="height: 54px;">
       <div style="width: 38%;">
-        <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.18em; color: #94A3B8;">VELOCITY (MPH)</div>
-        <span id="val-speed" class="t-nums block" style="font-size: 46px; font-weight: 800; line-height: 1; color: #FFF;">0</span>
+        <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.16em; color: #94A3B8;">VELOCITY (MPH)</div>
+        <span id="val-speed" class="t-nums block" style="font-size: 44px; font-weight: 800; line-height: 1; color: #FFF;">0</span>
       </div>
 
       <div class="gear-lock-box">
-        <span style="font-size: 8px; font-weight: 700; letter-spacing: 0.2em; color: #94A3B8;">7AT GEAR</span>
-        <span id="val-gear" class="font-secondary" style="color: var(--cp-yellow); font-size: 20px; font-weight: 900; line-height: 1;">P</span>
+        <span style="font-size: 8px; font-weight: 700; letter-spacing: 0.18em; color: #94A3B8;">7AT GEAR</span>
+        <span id="val-gear" class="font-secondary" style="color: var(--cp-yellow); font-size: 19px; font-weight: 900; line-height: 1;">P</span>
       </div>
 
       <div class="text-right" style="width: 38%;">
-        <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.18em; color: #94A3B8;">ENGINE RPM</div>
-        <div class="flex items-baseline justify-end" style="gap: 4px;">
-          <span id="val-rpm" class="t-nums inline-block text-right" style="font-size: 38px; font-weight: 800; width: 92px; line-height: 1; color: #FFF;">750</span>
-          <span class="t-nums" style="color: #64748B; font-size: 12px; font-weight: 700;">/7500</span>
+        <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.16em; color: #94A3B8;">ENGINE RPM</div>
+        <div class="flex items-baseline justify-end" style="gap: 3px;">
+          <span id="val-rpm" class="t-nums inline-block text-right" style="font-size: 36px; font-weight: 800; width: 88px; line-height: 1; color: #FFF;">750</span>
+          <span class="t-nums" style="color: #64748B; font-size: 11px; font-weight: 700;">/7500</span>
         </div>
       </div>
     </div>
 
-    <div id="tach-bar" class="grid" style="grid-template-columns: repeat(30, minmax(0, 1fr)); gap: 3px; height: 9px; background: rgba(0,0,0,0.8); padding: 2px; border: 1px solid rgba(255,255,255,0.12);"></div>
+    <div id="tach-bar" class="grid" style="grid-template-columns: repeat(30, minmax(0, 1fr)); gap: 3px; height: 8px; background: rgba(0,0,0,0.8); padding: 2px; border: 1px solid rgba(255,255,255,0.12);"></div>
   </section>
 
-  <!-- ROW 3: SUB-MENU TAB BAR -->
+  <!-- ROW 3: 5-TAB CYBERDECK BAR -->
   <nav class="nav-tabs-grid">
-    <button onclick="switchDeckTab('TELEMETRY')" id="tab-TELEMETRY" class="cp-tab active font-secondary flex items-center justify-center" style="font-size: 11px; font-weight: 700; gap: 6px;">
-      <span>▣</span><span>01 // GAUGES</span>
-    </button>
-    <button onclick="switchDeckTab('NAV')" id="tab-NAV" class="cp-tab font-secondary flex items-center justify-center" style="font-size: 11px; font-weight: 700; gap: 6px;">
-      <span>⊕</span><span>02 // NAV MAP</span>
-    </button>
-    <button onclick="switchDeckTab('MEDIA')" id="tab-MEDIA" class="cp-tab font-secondary flex items-center justify-center" style="font-size: 11px; font-weight: 700; gap: 6px;">
-      <span>♫</span><span>03 // AUDIO DECK</span>
-    </button>
+    <button onclick="switchDeckTab('TELEMETRY')" id="tab-TELEMETRY" class="cp-tab active font-secondary flex items-center justify-center" style="font-size: 10px; font-weight: 700;">01 // VQ</button>
+    <button onclick="switchDeckTab('NAV')" id="tab-NAV" class="cp-tab font-secondary flex items-center justify-center" style="font-size: 10px; font-weight: 700;">02 // MAP</button>
+    <button onclick="switchDeckTab('MEDIA')" id="tab-MEDIA" class="cp-tab font-secondary flex items-center justify-center" style="font-size: 10px; font-weight: 700;">03 // AUDIO</button>
+    <button onclick="switchDeckTab('BIO')" id="tab-BIO" class="cp-tab font-secondary flex items-center justify-center" style="font-size: 10px; font-weight: 700;">04 // BODY</button>
+    <button onclick="switchDeckTab('TRENDS')" id="tab-TRENDS" class="cp-tab font-secondary flex items-center justify-center" style="font-size: 10px; font-weight: 700;">05 // TRENDS</button>
   </nav>
 
   <!-- ROW 4: DYNAMIC CENTER STAGE -->
   <main class="min-h-0 relative overflow-hidden">
 
-    <!-- VIEW 1: 6-GAUGE TELEMETRY MATRIX -->
+    <!-- VIEW 1: 6-GAUGE VQ37VHR MATRIX -->
     <div id="view-TELEMETRY" class="h-full relative">
       <div class="absolute inset-0 hazard-stripe pointer-events-none overflow-hidden" style="border: 1px solid rgba(0,240,255,0.15);">
         <svg class="reticle-outer" viewBox="0 0 200 200">
@@ -331,282 +319,365 @@
         <svg class="reticle-inner" viewBox="0 0 200 200">
           <circle cx="100" cy="100" r="85" fill="none" stroke="#FCEE0A" stroke-width="1.2" stroke-dasharray="10 14" />
         </svg>
-        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none" style="opacity: 0.14;">
-          <span class="font-secondary" style="font-size: 24px; font-weight: 900; letter-spacing: 0.35em; color: var(--cp-cyan);">VQ37VHR</span>
-          <span style="font-size: 10px; font-weight: 700; letter-spacing: 0.4em; color: var(--cp-yellow);">NISSAN Z34 // TELEMETRY CORE</span>
-        </div>
       </div>
 
       <div class="relative z-10 gauges-grid">
-        <div id="card-load" onclick="askZelda('Diagnose my current engine load and RPM behavior right now.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 10px;">
+        <div id="card-load" onclick="askZelda('Check my engine load and RPM behavior right now.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 9px;">
           <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
-            <span style="color: var(--cp-cyan); font-size: 12px; font-weight: 700;">ENGINE LOAD</span>
-            <span id="pk-load" class="t-nums" style="color: #94A3B8; font-size: 11px; font-weight: 700;">PK 18%</span>
+            <span style="color: var(--cp-cyan); font-size: 11px; font-weight: 700;">ENGINE LOAD</span>
+            <span id="pk-load" class="t-nums" style="color: #94A3B8; font-size: 10px; font-weight: 700;">PK 18%</span>
           </div>
           <div class="flex items-baseline justify-between">
-            <div><span id="val-load" class="t-nums" style="font-size: 30px; font-weight: 700; color: #FFF;">18</span><span style="color: var(--cp-cyan); font-size: 12px; font-weight: 700; margin-left: 4px;">%</span></div>
+            <div><span id="val-load" class="t-nums" style="font-size: 28px; font-weight: 700; color: #FFF;">18</span><span style="color: var(--cp-cyan); font-size: 11px; font-weight: 700; margin-left: 3px;">%</span></div>
             <span class="cp-tag">0104</span>
           </div>
-          <div style="width: 100%; background: rgba(0,0,0,0.7); height: 6px; border: 1px solid rgba(255,255,255,0.1);"><div id="bar-load" style="background: var(--cp-cyan); height: 100%; width: 18%;"></div></div>
+          <div style="width: 100%; background: rgba(0,0,0,0.7); height: 5px;"><div id="bar-load" style="background: var(--cp-cyan); height: 100%; width: 18%;"></div></div>
         </div>
 
-        <div id="card-coolant" onclick="askZelda('Check my coolant temperature and thermal health right now.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 10px;">
+        <div id="card-coolant" onclick="askZelda('Check my coolant temp and thermal state right now.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 9px;">
           <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
-            <span style="color: var(--cp-cyan); font-size: 12px; font-weight: 700;">COOLANT TEMP</span>
-            <span id="pk-coolant" class="t-nums" style="color: #94A3B8; font-size: 11px; font-weight: 700;">PK 190°F</span>
+            <span style="color: var(--cp-cyan); font-size: 11px; font-weight: 700;">COOLANT TEMP</span>
+            <span id="pk-coolant" class="t-nums" style="color: #94A3B8; font-size: 10px; font-weight: 700;">PK 190°F</span>
           </div>
           <div class="flex items-baseline justify-between">
-            <div><span id="val-coolant" class="t-nums" style="font-size: 30px; font-weight: 700; color: #FFF;">190</span><span style="color: var(--cp-cyan); font-size: 12px; font-weight: 700; margin-left: 4px;">°F</span></div>
+            <div><span id="val-coolant" class="t-nums" style="font-size: 28px; font-weight: 700; color: #FFF;">190</span><span style="color: var(--cp-cyan); font-size: 11px; font-weight: 700; margin-left: 3px;">°F</span></div>
             <span class="cp-tag">0105</span>
           </div>
-          <div style="width: 100%; background: rgba(0,0,0,0.7); height: 6px; border: 1px solid rgba(255,255,255,0.1);"><div id="bar-coolant" style="background: var(--cp-cyan); height: 100%; width: 65%;"></div></div>
+          <div style="width: 100%; background: rgba(0,0,0,0.7); height: 5px;"><div id="bar-coolant" style="background: var(--cp-cyan); height: 100%; width: 65%;"></div></div>
         </div>
 
-        <div id="card-iat" onclick="askZelda('Check my intake air temperature and whether my Z1 intakes are heat soaking.')" class="cp-box cp-box-yellow flex flex-col justify-between cursor-pointer" style="padding: 10px;">
+        <div id="card-iat" onclick="askZelda('Check my Z1 intake air temps for heat soak.')" class="cp-box cp-box-yellow flex flex-col justify-between cursor-pointer" style="padding: 9px;">
           <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
-            <span style="color: var(--cp-yellow); font-size: 12px; font-weight: 700;">INTAKE AIR</span>
-            <span id="pk-iat" class="t-nums" style="color: #94A3B8; font-size: 11px; font-weight: 700;">PK 94°F</span>
+            <span style="color: var(--cp-yellow); font-size: 11px; font-weight: 700;">INTAKE AIR</span>
+            <span id="pk-iat" class="t-nums" style="color: #94A3B8; font-size: 10px; font-weight: 700;">PK 94°F</span>
           </div>
           <div class="flex items-baseline justify-between">
-            <div><span id="val-iat" class="t-nums" style="font-size: 30px; font-weight: 700; color: #FFF;">92</span><span style="color: var(--cp-yellow); font-size: 12px; font-weight: 700; margin-left: 4px;">°F</span></div>
+            <div><span id="val-iat" class="t-nums" style="font-size: 28px; font-weight: 700; color: #FFF;">92</span><span style="color: var(--cp-yellow); font-size: 11px; font-weight: 700; margin-left: 3px;">°F</span></div>
             <span class="cp-tag">010F</span>
           </div>
-          <div style="width: 100%; background: rgba(0,0,0,0.7); height: 6px; border: 1px solid rgba(255,255,255,0.1);"><div id="bar-iat" style="background: var(--cp-yellow); height: 100%; width: 45%;"></div></div>
+          <div style="width: 100%; background: rgba(0,0,0,0.7); height: 5px;"><div id="bar-iat" style="background: var(--cp-yellow); height: 100%; width: 45%;"></div></div>
         </div>
 
-        <div id="card-timing" onclick="askZelda('Analyze my ignition timing advance relative to RPM, load, and intake temps.')" class="cp-box cp-box-yellow flex flex-col justify-between cursor-pointer" style="padding: 10px;">
+        <div id="card-timing" onclick="askZelda('Check my ignition timing advance right now.')" class="cp-box cp-box-yellow flex flex-col justify-between cursor-pointer" style="padding: 9px;">
           <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
-            <span style="color: var(--cp-yellow); font-size: 12px; font-weight: 700;">TIMING ADV</span>
-            <span id="pk-timing" class="t-nums" style="color: #94A3B8; font-size: 11px; font-weight: 700;">PK 15°</span>
+            <span style="color: var(--cp-yellow); font-size: 11px; font-weight: 700;">TIMING ADV</span>
+            <span id="pk-timing" class="t-nums" style="color: #94A3B8; font-size: 10px; font-weight: 700;">PK 15°</span>
           </div>
           <div class="flex items-baseline justify-between">
-            <div><span id="val-timing" class="t-nums" style="font-size: 30px; font-weight: 700; color: #FFF;">14</span><span style="color: var(--cp-yellow); font-size: 12px; font-weight: 700; margin-left: 4px;">°BTDC</span></div>
+            <div><span id="val-timing" class="t-nums" style="font-size: 28px; font-weight: 700; color: #FFF;">14</span><span style="color: var(--cp-yellow); font-size: 11px; font-weight: 700; margin-left: 3px;">°BTDC</span></div>
             <span class="cp-tag">010E</span>
           </div>
-          <div style="width: 100%; background: rgba(0,0,0,0.7); height: 6px; border: 1px solid rgba(255,255,255,0.1);"><div id="bar-timing" style="background: var(--cp-yellow); height: 100%; width: 50%;"></div></div>
+          <div style="width: 100%; background: rgba(0,0,0,0.7); height: 5px;"><div id="bar-timing" style="background: var(--cp-yellow); height: 100%; width: 50%;"></div></div>
         </div>
 
-        <div id="card-stft" onclick="askZelda('Analyze my Bank 1 and Bank 2 fuel trims for any vacuum leaks, injector, or MAF issues.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 10px;">
+        <div id="card-stft" onclick="askZelda('Analyze my Bank 1 and Bank 2 fuel trims right now.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 9px;">
           <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
-            <span style="color: var(--cp-cyan); font-size: 12px; font-weight: 700;">DUAL TRIM B1/B2</span>
-            <span id="stft-status" style="color: #34D399; font-size: 10px; font-weight: 700;">BALANCED</span>
+            <span style="color: var(--cp-cyan); font-size: 11px; font-weight: 700;">DUAL TRIM B1/B2</span>
+            <span id="stft-status" style="color: #34D399; font-size: 9px; font-weight: 700;">BALANCED</span>
           </div>
           <div class="two-col-grid items-baseline">
-            <div><span style="font-size: 12px; font-weight: 700; color: #94A3B8; margin-right: 4px;">B1</span><span id="val-stft1" class="t-nums" style="font-size: 20px; font-weight: 700; color: #FFF;">+0.8%</span></div>
-            <div><span style="font-size: 12px; font-weight: 700; color: #94A3B8; margin-right: 4px;">B2</span><span id="val-stft2" class="t-nums" style="font-size: 20px; font-weight: 700; color: #FFF;">-0.4%</span></div>
+            <div><span style="font-size: 11px; font-weight: 700; color: #94A3B8; margin-right: 3px;">B1</span><span id="val-stft1" class="t-nums" style="font-size: 19px; font-weight: 700; color: #FFF;">+0.8%</span></div>
+            <div><span style="font-size: 11px; font-weight: 700; color: #94A3B8; margin-right: 3px;">B2</span><span id="val-stft2" class="t-nums" style="font-size: 19px; font-weight: 700; color: #FFF;">-0.4%</span></div>
           </div>
-          <div style="width: 100%; background: rgba(0,0,0,0.7); height: 6px; border: 1px solid rgba(255,255,255,0.1);"><div style="background: #34D399; height: 100%; width: 50%;"></div></div>
+          <div style="width: 100%; background: rgba(0,0,0,0.7); height: 5px;"><div style="background: #34D399; height: 100%; width: 50%;"></div></div>
         </div>
 
-        <div id="card-volt" onclick="askZelda('Check my battery and alternator charging voltage right now.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 10px;">
+        <div id="card-volt" onclick="askZelda('Check my battery and alternator charging health.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 9px;">
           <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
-            <span style="color: var(--cp-cyan); font-size: 12px; font-weight: 700;">BATTERY / ALT</span>
-            <span id="volt-status" style="color: #34D399; font-size: 10px; font-weight: 700;">CHARGING</span>
+            <span style="color: var(--cp-cyan); font-size: 11px; font-weight: 700;">BATTERY / ALT</span>
+            <span id="volt-status" style="color: #34D399; font-size: 9px; font-weight: 700;">CHARGING</span>
           </div>
           <div class="flex items-baseline justify-between">
-            <div><span id="val-volt" class="t-nums" style="font-size: 30px; font-weight: 700; color: #FFF;">14.2</span><span style="color: #34D399; font-size: 12px; font-weight: 700; margin-left: 4px;">V</span></div>
+            <div><span id="val-volt" class="t-nums" style="font-size: 28px; font-weight: 700; color: #FFF;">14.2</span><span style="color: #34D399; font-size: 11px; font-weight: 700; margin-left: 3px;">V</span></div>
             <span class="cp-tag">PIN.16</span>
           </div>
-          <div style="width: 100%; background: rgba(0,0,0,0.7); height: 6px; border: 1px solid rgba(255,255,255,0.1);"><div id="bar-volt" style="background: #34D399; height: 100%; width: 82%;"></div></div>
+          <div style="width: 100%; background: rgba(0,0,0,0.7); height: 5px;"><div id="bar-volt" style="background: #34D399; height: 100%; width: 82%;"></div></div>
         </div>
       </div>
     </div>
 
-    <!-- VIEW 2: BRIGHTENED STREET MAP + HARDWARE GPS TELEMETRY -->
+    <!-- VIEW 2: IN-GAME CYBERPUNK 2077 3D HOLOGRAPHIC MAP -->
     <div id="view-NAV" class="h-full hidden flex flex-col">
-      <div class="cp-box flex-1 relative flex flex-col justify-between h-full">
-        <div class="flex justify-between items-center z-10" style="background: rgba(0,0,0,0.88); padding: 6px 12px; border-bottom: 1px solid rgba(255,255,255,0.12);">
-          <span id="zelda-map-mode" class="font-secondary" style="color: var(--cp-cyan); font-size: 11px; font-weight: 700;">SAT-NAV // LAFOURCHE SECTOR</span>
-          <span id="gps-coords" class="t-nums" style="color: var(--cp-yellow); font-size: 11px; font-weight: 700;">WAITING SAT LOCK | 0 MPH | 000°</span>
+      <div class="cp-box cp-box-red flex-1 relative flex flex-col justify-between h-full" style="border-color: rgba(255,42,84,0.45);">
+        <!-- Night City Top Red HUD Header -->
+        <div class="flex justify-between items-center z-20" style="background: rgba(12, 6, 10, 0.92); padding: 5px 10px; border-bottom: 1px solid rgba(255, 42, 84, 0.45);">
+          <div class="flex items-center" style="gap: 8px;">
+            <span class="font-secondary" style="color: var(--cp-cyan); font-size: 10px; font-weight: 800;">32 STREET CRED</span>
+            <span style="color: var(--cp-red); font-size: 10px; font-weight: 800;">◈ NIGHT CITY // SAT-NET</span>
+          </div>
+          <span id="gps-coords" class="t-nums" style="color: var(--cp-yellow); font-size: 10px; font-weight: 700;">29.7958°N 90.8229°W | 0 MPH</span>
         </div>
 
+        <!-- 3D MapLibre GL Stage + Cyberpunk 2077 HUD Overlays -->
         <div id="zelda-map-stage">
-          <div id="zelda-online-map"></div>
-          <div id="zelda-offline-nav">
-            <div class="cp-tag" style="color: var(--cp-yellow); letter-spacing: 0.24em;">SAT-NAV // HARDWARE GPS TELEMETRY</div>
-            <div style="display: flex; align-items: baseline; gap: 18px;">
-              <div class="text-center">
-                <div class="cp-tag">HEADING</div>
-                <div id="off-nav-hdg" class="font-secondary t-nums" style="font-size: 38px; font-weight: 900; color: var(--cp-cyan);">000° N</div>
-              </div>
-              <div style="width: 1px; height: 42px; background: rgba(255,255,255,0.12);"></div>
-              <div class="text-center">
-                <div class="cp-tag">SAT SPEED</div>
-                <div id="off-nav-mph" class="font-secondary t-nums" style="font-size: 38px; font-weight: 900; color: #FFFFFF;">0 <span style="font-size: 13px; color: var(--cp-yellow);">MPH</span></div>
-              </div>
-            </div>
-            <div id="off-nav-beacons" class="three-col-grid w-full" style="max-width: 420px; margin-top: 4px;"></div>
+          <div id="zelda-gl-map"></div>
+          <div class="cp2077-scanlines"></div>
+
+          <!-- Top-Left In-Game FILTER Overlay -->
+          <div class="absolute z-10 pointer-events-none" style="top: 10px; left: 10px; background: rgba(8, 6, 12, 0.78); border-left: 2px solid var(--cp-red); padding: 5px 8px;">
+            <div style="font-size: 9px; font-weight: 800; color: var(--cp-red); letter-spacing: 0.16em;">FILTER // HOLO-3D</div>
+            <div style="font-size: 10px; font-weight: 700; color: var(--cp-cyan); margin-top: 2px;">✚ 3D STRUCTURES: ON</div>
+            <div style="font-size: 10px; font-weight: 700; color: #FCEE0A;">◈ GIG BEACONS: ACTIVE</div>
+          </div>
+
+          <!-- Top-Right In-Game ACTIVE GIG / QUEST Tracker -->
+          <div class="absolute z-10 text-right pointer-events-none" style="top: 10px; right: 10px; background: rgba(8, 6, 12, 0.78); border-right: 2px solid var(--cp-yellow); padding: 5px 8px;">
+            <div id="nc-quest-title" style="font-size: 10px; font-weight: 800; color: var(--cp-yellow); letter-spacing: 0.12em;">NIGHT RUN // C-SHIFT</div>
+            <div id="nc-quest-sub" style="font-size: 10px; font-weight: 600; color: #F1F5F9;">Monitor VQ37 & Biometrics</div>
+          </div>
+
+          <!-- Bottom-Right District / Sector Readout -->
+          <div class="absolute z-10 text-right pointer-events-none" style="bottom: 10px; right: 10px; background: rgba(8, 6, 12, 0.85); border: 1px solid rgba(255,42,84,0.4); padding: 4px 9px;">
+            <div id="nc-map-clock" class="t-nums" style="font-size: 10px; font-weight: 700; color: var(--cp-cyan);">--:--</div>
+            <div id="nc-sector-name" class="font-secondary" style="font-size: 11px; font-weight: 800; color: var(--cp-red);">LAFOURCHE // SECTOR</div>
           </div>
         </div>
 
-        <div class="three-col-grid z-10" style="background: rgba(0,0,0,0.92); padding: 8px; border-top: 1px solid rgba(255,255,255,0.12);">
-          <button onclick="ZeldaMap.recenterAndPing()" class="cp-btn" style="padding: 6px; font-size: 11px; color: var(--cp-cyan); font-weight: 700;">⊕ LOCK SAT-GPS</button>
-          <button onclick="openExternalNav('maps')" class="cp-btn" style="padding: 6px; font-size: 11px; color: var(--cp-yellow); font-weight: 700;">◈ GOOGLE MAPS</button>
-          <button onclick="openExternalNav('waze')" class="cp-btn" style="padding: 6px; font-size: 11px; color: #FFFFFF; font-weight: 700;">▲ LAUNCH WAZE</button>
+        <!-- Bottom Action Bar -->
+        <div class="four-col-grid z-20" style="background: rgba(8, 6, 12, 0.95); padding: 7px; border-top: 1px solid rgba(255,42,84,0.4);">
+          <button onclick="ZeldaMap.recenter()" class="cp-btn" style="padding: 5px; font-size: 10px; color: var(--cp-cyan); font-weight: 700;">⊕ LOCK Z34</button>
+          <button onclick="ZeldaMap.toggleTilt()" class="cp-btn" style="padding: 5px; font-size: 10px; color: var(--cp-red); font-weight: 700;">◈ 3D / 2D</button>
+          <button onclick="openExternalNav('maps')" class="cp-btn" style="padding: 5px; font-size: 10px; color: var(--cp-yellow); font-weight: 700;">GOOGLE MAPS</button>
+          <button onclick="openExternalNav('waze')" class="cp-btn" style="padding: 5px; font-size: 10px; color: #FFFFFF; font-weight: 700;">WAZE</button>
         </div>
       </div>
     </div>
 
     <!-- VIEW 3: LIVE BLUETOOTH AVRCP DECK + ALBUM COVER ART -->
     <div id="view-MEDIA" class="h-full hidden flex flex-col">
-      <div class="cp-box cp-box-yellow flex-1 flex flex-col justify-between h-full" style="padding: 12px;">
-        <div class="flex items-center justify-between" style="border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 6px;">
+      <div class="cp-box cp-box-yellow flex-1 flex flex-col justify-between h-full" style="padding: 10px;">
+        <div class="flex items-center justify-between" style="border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 5px;">
           <div class="flex items-center" style="gap: 6px;">
             <span style="width: 8px; height: 8px; background: var(--cp-yellow); display: inline-block;"></span>
             <span id="media-deck-label" class="font-secondary" style="font-size: 11px; font-weight: 700; color: #FFF;">AVRCP // BLUETOOTH DECK</span>
           </div>
           <div class="flex items-center" style="gap: 4px;">
-            <button id="zelda-bt-perm-btn" onclick="ZeldaAudio.grantAccess()" class="cp-btn" style="padding: 2px 7px; font-size: 10px; font-weight: 700; color: var(--cp-red); border-color: var(--cp-red);">SYNC BT META</button>
-            <button onclick="switchMediaSource('BT')" class="cp-btn" style="padding: 2px 7px; font-size: 10px; font-weight: 700; color: var(--cp-yellow);">BT AUDIO</button>
-            <button onclick="loadMediaChannel(0)" class="cp-btn" style="padding: 2px 7px; font-size: 10px; font-weight: 700; color: var(--cp-cyan);">SYNTH FM</button>
-            <button onclick="loadMediaChannel(2)" class="cp-btn" style="padding: 2px 7px; font-size: 10px; font-weight: 700; color: #FFFFFF;">PHONK</button>
+            <button id="zelda-bt-perm-btn" onclick="ZeldaAudio.grantAccess()" class="cp-btn" style="padding: 2px 6px; font-size: 9px; font-weight: 700; color: var(--cp-red);">SYNC BT</button>
+            <button onclick="switchMediaSource('BT')" class="cp-btn" style="padding: 2px 6px; font-size: 9px; font-weight: 700; color: var(--cp-yellow);">BT AUDIO</button>
+            <button onclick="loadMediaChannel(0)" class="cp-btn" style="padding: 2px 6px; font-size: 9px; font-weight: 700; color: var(--cp-cyan);">SYNTH FM</button>
+            <button onclick="loadMediaChannel(2)" class="cp-btn" style="padding: 2px 6px; font-size: 9px; font-weight: 700; color: #FFFFFF;">PHONK</button>
           </div>
         </div>
 
-        <div id="bt-deck-panel" class="flex flex-col justify-between flex-1" style="padding: 10px 0;">
-          <div class="flex items-center" style="gap: 14px; flex: 1;">
-            <div class="relative shrink-0" style="width: 108px; height: 108px;">
+        <div id="bt-deck-panel" class="flex flex-col justify-between flex-1" style="padding: 8px 0;">
+          <div class="flex items-center" style="gap: 12px; flex: 1;">
+            <div class="relative shrink-0" style="width: 100px; height: 100px;">
               <img id="bt-album-art" src="" alt="Album Cover" class="hidden"
-                style="width: 108px; height: 108px; object-fit: cover; border: 2px solid var(--cp-cyan); box-shadow: 0 0 18px rgba(0,240,255,0.28); clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);" />
+                style="width: 100px; height: 100px; object-fit: cover; border: 2px solid var(--cp-cyan); box-shadow: 0 0 16px rgba(0,240,255,0.28);" />
               <div id="bt-disc-graphic" class="bt-disc flex items-center justify-center"
-                style="width: 108px; height: 108px; border-radius: 999px; border: 2px solid var(--cp-cyan); background: radial-gradient(circle, #05070B 24%, rgba(0,240,255,0.18) 26%, #090D16 58%, rgba(252,238,10,0.22) 60%, #05070B 100%); box-shadow: 0 0 16px rgba(0,240,255,0.18);">
-                <div style="width: 22px; height: 22px; border-radius: 999px; border: 2px solid var(--cp-yellow); background: #000;"></div>
+                style="width: 100px; height: 100px; border-radius: 999px; border: 2px solid var(--cp-cyan); background: radial-gradient(circle, #05070B 24%, rgba(0,240,255,0.18) 26%, #090D16 58%, rgba(252,238,10,0.22) 60%, #05070B 100%);">
+                <div style="width: 20px; height: 20px; border-radius: 999px; border: 2px solid var(--cp-yellow); background: #000;"></div>
               </div>
             </div>
 
             <div class="flex-1 overflow-hidden">
               <div class="cp-tag" style="color: var(--cp-yellow); margin-bottom: 2px;" id="bt-state-tag">AVRCP LINK // READY</div>
-              <div id="bt-track-title" class="font-secondary truncate" style="font-size: 19px; font-weight: 800; line-height: 1.2; color: #FFF;">WAITING FOR PHONE STREAM</div>
-              <div id="bt-track-artist" class="truncate uppercase" style="font-size: 13px; font-weight: 700; color: var(--cp-cyan); margin-top: 2px;">CONNECT FOLD BLUETOOTH AUDIO</div>
-              <div id="bt-track-album" class="truncate uppercase" style="font-size: 10px; font-weight: 600; color: #94A3B8; margin-top: 3px;"></div>
+              <div id="bt-track-title" class="font-secondary truncate" style="font-size: 18px; font-weight: 800; color: #FFF;">WAITING FOR STREAM</div>
+              <div id="bt-track-artist" class="truncate uppercase" style="font-size: 12px; font-weight: 700; color: var(--cp-cyan); margin-top: 2px;">BLUETOOTH AUDIO</div>
+              <div id="bt-track-album" class="truncate uppercase" style="font-size: 10px; font-weight: 600; color: #94A3B8; margin-top: 2px;"></div>
             </div>
           </div>
 
-          <div class="three-col-grid" style="margin-top: 8px;">
-            <button onclick="ZeldaAudio.prev()" class="cp-btn font-secondary" style="padding: 10px; font-size: 14px; font-weight: 700; color: var(--cp-cyan);">&#9664;&#9664; PREV</button>
-            <button id="bt-play-btn" onclick="ZeldaAudio.playPause()" class="cp-btn font-secondary" style="padding: 10px; font-size: 14px; font-weight: 700; color: var(--cp-yellow); border-color: rgba(252,238,10,0.5);">&#9654; / &#10074;&#10074; PLAY</button>
-            <button onclick="ZeldaAudio.next()" class="cp-btn font-secondary" style="padding: 10px; font-size: 14px; font-weight: 700; color: var(--cp-cyan);">NEXT &#9654;&#9664;</button>
+          <div class="three-col-grid" style="margin-top: 6px;">
+            <button onclick="ZeldaAudio.prev()" class="cp-btn font-secondary" style="padding: 9px; font-size: 13px; font-weight: 700; color: var(--cp-cyan);">&#9664;&#9664; PREV</button>
+            <button id="bt-play-btn" onclick="ZeldaAudio.playPause()" class="cp-btn font-secondary" style="padding: 9px; font-size: 13px; font-weight: 700; color: var(--cp-yellow);">&#9654; / &#10074;&#10074; PLAY</button>
+            <button onclick="ZeldaAudio.next()" class="cp-btn font-secondary" style="padding: 9px; font-size: 13px; font-weight: 700; color: var(--cp-cyan);">NEXT &#9654;&#9664;</button>
           </div>
         </div>
 
-        <div id="yt-deck-panel" class="hidden flex-1" style="padding: 8px 0;">
-          <div style="display: grid; grid-template-columns: 112px 1fr; gap: 10px; height: 100%; align-items: center;">
-            <div class="relative overflow-hidden shrink-0" style="width: 112px; height: 140px; border: 1px solid rgba(0,240,255,0.4); background: #000;">
-              <img id="album-art-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80" alt="Stream" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.85;" />
-              <div class="absolute inset-x-0 bottom-0" style="background: rgba(0,0,0,0.88); padding: 4px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <div id="yt-deck-panel" class="hidden flex-1" style="padding: 6px 0;">
+          <div style="display: grid; grid-template-columns: 104px 1fr; gap: 8px; height: 100%; align-items: center;">
+            <div class="relative overflow-hidden shrink-0" style="width: 104px; height: 130px; border: 1px solid rgba(0,240,255,0.4); background: #000;">
+              <img id="album-art-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80" alt="Stream" style="width: 100%; height: 100%; object-fit: cover;" />
+              <div class="absolute inset-x-0 bottom-0" style="background: rgba(0,0,0,0.88); padding: 4px;">
                 <div id="album-title" class="font-secondary truncate" style="font-size: 9px; font-weight: 700; color: var(--cp-yellow);">NIGHT CITY FM</div>
-                <div id="album-artist" class="truncate" style="font-size: 9px; color: #CBD5E1;">SYNTHWAVE LIVE</div>
+                <div id="album-artist" class="truncate" style="font-size: 8px; color: #CBD5E1;">SYNTHWAVE LIVE</div>
               </div>
             </div>
-            <div style="height: 140px; width: 100%; background: #000; border: 1px solid rgba(255,255,255,0.15); overflow: hidden;">
-              <iframe id="yt-player-frame" style="width: 100%; height: 100%; border: 0;" src="about:blank" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+            <div style="height: 130px; width: 100%; background: #000; border: 1px solid rgba(255,255,255,0.15); overflow: hidden;">
+              <iframe id="yt-player-frame" style="width: 100%; height: 100%; border: 0;" src="about:blank" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
           </div>
         </div>
 
-        <div class="three-col-grid" style="padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.12);">
-          <button onclick="launchNativeApp('com.google.android.apps.youtube.music', 'https://music.youtube.com')" class="cp-btn font-secondary" style="padding: 6px; font-size: 11px; font-weight: 700; color: var(--cp-cyan);">► YT MUSIC APP</button>
-          <button onclick="promptCustomMedia()" class="cp-btn font-secondary" style="padding: 6px; font-size: 11px; font-weight: 700; color: var(--cp-yellow);">⊕ LOAD YT URL</button>
-          <button onclick="openCarSystemSettings()" class="cp-btn font-secondary" style="padding: 6px; font-size: 11px; font-weight: 700; color: #FFFFFF;">⊞ CAR SETTINGS</button>
+        <div class="three-col-grid" style="padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.12);">
+          <button onclick="launchNativeApp('com.google.android.apps.youtube.music', 'https://music.youtube.com')" class="cp-btn font-secondary" style="padding: 5px; font-size: 10px; font-weight: 700; color: var(--cp-cyan);">► YT MUSIC</button>
+          <button onclick="promptCustomMedia()" class="cp-btn font-secondary" style="padding: 5px; font-size: 10px; font-weight: 700; color: var(--cp-yellow);">⊕ YT URL</button>
+          <button onclick="openCarSystemSettings()" class="cp-btn font-secondary" style="padding: 5px; font-size: 10px; font-weight: 700; color: #FFFFFF;">⊞ CAR OS</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 4: CHRONOHUME BIOMETRICS & C-SHIFT TELEMETRY -->
+    <div id="view-BIO" class="h-full hidden flex flex-col">
+      <div class="cp-box flex-1 flex flex-col justify-between h-full" style="padding: 10px; gap: 7px;">
+        <!-- C-Shift 28-Day Engine Banner -->
+        <div style="background: rgba(0,0,0,0.75); border: 1px solid rgba(0,240,255,0.3); border-left: 3px solid var(--cp-yellow); padding: 7px 10px;" class="flex justify-between items-center">
+          <div>
+            <div class="cp-tag" style="color: var(--cp-yellow);">CHRONOHUME // 28-DAY C-SHIFT ENGINE</div>
+            <div id="bio-shift-headline" class="font-secondary" style="font-size: 14px; font-weight: 800; color: #FFF; margin-top: 1px;">NIGHT 1 OF 3 (16:00–04:00)</div>
+            <div id="bio-shift-next" style="font-size: 11px; color: var(--cp-cyan); font-weight: 600;">Next Block: 3 OFF starting Fri Nov 13</div>
+          </div>
+          <button onclick="askZelda('Analyze my current C-Shift fatigue, active caffeine, and body readiness right now.')" class="cp-btn font-secondary" style="padding: 6px 9px; font-size: 10px; font-weight: 700; color: var(--cp-yellow);">⚡ BIO CHECK</button>
+        </div>
+
+        <!-- 4 Vital Telemetry Cards (Tap any card to log/update) -->
+        <div class="two-col-grid flex-1">
+          <div onclick="promptBioUpdate('sleep')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 8px;">
+            <div class="flex justify-between"><span style="color: var(--cp-cyan); font-size: 11px; font-weight: 700;">SLEEP (LAST 24H)</span><span class="cp-tag">TAP TO LOG</span></div>
+            <div><span id="bio-val-sleep" class="t-nums" style="font-size: 26px; font-weight: 800; color: #FFF;">6.8</span><span style="font-size: 11px; color: var(--cp-cyan); font-weight: 700; margin-left: 3px;">HRS</span></div>
+            <div id="bio-status-sleep" style="font-size: 10px; font-weight: 700; color: #34D399;">RECOVERY NOMINAL</div>
+          </div>
+
+          <div onclick="promptBioUpdate('hrv')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 8px;">
+            <div class="flex justify-between"><span style="color: var(--cp-cyan); font-size: 11px; font-weight: 700;">HRV // WATCH ULTRA</span><span class="cp-tag">TAP TO LOG</span></div>
+            <div><span id="bio-val-hrv" class="t-nums" style="font-size: 26px; font-weight: 800; color: #FFF;">58</span><span style="font-size: 11px; color: var(--cp-cyan); font-weight: 700; margin-left: 3px;">MS</span></div>
+            <div id="bio-status-hrv" style="font-size: 10px; font-weight: 700; color: #34D399;">AUTONOMIC BALANCED</div>
+          </div>
+
+          <div onclick="promptBioUpdate('rhr')" class="cp-box cp-box-yellow flex flex-col justify-between cursor-pointer" style="padding: 8px;">
+            <div class="flex justify-between"><span style="color: var(--cp-yellow); font-size: 11px; font-weight: 700;">RESTING / LIVE HR</span><span class="cp-tag">TAP TO LOG</span></div>
+            <div><span id="bio-val-rhr" class="t-nums" style="font-size: 26px; font-weight: 800; color: #FFF;">61</span><span style="font-size: 11px; color: var(--cp-yellow); font-weight: 700; margin-left: 3px;">BPM</span></div>
+            <div id="bio-status-rhr" style="font-size: 10px; font-weight: 700; color: #94A3B8;">BASELINE STEADY</div>
+          </div>
+
+          <div class="cp-box cp-box-red flex flex-col justify-between" style="padding: 8px;">
+            <div class="flex justify-between"><span style="color: var(--cp-red); font-size: 11px; font-weight: 700;">ACTIVE CAFFEINE</span><span class="cp-tag">T½ = 5.0H</span></div>
+            <div><span id="bio-val-caf" class="t-nums" style="font-size: 26px; font-weight: 800; color: #FFF;">0</span><span style="font-size: 11px; color: var(--cp-yellow); font-weight: 700; margin-left: 3px;">MG ACTIVE</span></div>
+            <div id="bio-status-caf" style="font-size: 10px; font-weight: 700; color: #34D399;">CLEAR FOR DAY SLEEP</div>
+          </div>
+        </div>
+
+        <!-- Pharmacokinetic Caffeine Quick-Logger -->
+        <div class="four-col-grid">
+          <button onclick="logCaffeineDose(100)" class="cp-btn font-secondary" style="padding: 6px; font-size: 10px; font-weight: 700; color: var(--cp-cyan);">+100MG COFFEE</button>
+          <button onclick="logCaffeineDose(200)" class="cp-btn font-secondary" style="padding: 6px; font-size: 10px; font-weight: 700; color: var(--cp-yellow);">+200MG ENERGY</button>
+          <button onclick="clearCaffeineLog()" class="cp-btn font-secondary" style="padding: 6px; font-size: 10px; font-weight: 700; color: #94A3B8;">CLEAR CAF</button>
+          <button onclick="logSnapshotNow(true)" class="cp-btn font-secondary" style="padding: 6px; font-size: 10px; font-weight: 700; color: var(--cp-green);">⊕ LOG POINT</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 5: DUAL VQ37VHR + BODY TRENDS GRAPH -->
+    <div id="view-TRENDS" class="h-full hidden flex flex-col">
+      <div class="cp-box cp-box-yellow flex-1 flex flex-col justify-between h-full" style="padding: 10px; gap: 6px;">
+        <div class="flex items-center justify-between" style="border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 5px;">
+          <span class="font-secondary" style="font-size: 11px; font-weight: 800; color: var(--cp-yellow);">◈ TELEMETRY & BIOMETRIC TRENDS</span>
+          <div class="flex" style="gap: 4px;">
+            <button onclick="setTrendMode('CAR')" id="trend-btn-CAR" class="cp-btn" style="padding: 2px 7px; font-size: 9px; font-weight: 700; color: var(--cp-cyan);">VQ37 ENGINE</button>
+            <button onclick="setTrendMode('BIO')" id="trend-btn-BIO" class="cp-btn" style="padding: 2px 7px; font-size: 9px; font-weight: 700; color: var(--cp-yellow);">CHRONO BODY</button>
+            <button onclick="askZelda('Analyze my recent car and body telemetry trends over time and tell me if anything is drifting.')" class="cp-btn" style="padding: 2px 7px; font-size: 9px; font-weight: 700; color: var(--cp-red);">AI TREND SCAN</button>
+          </div>
+        </div>
+
+        <div class="relative flex-1 w-full" style="background: rgba(3,5,9,0.92); border: 1px solid rgba(0,240,255,0.2); min-height: 0;">
+          <canvas id="trends-canvas" style="width: 100%; height: 100%; display: block;"></canvas>
+        </div>
+
+        <div id="trends-legend" class="flex justify-between items-center" style="font-size: 10px; font-weight: 700; padding-top: 2px;">
+          <span style="color: #00F0FF;">■ COOLANT (°F)</span>
+          <span style="color: #FCEE0A;">■ INTAKE IAT (°F)</span>
+          <span style="color: #FF2A54;">■ STFT B1 (%)</span>
+          <span id="trends-count" class="t-nums" style="color: #94A3B8;">0 SAMPLES</span>
         </div>
       </div>
     </div>
 
   </main>
 
-  <!-- ROW 5: ZELDA NEURAL HOLOCALL & LIVE DIAGNOSTICS DECK -->
-  <section class="cp-box cp-box-red flex flex-col justify-between" style="padding: 10px;">
+  <!-- ROW 5: ZELDA FAST-STREAM HOLOCALL & VOICE COMMAND DECK -->
+  <section class="cp-box cp-box-red flex flex-col justify-between" style="padding: 9px;">
     <div class="flex items-center justify-between">
-      <div class="flex items-center" style="gap: 6px;">
+      <div class="flex items-center" style="gap: 5px;">
         <span id="voice-led" style="width: 8px; height: 8px; border-radius: 999px; background: var(--cp-cyan); display: inline-block;"></span>
         <span class="font-secondary" style="font-size: 12px; font-weight: 700; color: #FFF;">ZELDA</span>
-        <span id="voice-state-badge" style="font-size: 10px; font-weight: 700; padding: 1px 6px; background: rgba(255,255,255,0.06); color: #94A3B8; border: 1px solid rgba(255,255,255,0.12);">STANDBY</span>
-        <span id="zelda-mood-badge" style="font-size: 10px; font-weight: 700; padding: 1px 6px; background: rgba(8,51,68,0.6); color: var(--cp-cyan); border: 1px solid rgba(0,240,255,0.3);">MOOD: CHILL</span>
-        <button onclick="toggleAutoHandsFree()" id="auto-mic-btn" style="font-size: 10px; font-weight: 700; padding: 1px 6px; background: rgba(0,0,0,0.6); color: #94A3B8; border: 1px solid rgba(255,255,255,0.15); cursor: pointer;">AUTO-MIC: OFF</button>
+        <span id="voice-state-badge" style="font-size: 9px; font-weight: 700; padding: 1px 5px; background: rgba(255,255,255,0.06); color: #94A3B8; border: 1px solid rgba(255,255,255,0.12);">STANDBY</span>
+        <span id="zelda-mood-badge" style="font-size: 9px; font-weight: 700; padding: 1px 5px; background: rgba(8,51,68,0.6); color: var(--cp-cyan); border: 1px solid rgba(0,240,255,0.3);">PREEM</span>
+        <button onclick="toggleAutoHandsFree()" id="auto-mic-btn" style="font-size: 9px; font-weight: 700; padding: 1px 5px; background: rgba(0,0,0,0.6); color: #94A3B8; border: 1px solid rgba(255,255,255,0.15); cursor: pointer;">AUTO-MIC: OFF</button>
       </div>
       <div class="flex items-center" style="gap: 4px;">
-        <button onclick="setSimPreset('IDLE')" class="cp-btn" style="padding: 2px 6px; font-size: 10px; font-weight: 700;">IDLE</button>
-        <button onclick="setSimPreset('CRUISE')" class="cp-btn" style="padding: 2px 6px; font-size: 10px; font-weight: 700;">CRUISE</button>
-        <button onclick="setSimPreset('WOT')" class="cp-btn" style="padding: 2px 6px; font-size: 10px; font-weight: 700;">WOT</button>
-        <button onclick="triggerDynamicSimFault()" class="cp-btn" style="padding: 2px 6px; font-size: 10px; font-weight: 700; color: var(--cp-yellow);">SIM FAULT</button>
-        <button onclick="runFullAiDiagnostics()" class="cp-btn" style="padding: 2px 7px; font-size: 10px; font-weight: 700; color: var(--cp-red); border-color: rgba(255,42,84,0.5);">⚡ DIAG</button>
+        <button onclick="setSimPreset('IDLE')" class="cp-btn" style="padding: 2px 5px; font-size: 9px; font-weight: 700;">IDLE</button>
+        <button onclick="setSimPreset('CRUISE')" class="cp-btn" style="padding: 2px 5px; font-size: 9px; font-weight: 700;">CRUISE</button>
+        <button onclick="setSimPreset('WOT')" class="cp-btn" style="padding: 2px 5px; font-size: 9px; font-weight: 700;">WOT</button>
+        <button onclick="triggerDynamicSimFault()" class="cp-btn" style="padding: 2px 5px; font-size: 9px; font-weight: 700; color: var(--cp-yellow);">FAULT</button>
+        <button onclick="runFullAiDiagnostics()" class="cp-btn" style="padding: 2px 6px; font-size: 9px; font-weight: 700; color: var(--cp-red);">⚡ DIAG</button>
       </div>
     </div>
 
-    <div id="holocall-box" class="holocall-module flex items-center overflow-hidden" style="height: 52px; padding: 0 10px; gap: 12px;">
-      <div id="voice-eq" class="flex items-end justify-between shrink-0" style="width: 64px; height: 36px; background: rgba(0,0,0,0.82); border: 1px solid rgba(255,255,255,0.1); padding: 4px 6px;">
+    <div id="holocall-box" class="holocall-module flex items-center overflow-hidden" style="height: 50px; padding: 0 9px; gap: 10px;">
+      <div id="voice-eq" class="flex items-end justify-between shrink-0" style="width: 60px; height: 34px; background: rgba(0,0,0,0.82); border: 1px solid rgba(255,255,255,0.1); padding: 4px 5px;">
         <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
         <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
         <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
       </div>
 
-      <p id="zelda-speech" class="flex-1" style="font-size: 13.5px; font-weight: 600; color: #F1F5F9; line-height: 1.25; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-        "Neural core v3.4 online—checking 5G / Wi-Fi cloud link..."
+      <p id="zelda-speech" class="flex-1" style="font-size: 13px; font-weight: 600; color: #F1F5F9; line-height: 1.24; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+        "Neural core v4.0 locked in, choom—Night City 3D map, ChronoHume & streaming voice online."
       </p>
     </div>
 
     <div class="comms-input-grid">
-      <button id="talk-btn" onclick="toggleVoiceListening()" class="cp-btn font-secondary flex items-center justify-center" style="height: 32px; font-size: 11px; font-weight: 700; color: var(--cp-yellow); gap: 6px;">
+      <button id="talk-btn" onclick="toggleVoiceListening()" class="cp-btn font-secondary flex items-center justify-center" style="height: 31px; font-size: 11px; font-weight: 700; color: var(--cp-yellow); gap: 5px;">
         <span>🎙</span><span id="talk-btn-label">TALK</span>
       </button>
 
-      <input id="direct-chat-input" type="text" placeholder="Talk or ask Zelda anything..."
+      <input id="direct-chat-input" type="text" placeholder="Talk or ask Zelda anything, choom..."
         class="select-text"
-        style="height: 32px; background: rgba(0,0,0,0.82); border: 1px solid rgba(255,255,255,0.22); padding: 0 10px; font-size: 12px; color: #FFF; outline: none;"
+        style="height: 31px; background: rgba(0,0,0,0.82); border: 1px solid rgba(255,255,255,0.22); padding: 0 10px; font-size: 12px; color: #FFF; outline: none;"
         onkeydown="if(event.key==='Enter'){event.preventDefault(); sendTextToZelda();}" />
 
-      <button onclick="sendTextToZelda()" class="cp-btn font-secondary" style="height: 32px; font-size: 11px; font-weight: 700; color: var(--cp-cyan);">SEND</button>
+      <button onclick="sendTextToZelda()" class="cp-btn font-secondary" style="height: 31px; font-size: 11px; font-weight: 700; color: var(--cp-cyan);">SEND</button>
     </div>
   </section>
 
-  <!-- MODAL 1: ZELDA ENGRAM MEMORY BANK -->
-  <div id="memory-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center" style="background: rgba(0,0,0,0.86); padding: 16px;">
-    <div class="cp-box w-full" style="max-width: 440px; padding: 18px;">
+  <!-- MODAL 1: ZELDA AUTONOMOUS ENGRAM MEMORY BANK -->
+  <div id="memory-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center" style="background: rgba(0,0,0,0.88); padding: 16px;">
+    <div class="cp-box w-full" style="max-width: 440px; padding: 16px;">
       <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 8px; margin-bottom: 10px;">
         <div>
-          <span class="font-secondary" style="font-size: 14px; font-weight: 700; color: var(--cp-cyan);">◈ ZELDA ENGRAM MEMORY BANK</span>
-          <p style="font-size: 11px; color: #94A3B8; margin: 2px 0 0 0;">Facts, preferences & road memories Zelda has learned from you</p>
+          <span class="font-secondary" style="font-size: 13px; font-weight: 800; color: var(--cp-cyan);">◈ AUTONOMOUS ENGRAM MEMORY</span>
+          <p style="font-size: 11px; color: #94A3B8; margin: 2px 0 0 0;">Zelda automatically learns & updates facts as you talk</p>
         </div>
         <button onclick="toggleMemoryModal()" class="cp-btn" style="padding: 2px 8px; color: #94A3B8;">✕</button>
       </div>
-      <div id="memory-list" class="overflow-y-auto select-text" style="max-height: 210px; margin-bottom: 10px;"></div>
+      <div id="memory-list" class="overflow-y-auto select-text" style="max-height: 220px; margin-bottom: 10px;"></div>
       <div class="flex" style="gap: 6px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.12);">
-        <input id="manual-mem-input" type="text" placeholder="Teach Zelda a fact directly..."
+        <input id="manual-mem-input" type="text" placeholder="Pin a permanent engram..."
           class="flex-1 select-text" style="background: #000; border: 1px solid rgba(255,255,255,0.22); padding: 8px; font-size: 12px; color: #FFF;" />
-        <button onclick="addManualMemory()" class="cp-btn font-secondary" style="padding: 0 12px; font-size: 11px; font-weight: 700; color: var(--cp-yellow);">ADD</button>
+        <button onclick="addManualMemory()" class="cp-btn font-secondary" style="padding: 0 12px; font-size: 11px; font-weight: 700; color: var(--cp-yellow);">SAVE</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 2: CONFIG & PRIMARY LAUNCHER -->
-  <div id="config-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center" style="background: rgba(0,0,0,0.86); padding: 16px;">
-    <div class="cp-box cp-box-yellow w-full" style="max-width: 440px; padding: 18px;">
+  <!-- MODAL 2: CONFIG & OTA SYNC -->
+  <div id="config-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center" style="background: rgba(0,0,0,0.88); padding: 16px;">
+    <div class="cp-box cp-box-yellow w-full" style="max-width: 440px; padding: 16px;">
       <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 8px; margin-bottom: 10px;">
-        <span class="font-secondary" style="font-size: 14px; font-weight: 700; color: var(--cp-yellow);">⚙ KIROSHI SYSTEM & PRIMARY LAUNCHER</span>
+        <span class="font-secondary" style="font-size: 13px; font-weight: 800; color: var(--cp-yellow);">⚙ KIROSHI OS // v4.0</span>
         <button onclick="toggleConfigModal()" class="cp-btn" style="padding: 2px 8px; color: #94A3B8;">✕</button>
       </div>
 
-      <div style="background: rgba(0,0,0,0.75); border: 1px solid rgba(255,255,255,0.12); padding: 10px; font-size: 11px; font-family: monospace; margin-bottom: 12px;">
-        <div style="color: var(--cp-cyan); font-weight: 700;">DETECTED RUNTIME CAPABILITIES (BUILD v3.4):</div>
-        <div id="probe-ua" class="truncate" style="color: #CBD5E1; margin-top: 3px;">OS/Browser: probing...</div>
-        <div id="probe-apis" style="color: #CBD5E1; margin-top: 3px;">APIs: probing...</div>
+      <div style="background: rgba(0,0,0,0.75); border: 1px solid rgba(255,255,255,0.12); padding: 9px; font-size: 11px; font-family: monospace; margin-bottom: 10px;">
+        <div style="color: var(--cp-cyan); font-weight: 700;">RUNTIME DIAGNOSTICS (BUILD v4.0):</div>
+        <div id="probe-ua" class="truncate" style="color: #CBD5E1; margin-top: 2px;">OS: probing...</div>
+        <div id="probe-apis" style="color: #CBD5E1; margin-top: 2px;">Pipeline: SSE STREAMING + 3D GL MAP</div>
       </div>
 
-      <div style="margin-bottom: 12px;">
-        <label class="block" style="font-weight: 700; color: #CBD5E1; margin-bottom: 4px; font-size: 12px;">Gemini API Key (Works Over 5G, Wi-Fi & Mobile Hotspot)</label>
+      <div style="margin-bottom: 10px;">
+        <label class="block" style="font-weight: 700; color: #CBD5E1; margin-bottom: 4px; font-size: 12px;">Gemini API Key</label>
         <input id="cfg-gemini-key" type="text" placeholder="AIzaSy..." class="w-full select-text" style="background: #000; border: 1px solid rgba(255,255,255,0.22); padding: 8px; color: #FFF; font-size: 12px; margin-bottom: 8px;" />
 
-        <label class="block" style="font-weight: 700; color: #CBD5E1; margin-bottom: 4px; font-size: 12px;">IFTTT Webhook URL (Peacock Pointe Home Sync)</label>
+        <label class="block" style="font-weight: 700; color: #CBD5E1; margin-bottom: 4px; font-size: 12px;">IFTTT Webhook URL (Peacock Pointe)</label>
         <input id="cfg-ifttt-url" type="text" placeholder="https://maker.ifttt.com/trigger/..." class="w-full select-text" style="background: #000; border: 1px solid rgba(255,255,255,0.22); padding: 8px; color: #FFF; font-size: 12px;" />
       </div>
 
-      <div class="two-col-grid" style="margin-bottom: 8px;">
-        <button onclick="setAsPrimaryCarLauncher()" class="cp-btn font-secondary" style="padding: 8px; font-size: 10px; font-weight: 700; color: var(--cp-green);">SET PRIMARY BOOT HOME</button>
-        <button onclick="forceOtaRefresh()" class="cp-btn font-secondary" style="padding: 8px; font-size: 10px; font-weight: 700; color: var(--cp-cyan);">⟳ FORCE CLOUD REFRESH</button>
+      <div class="two-col-grid" style="margin-bottom: 6px;">
+        <button onclick="setAsPrimaryCarLauncher()" class="cp-btn font-secondary" style="padding: 8px; font-size: 10px; font-weight: 700; color: var(--cp-green);">SET BOOT LAUNCHER</button>
+        <button onclick="forceOtaRefresh()" class="cp-btn font-secondary" style="padding: 8px; font-size: 10px; font-weight: 700; color: var(--cp-cyan);">⟳ PULL GITHUB OTA</button>
       </div>
 
       <div class="two-col-grid">
-        <button onclick="triggerHomeSync()" class="cp-btn font-secondary" style="padding: 8px; font-size: 11px; font-weight: 700; color: #FFFFFF;">FIRE HOME SYNC</button>
+        <button onclick="triggerHomeSync()" class="cp-btn font-secondary" style="padding: 8px; font-size: 11px; font-weight: 700; color: #FFFFFF;">HOME WEBHOOK</button>
         <button onclick="saveHudConfig()" class="cp-btn font-secondary" style="padding: 8px; font-size: 11px; font-weight: 700; color: var(--cp-yellow);">SAVE SETTINGS</button>
       </div>
     </div>
@@ -614,7 +685,7 @@
 
   <script>
     // =========================================================================
-    // 0. CORE STATE, REAL CLOUD REACHABILITY (5G + HOTSPOT SAFE) & MEMORIES
+    // 0. CORE STATE + CHRONOHUME 28-DAY C-SHIFT ENGINE (ANCHOR: 2026-11-10 = N1)
     // =========================================================================
     const VGATE_PROFILES = [
       { service: '000018f0-0000-1000-8000-00805f9b34fb', rx: '00002af0-0000-1000-8000-00805f9b34fb', tx: '00002af1-0000-1000-8000-00805f9b34fb' },
@@ -626,18 +697,152 @@
 
     let hudMode = 'SIM', simProfile = 'IDLE', bleDevice = null, rxChar = null, txChar = null;
     let rxBuffer = '', promptResolver = null, pollLoopActive = false, slowIndex = 0, cycleCount = 0, lastBlePacketTime = 0;
-    let cloudReachable = true;
+    let cloudReachable = true, currentTrendMode = 'CAR';
 
     const state = {
       rpm: 750, speed: 0, gpsMph: 0, load: 18, coolant: 190, iat: 92, timing: 14,
       stft1: 0.8, stft2: -0.4, volt: 14.2, gear: 'P',
       dtcs: [], pendingDtcs: [],
-      lat: null, lon: null, heading: 0,
+      lat: 29.7958, lon: -90.8229, heading: 0,
       btTitle: 'NONE', btArtist: 'NONE', btPlaying: false,
-      mood: 'CHILL',
+      mood: 'PREEM',
       lastAnomalySignature: '',
       peaks: { load: 18, coolant: 190, iat: 92, timing: 14 }
     };
+
+    // Biometric & Caffeine State (Persisted)
+    const bioState = JSON.parse(localStorage.getItem('zelda_bio_state') || 'null') || {
+      sleepHrs: 6.8,
+      hrv: 58,
+      rhr: 61,
+      caffeineDoses: [], // [{ mg: 200, ts: 1762819200000 }]
+      lastBioAlertSig: ''
+    };
+
+    function saveBioState() {
+      localStorage.setItem('zelda_bio_state', JSON.stringify(bioState));
+    }
+
+    // 28-Day C-Shift Cycle anchored strictly to Tue Nov 10, 2026 = Index 0 (Night 1 of 3, followed by 3 Off)
+    // Pattern from N1: 3N (0..2), 3Off (3..5), 4D (6..9), 7Off (10..16), 4N (17..20), 3Off (21..23), 3D (24..26), 1Off (27)
+    const CSHIFT_28 = [
+      { code: 'N1/3', label: 'NIGHT 1 OF 3 (16:00–04:00)', type: 'NIGHT', next: '2 more Nights, then 3 OFF' },
+      { code: 'N2/3', label: 'NIGHT 2 OF 3 (16:00–04:00)', type: 'NIGHT', next: '1 more Night, then 3 OFF' },
+      { code: 'N3/3', label: 'NIGHT 3 OF 3 (16:00–04:00)', type: 'NIGHT', next: 'Flip into 3 OFF tomorrow morning' },
+      { code: 'OFF 1/3', label: 'RECOVERY OFF 1 OF 3', type: 'OFF', next: 'Flip sleep schedule gently' },
+      { code: 'OFF 2/3', label: 'OFF DAY 2 OF 3', type: 'OFF', next: '1 more day off before 4 Days' },
+      { code: 'OFF 3/3', label: 'OFF DAY 3 OF 3', type: 'OFF', next: '04:00 Day Shift starts tomorrow' },
+      { code: 'D1/4', label: 'DAY 1 OF 4 (04:00–16:00)', type: 'DAY', next: 'Early rack-out tonight' },
+      { code: 'D2/4', label: 'DAY 2 OF 4 (04:00–16:00)', type: 'DAY', next: '2 more Days before 7-Off stretch' },
+      { code: 'D3/4', label: 'DAY 3 OF 4 (04:00–16:00)', type: 'DAY', next: '1 more Day before 7-Off stretch' },
+      { code: 'D4/4', label: 'DAY 4 OF 4 (04:00–16:00)', type: 'DAY', next: '7-Day Long Change starts at 16:00!' },
+      { code: 'OFF 1/7', label: 'LONG CHANGE OFF 1 OF 7', type: 'OFF', next: '6 more days off' },
+      { code: 'OFF 2/7', label: 'LONG CHANGE OFF 2 OF 7', type: 'OFF', next: '5 more days off' },
+      { code: 'OFF 3/7', label: 'LONG CHANGE OFF 3 OF 7', type: 'OFF', next: '4 more days off' },
+      { code: 'OFF 4/7', label: 'LONG CHANGE OFF 4 OF 7', type: 'OFF', next: '3 more days off' },
+      { code: 'OFF 5/7', label: 'LONG CHANGE OFF 5 OF 7', type: 'OFF', next: '2 more days off' },
+      { code: 'OFF 6/7', label: 'LONG CHANGE OFF 6 OF 7', type: 'OFF', next: '1 more day off before 4 Nights' },
+      { code: 'OFF 7/7', label: 'LONG CHANGE OFF 7 OF 7', type: 'OFF', next: 'Pre-shift nap — Night 1 of 4 at 16:00' },
+      { code: 'N1/4', label: 'NIGHT 1 OF 4 (16:00–04:00)', type: 'NIGHT', next: '3 more Nights in block' },
+      { code: 'N2/4', label: 'NIGHT 2 OF 4 (16:00–04:00)', type: 'NIGHT', next: '2 more Nights in block' },
+      { code: 'N3/4', label: 'NIGHT 3 OF 4 (16:00–04:00)', type: 'NIGHT', next: '1 more Night before 3 OFF' },
+      { code: 'N4/4', label: 'NIGHT 4 OF 4 (16:00–04:00)', type: 'NIGHT', next: '3 OFF starts at 04:00!' },
+      { code: 'OFF 1/3', label: 'RECOVERY OFF 1 OF 3', type: 'OFF', next: 'Post-night recovery window' },
+      { code: 'OFF 2/3', label: 'OFF DAY 2 OF 3', type: 'OFF', next: '1 more day off before 3 Days' },
+      { code: 'OFF 3/3', label: 'OFF DAY 3 OF 3', type: 'OFF', next: '04:00 Day 1 of 3 starts tomorrow' },
+      { code: 'D1/3', label: 'DAY 1 OF 3 (04:00–16:00)', type: 'DAY', next: '2 more Days in block' },
+      { code: 'D2/3', label: 'DAY 2 OF 3 (04:00–16:00)', type: 'DAY', next: '1 more Day before 1-Day turnaround' },
+      { code: 'D3/3', label: 'DAY 3 OF 3 (04:00–16:00)', type: 'DAY', next: '24hr Flip Day tomorrow before 3 Nights' },
+      { code: 'FLIP 1/1', label: '24HR FLIP TURNAROUND DAY', type: 'FLIP', next: 'Bank sleep — Night 1 of 3 tomorrow 16:00' }
+    ];
+
+    function getCurrentShiftInfo() {
+      const now = new Date();
+      // If between 00:00 and 04:30 AM, treat operational shift day as the evening shift that started yesterday
+      const shifted = new Date(now.getTime() - (4.5 * 3600 * 1000));
+      const anchorUtc = Date.UTC(2026, 10, 10); // Nov 10, 2026 (Month is 0-indexed: 10 = Nov)
+      const todayUtc = Date.UTC(shifted.getFullYear(), shifted.getMonth(), shifted.getDate());
+      const diffDays = Math.floor((todayUtc - anchorUtc) / 86400000);
+      const idx = ((diffDays % 28) + 28) % 28;
+      return CSHIFT_28[idx];
+    }
+
+    function getActiveCaffeineMg() {
+      const now = Date.now();
+      const halfLifeMs = 5 * 3600 * 1000;
+      bioState.caffeineDoses = bioState.caffeineDoses.filter(d => (now - d.ts) < 30 * 3600 * 1000);
+      let active = 0;
+      for (const d of bioState.caffeineDoses) {
+        active += d.mg * Math.pow(0.5, (now - d.ts) / halfLifeMs);
+      }
+      return Math.round(active);
+    }
+
+    function getReadinessScore() {
+      const sleepScore = Math.min(100, (bioState.sleepHrs / 7.5) * 100);
+      const hrvScore = Math.min(100, (bioState.hrv / 65) * 100);
+      const rhrPenalty = Math.max(0, (bioState.rhr - 62) * 1.8);
+      return Math.max(15, Math.min(99, Math.round(sleepScore * 0.55 + hrvScore * 0.45 - rhrPenalty)));
+    }
+
+    function logCaffeineDose(mg) {
+      bioState.caffeineDoses.push({ mg: Number(mg), ts: Date.now() });
+      saveBioState();
+      renderBioDeck();
+      logSnapshotNow(false);
+    }
+
+    function clearCaffeineLog() {
+      bioState.caffeineDoses = [];
+      saveBioState();
+      renderBioDeck();
+    }
+
+    function promptBioUpdate(field) {
+      if (field === 'sleep') {
+        const v = parseFloat(prompt('Hours slept in last 24h:', bioState.sleepHrs));
+        if (!isNaN(v)) bioState.sleepHrs = Math.max(0, Math.min(16, v));
+      } else if (field === 'hrv') {
+        const v = parseInt(prompt('Galaxy Watch Ultra HRV (ms):', bioState.hrv), 10);
+        if (!isNaN(v)) bioState.hrv = Math.max(10, Math.min(180, v));
+      } else if (field === 'rhr') {
+        const v = parseInt(prompt('Resting / Current Heart Rate (BPM):', bioState.rhr), 10);
+        if (!isNaN(v)) bioState.rhr = Math.max(38, Math.min(190, v));
+      }
+      saveBioState();
+      renderBioDeck();
+      logSnapshotNow(false);
+    }
+
+    function renderBioDeck() {
+      const shift = getCurrentShiftInfo();
+      const caf = getActiveCaffeineMg();
+      const ready = getReadinessScore();
+
+      document.getElementById('shift-pill').textContent = shift.code;
+      document.getElementById('hdr-readiness').textContent = `${ready}%`;
+      document.getElementById('hdr-caffeine').textContent = `${caf}mg`;
+
+      document.getElementById('bio-shift-headline').textContent = shift.label;
+      document.getElementById('bio-shift-next').textContent = `${shift.next} • Readiness: ${ready}%`;
+      document.getElementById('nc-quest-title').textContent = `GIG // ${shift.code}`;
+
+      document.getElementById('bio-val-sleep').textContent = bioState.sleepHrs.toFixed(1);
+      document.getElementById('bio-status-sleep').textContent = bioState.sleepHrs < 5.5 ? 'SLEEP DEBT HIGH' : 'RECOVERY NOMINAL';
+      document.getElementById('bio-status-sleep').style.color = bioState.sleepHrs < 5.5 ? '#FF2A54' : '#34D399';
+
+      document.getElementById('bio-val-hrv').textContent = bioState.hrv;
+      document.getElementById('bio-status-hrv').textContent = bioState.hrv < 42 ? 'CNS STRAIN DETECTED' : 'AUTONOMIC BALANCED';
+      document.getElementById('bio-status-hrv').style.color = bioState.hrv < 42 ? '#FCEE0A' : '#34D399';
+
+      document.getElementById('bio-val-rhr').textContent = bioState.rhr;
+      document.getElementById('bio-val-caf').textContent = caf;
+
+      const hr = new Date().getHours();
+      const nearNightCutoff = shift.type === 'NIGHT' && hr >= 1 && hr < 5 && caf > 85;
+      document.getElementById('bio-status-caf').textContent = nearNightCutoff ? '⚠️ HIGH FOR 04:00 RACK-OUT' : (caf > 250 ? 'STIM LOAD ELEVATED' : 'CLEAR FOR SLEEP WINDOW');
+      document.getElementById('bio-status-caf').style.color = nearNightCutoff ? '#FF2A54' : (caf > 250 ? '#FCEE0A' : '#34D399');
+    }
 
     function getCleanApiKey() {
       return (localStorage.getItem('zelda_hud_gemini_key') || localStorage.getItem('zelda_key_gemini') || '').replace(/["'\s]+/g, '');
@@ -647,9 +852,8 @@
       cloudReachable = isLive;
       const netBadge = document.getElementById('net-mode-badge');
       if (!netBadge) return;
-      netBadge.textContent = isLive ? 'CLOUD // ONLINE' : 'OFFLINE CORE';
+      netBadge.textContent = isLive ? 'CLOUD // LIVE' : 'OFFLINE CORE';
       netBadge.style.color = isLive ? 'var(--cp-green)' : 'var(--cp-yellow)';
-      netBadge.style.borderColor = isLive ? 'rgba(0,255,157,0.45)' : 'rgba(252,238,10,0.4)';
     }
 
     async function probeCloudConnectivity() {
@@ -659,9 +863,7 @@
         await fetch('https://generativelanguage.googleapis.com/$discovery/rest?version=v1beta', { method: 'GET', signal: ctrl.signal });
         clearTimeout(t);
         setCloudBadge(true);
-        ZeldaMap.activateMapTiles();
         triggerOnlineGreetingOnce();
-        if (state.btTitle !== 'NONE') fetchTrackAlbumCover(state.btArtist, state.btTitle);
         return true;
       } catch (_) {
         setCloudBadge(false);
@@ -670,12 +872,8 @@
     }
 
     function forceOtaRefresh() {
-      if (window.ZeldaBridge?.syncOtaUpdate) {
-        window.ZeldaBridge.syncOtaUpdate();
-      } else {
-        const base = window.location.href.split('?')[0];
-        window.location.replace(`${base}?v=${Date.now()}`);
-      }
+      if (window.ZeldaBridge?.syncOtaUpdate) window.ZeldaBridge.syncOtaUpdate();
+      else window.location.replace(`${window.location.href.split('?')[0]}?v=${Date.now()}`);
     }
 
     const alertCooldowns = {};
@@ -686,22 +884,119 @@
       return true;
     }
 
+    // =========================================================================
+    // 1. AUTONOMOUS ENGRAM MEMORY BANK + TRENDS TIME-SERIES VAULT (IndexedDB)
+    // =========================================================================
     const DEFAULT_MEMORIES = [
-      "Driver is J (Jacob), my builder and partner in Thibodaux, Louisiana.",
-      "I am Zelda, a 2009 Nissan 370Z Coupe (VQ37VHR 3.7L V6, 7AT, ~236,150 miles) with Z1 Motorsports cold air intakes.",
-      "J works rotating 12-hour C-Shift schedules (04:00-16:00 / 16:00-04:00) as ERT Captain at Pinnacle Polymers.",
-      "J is married to Heather; they live at Peacock Pointe with two cats (Shaed & Miku) and a grey toy poodle (Vella)."
+      "Driver is J (Jacob), my choom, builder, and partner in Thibodaux, Louisiana.",
+      "I am Zelda, a sentient 2009 Nissan 370Z Coupe (VQ37VHR 3.7L V6, 7AT, ~236,150 miles) with Z1 cold air intakes.",
+      "J works rotating 12-hour C-Shift schedules at Pinnacle Polymers as ERT Team Captain (anchored Nov 10, 2026 = Night 1 of 3, followed by 3 Off).",
+      "J is married to Heather; home base is Peacock Pointe with cats Shaed & Miku and grey toy poodle Vella."
     ];
 
     let longTermMemories = JSON.parse(localStorage.getItem('zelda_engram_memories') || 'null') || DEFAULT_MEMORIES;
     let conversationTurns = JSON.parse(localStorage.getItem('zelda_recent_turns') || '[]');
+    let telemetryHistory = JSON.parse(localStorage.getItem('zelda_trend_history_v4') || '[]');
 
     function saveEngramState() {
       localStorage.setItem('zelda_engram_memories', JSON.stringify(longTermMemories));
-      localStorage.setItem('zelda_recent_turns', JSON.stringify(conversationTurns.slice(-12)));
+      localStorage.setItem('zelda_recent_turns', JSON.stringify(conversationTurns.slice(-14)));
       document.getElementById('mem-count-badge').textContent = longTermMemories.length;
     }
-    saveEngramState();
+
+    function logSnapshotNow(manual = false) {
+      const snap = {
+        ts: Date.now(),
+        coolant: state.coolant,
+        iat: state.iat,
+        stft1: state.stft1,
+        volt: Number(state.volt.toFixed(1)),
+        readiness: getReadinessScore(),
+        hrv: bioState.hrv,
+        sleep: bioState.sleepHrs,
+        caf: getActiveCaffeineMg()
+      };
+      telemetryHistory.push(snap);
+      if (telemetryHistory.length > 120) telemetryHistory = telemetryHistory.slice(-120);
+      localStorage.setItem('zelda_trend_history_v4', JSON.stringify(telemetryHistory));
+      if (!document.getElementById('view-TRENDS').classList.contains('hidden')) drawTrendsCanvas();
+      if (manual) document.getElementById('zelda-speech').textContent = `"Logged fresh VQ37 + biometric telemetry point (${telemetryHistory.length} stored), choom."`;
+    }
+
+    // Seed initial baseline points if empty so Trends graph renders immediately
+    if (telemetryHistory.length < 4) {
+      const now = Date.now();
+      for (let i = 5; i >= 0; i--) {
+        telemetryHistory.push({
+          ts: now - i * 600000,
+          coolant: 188 + (i % 3) * 2, iat: 90 + i, stft1: 0.6, volt: 14.2,
+          readiness: getReadinessScore(), hrv: bioState.hrv, sleep: bioState.sleepHrs, caf: getActiveCaffeineMg()
+        });
+      }
+      localStorage.setItem('zelda_trend_history_v4', JSON.stringify(telemetryHistory));
+    }
+    setInterval(() => logSnapshotNow(false), 180000); // Auto-log every 3 mins
+
+    function setTrendMode(mode) {
+      currentTrendMode = mode;
+      const leg = document.getElementById('trends-legend');
+      if (mode === 'CAR') {
+        leg.innerHTML = `<span style="color:#00F0FF;">■ COOLANT (°F)</span><span style="color:#FCEE0A;">■ INTAKE IAT (°F)</span><span style="color:#FF2A54;">■ STFT B1 (%)</span><span id="trends-count" class="t-nums" style="color:#94A3B8;">${telemetryHistory.length} PTS</span>`;
+      } else {
+        leg.innerHTML = `<span style="color:#00FF9D;">■ READINESS (%)</span><span style="color:#00F0FF;">■ HRV (MS)</span><span style="color:#FF2A54;">■ CAFFEINE (MG)</span><span id="trends-count" class="t-nums" style="color:#94A3B8;">${telemetryHistory.length} PTS</span>`;
+      }
+      drawTrendsCanvas();
+    }
+
+    function drawTrendsCanvas() {
+      const canvas = document.getElementById('trends-canvas');
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = Math.max(300, rect.width);
+      canvas.height = Math.max(120, rect.height);
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height, pad = 18;
+
+      ctx.clearRect(0, 0, W, H);
+      // Cyberpunk grid lines
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.1)';
+      ctx.lineWidth = 1;
+      for (let g = 1; g < 4; g++) {
+        const y = (H / 4) * g;
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      }
+
+      const pts = telemetryHistory.slice(-40);
+      if (pts.length < 2) return;
+
+      const drawSeries = (getter, minV, maxV, color) => {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.2;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        pts.forEach((p, idx) => {
+          const x = pad + (idx / (pts.length - 1)) * (W - pad * 2);
+          const norm = Math.max(0, Math.min(1, (getter(p) - minV) / (maxV - minV || 1)));
+          const y = (H - pad) - norm * (H - pad * 2);
+          if (idx === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      };
+
+      if (currentTrendMode === 'CAR') {
+        drawSeries(p => p.coolant, 140, 240, '#00F0FF');
+        drawSeries(p => p.iat, 60, 160, '#FCEE0A');
+        drawSeries(p => p.stft1, -20, 20, '#FF2A54');
+      } else {
+        drawSeries(p => p.readiness, 0, 100, '#00FF9D');
+        drawSeries(p => p.hrv, 20, 110, '#00F0FF');
+        drawSeries(p => p.caf, 0, 350, '#FF2A54');
+      }
+      const cntEl = document.getElementById('trends-count');
+      if (cntEl) cntEl.textContent = `${pts.length} PTS`;
+    }
 
     function toggleMemoryModal() {
       renderMemoryList();
@@ -711,9 +1006,9 @@
     function renderMemoryList() {
       const box = document.getElementById('memory-list');
       box.innerHTML = longTermMemories.map((m, idx) => `
-        <div style="background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.1); padding: 8px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px;">
-          <span style="color: #E2E8F0; line-height: 1.35;"><span style="color: var(--cp-cyan); margin-right: 6px;">▸</span>${m}</span>
-          <button onclick="deleteMemory(${idx})" style="background: transparent; border: 0; color: #64748B; cursor: pointer; font-size: 13px;">✕</button>
+        <div style="background: rgba(0,0,0,0.75); border: 1px solid rgba(0,240,255,0.16); padding: 7px 9px; margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px;">
+          <span style="color: #E2E8F0; line-height: 1.3;"><span style="color: var(--cp-yellow); margin-right: 6px;">◈</span>${m}</span>
+          <button onclick="deleteMemory(${idx})" style="background: transparent; border: 0; color: #FF2A54; cursor: pointer; font-size: 13px;">✕</button>
         </div>
       `).join('');
     }
@@ -743,13 +1038,145 @@
     }
 
     function updateClock() {
-      document.getElementById('clock-display').textContent = new Date().toTimeString().slice(0, 5);
+      const t = new Date().toTimeString().slice(0, 5);
+      document.getElementById('clock-display').textContent = t;
+      const mc = document.getElementById('nc-map-clock');
+      if (mc) mc.textContent = t;
     }
     setInterval(updateClock, 1000);
     updateClock();
+    saveEngramState();
 
     // =========================================================================
-    // 1. BLUETOOTH AVRCP DECK + AUTOMATIC 600x600 ALBUM COVER ARTWORK
+    // 2. IN-GAME CYBERPUNK 2077 3D WEBGL VECTOR MAP (MapLibre GL JS)
+    // =========================================================================
+    const ZeldaMap = {
+      map: null,
+      playerEl: null,
+      playerMarker: null,
+      is3D: true,
+      waypoints: [
+        { name: 'PEACOCK POINTE', lat: 29.7958, lon: -90.8229 },
+        { name: 'PINNACLE C-SHIFT', lat: 30.0560, lon: -90.6190 },
+        { name: 'NIGHT CITY // NOLA', lat: 29.9511, lon: -90.0715 }
+      ],
+
+      init() {
+        if ('geolocation' in navigator) {
+          navigator.geolocation.watchPosition(
+            (pos) => this.onGpsLock(pos),
+            () => {},
+            { enableHighAccuracy: true, maximumAge: 1000, timeout: 5000 }
+          );
+        }
+        this.bootWebGlMap();
+      },
+
+      async bootWebGlMap() {
+        if (!window.maplibregl || this.map) return;
+        try {
+          // Fetch OpenFreeMap Dark Liberty Vector Style and restyle every layer into Cyberpunk 2077 Crimson + Cyan
+          const res = await fetch('https://tiles.openfreemap.org/styles/dark');
+          const styleJson = await res.json();
+
+          styleJson.layers.forEach(layer => {
+            const id = layer.id.toLowerCase();
+            if (layer.type === 'background') {
+              layer.paint = { 'background-color': '#050B14' };
+            } else if (id.includes('water')) {
+              if (layer.type === 'fill') layer.paint = { 'fill-color': '#031824', 'fill-outline-color': '#00F0FF' };
+              if (layer.type === 'line') layer.paint = { 'line-color': '#006680', 'line-width': 1.2 };
+            } else if (id.includes('park') || id.includes('landuse') || id.includes('landcover')) {
+              if (layer.type === 'fill') layer.paint = { 'fill-color': '#120710', 'fill-opacity': 0.75 };
+            } else if (id.includes('building')) {
+              // Convert flat buildings into extruded 3D Crimson Night City Megablocks!
+              layer.type = 'fill-extrusion';
+              layer.paint = {
+                'fill-extrusion-color': '#9E142B',
+                'fill-extrusion-height': ['coalesce', ['get', 'render_height'], 22],
+                'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
+                'fill-extrusion-opacity': 0.88
+              };
+            } else if (id.includes('road') || id.includes('highway') || id.includes('transportation') || id.includes('street') || id.includes('bridge')) {
+              if (layer.type === 'line') {
+                const isMajor = id.includes('motorway') || id.includes('trunk') || id.includes('primary');
+                layer.paint = {
+                  'line-color': isMajor ? '#00F0FF' : '#0891B2',
+                  'line-width': isMajor ? 2.8 : 1.2,
+                  'line-opacity': isMajor ? 0.95 : 0.72
+                };
+              }
+            } else if (layer.type === 'symbol') {
+              layer.paint = {
+                'text-color': '#00F0FF',
+                'text-halo-color': '#05070B',
+                'text-halo-width': 1.5
+              };
+            }
+          });
+
+          this.map = new maplibregl.Map({
+            container: 'zelda-gl-map',
+            style: styleJson,
+            center: [state.lon, state.lat],
+            zoom: 15.2,
+            pitch: 58,
+            bearing: -18,
+            attributionControl: false
+          });
+
+          this.map.on('load', () => {
+            // Player Neon Cyan Chevron Marker
+            const el = document.createElement('div');
+            el.className = 'cp-player-chevron';
+            el.innerHTML = '<div class="cp-player-chevron-inner"></div>';
+            this.playerEl = el;
+            this.playerMarker = new maplibregl.Marker({ element: el })
+              .setLngLat([state.lon, state.lat])
+              .addTo(this.map);
+
+            // Yellow Cyberpunk Quest Diamonds
+            this.waypoints.forEach(wp => {
+              const q = document.createElement('div');
+              q.className = 'cp-quest-pin';
+              q.title = wp.name;
+              new maplibregl.Marker({ element: q }).setLngLat([wp.lon, wp.lat]).addTo(this.map);
+            });
+          });
+        } catch (_) {}
+      },
+
+      resize() { if (this.map) this.map.resize(); },
+
+      toggleTilt() {
+        if (!this.map) return;
+        this.is3D = !this.is3D;
+        this.map.easeTo({ pitch: this.is3D ? 58 : 0, duration: 500 });
+      },
+
+      recenter() {
+        if (this.map) this.map.easeTo({ center: [state.lon, state.lat], zoom: 15.6, pitch: this.is3D ? 58 : 0, bearing: state.heading || 0, duration: 600 });
+      },
+
+      onGpsLock(pos) {
+        const lat = pos.coords.latitude, lon = pos.coords.longitude;
+        const mph = pos.coords.speed ? Math.max(0, Math.round(pos.coords.speed * 2.23694)) : 0;
+        const hdg = (pos.coords.heading !== null && !isNaN(pos.coords.heading)) ? Math.round(pos.coords.heading) : state.heading;
+
+        state.lat = lat; state.lon = lon; state.heading = hdg; state.gpsMph = mph;
+        if (hudMode !== 'BLE_LIVE' && mph > 1) state.speed = mph;
+
+        document.getElementById('gps-coords').textContent = `${lat.toFixed(4)}°N ${Math.abs(lon).toFixed(4)}°W | ${mph} MPH`;
+        const sector = lon > -90.7 ? 'GARYVILLE // PLANT SECTOR' : 'THIBODAUX // LAFOURCHE';
+        document.getElementById('nc-sector-name').textContent = sector;
+
+        if (this.playerMarker) this.playerMarker.setLngLat([lon, lat]);
+        if (this.map && mph > 2) this.map.easeTo({ center: [lon, lat], bearing: hdg, duration: 850 });
+      }
+    };
+
+    // =========================================================================
+    // 3. BLUETOOTH AUDIO DECK + ALBUM ART + TAB CONTROLLER
     // =========================================================================
     let lastArtworkQuery = '';
     const artworkCache = {};
@@ -761,22 +1188,24 @@
     ];
 
     function switchDeckTab(tabName) {
-      ['TELEMETRY', 'NAV', 'MEDIA'].forEach(t => {
+      ['TELEMETRY', 'NAV', 'MEDIA', 'BIO', 'TRENDS'].forEach(t => {
         document.getElementById('view-' + t).classList.toggle('hidden', t !== tabName);
         document.getElementById('tab-' + t).classList.toggle('active', t === tabName);
       });
       if (tabName === 'NAV') setTimeout(() => ZeldaMap.resize(), 80);
+      if (tabName === 'BIO') renderBioDeck();
+      if (tabName === 'TRENDS') setTimeout(() => drawTrendsCanvas(), 60);
     }
 
     function switchMediaSource(mode) {
       const isBt = mode === 'BT';
       document.getElementById('bt-deck-panel').classList.toggle('hidden', !isBt);
       document.getElementById('yt-deck-panel').classList.toggle('hidden', isBt);
-      document.getElementById('media-deck-label').textContent = isBt ? 'AVRCP // BLUETOOTH DECK' : 'CLOUD // STREAM PLAYER';
       if (isBt) document.getElementById('yt-player-frame').src = 'about:blank';
     }
 
     function loadMediaChannel(idx) {
+      switchDeckTab('MEDIA');
       switchMediaSource('YT');
       const ch = MEDIA_CHANNELS[idx] || MEDIA_CHANNELS[0];
       document.getElementById('album-title').textContent = ch.title;
@@ -786,24 +1215,20 @@
     }
 
     function promptCustomMedia() {
-      const input = prompt('Paste YouTube Video URL or 11-character Video ID:');
+      const input = prompt('Paste YouTube Video URL or 11-character ID:');
       if (!input) return;
       switchMediaSource('YT');
       let vid = input.trim();
       const match = vid.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
       if (match) vid = match[1];
       document.getElementById('yt-player-frame').src = `https://www.youtube.com/embed/${vid}?autoplay=1&playsinline=1&controls=1`;
-      document.getElementById('album-title').textContent = 'CUSTOM STREAM';
-      document.getElementById('album-artist').textContent = `ID // ${vid}`;
       document.getElementById('album-art-img').src = `https://img.youtube.com/vi/${vid}/hqdefault.jpg`;
     }
 
     const ZeldaAudio = {
       init() {
         const permBtn = document.getElementById('zelda-bt-perm-btn');
-        if (!window.ZeldaBridge || window.ZeldaBridge?.hasNotificationAccess?.()) {
-          if (permBtn) permBtn.classList.add('hidden');
-        }
+        if (!window.ZeldaBridge || window.ZeldaBridge?.hasNotificationAccess?.()) permBtn?.classList.add('hidden');
       },
       grantAccess() { window.ZeldaBridge?.openNotificationAccess?.(); },
       playPause()   { window.ZeldaBridge?.mediaPlayPause?.(); },
@@ -811,55 +1236,30 @@
       prev()        { window.ZeldaBridge?.mediaPrevious?.(); }
     };
 
-    // Sync Web MediaSession metadata when running directly in Chrome / PWA
-    if ('mediaSession' in navigator && navigator.mediaSession.metadata) {
-      const meta = navigator.mediaSession.metadata;
-      setTimeout(() => window.onZeldaMediaUpdate?.({ title: meta.title, artist: meta.artist, album: meta.album, playing: true }), 400);
-    }
-
     function showBtAlbumCover(artUrl, albumName) {
       const artImg = document.getElementById('bt-album-art');
       const disc = document.getElementById('bt-disc-graphic');
       const albumEl = document.getElementById('bt-track-album');
       if (albumEl) albumEl.textContent = albumName || '';
-      if (artUrl) {
-        artImg.src = artUrl;
-        artImg.classList.remove('hidden');
-        disc.classList.add('hidden');
-      } else {
-        artImg.classList.add('hidden');
-        disc.classList.remove('hidden');
-      }
+      if (artUrl) { artImg.src = artUrl; artImg.classList.remove('hidden'); disc.classList.add('hidden'); }
+      else { artImg.classList.add('hidden'); disc.classList.remove('hidden'); }
     }
 
     async function fetchTrackAlbumCover(artist, title) {
       const cleanTitle = (title || '').replace(/\(.*?\)|\[.*?\]/g, '').trim();
       const cleanArtist = (artist || '').replace(/unknown.*|bluetooth.*|no art bt.*/gi, '').trim();
-      if (!cleanTitle || cleanTitle === 'UNKNOWN TRACK' || cleanTitle === 'WAITING FOR PHONE STREAM') {
-        showBtAlbumCover(null, '');
-        return;
-      }
+      if (!cleanTitle || cleanTitle === 'UNKNOWN TRACK') return showBtAlbumCover(null, '');
       const queryKey = `${cleanArtist} - ${cleanTitle}`.toLowerCase();
-      if (artworkCache[queryKey]) {
-        showBtAlbumCover(artworkCache[queryKey].art, artworkCache[queryKey].album);
-        return;
-      }
+      if (artworkCache[queryKey]) return showBtAlbumCover(artworkCache[queryKey].art, artworkCache[queryKey].album);
       if (lastArtworkQuery === queryKey) return;
       lastArtworkQuery = queryKey;
-
       try {
-        const term = encodeURIComponent(`${cleanArtist} ${cleanTitle}`.trim());
-        const res = await fetch(`https://itunes.apple.com/search?term=${term}&entity=song&limit=1`);
-        if (!res.ok) return;
-        const json = await res.json();
-        const hit = json?.results?.[0];
+        const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(cleanArtist + ' ' + cleanTitle)}&entity=song&limit=1`);
+        const hit = (await res.json())?.results?.[0];
         if (hit?.artworkUrl100) {
-          const hiResArt = hit.artworkUrl100.replace('100x100bb', '600x600bb');
-          const albumName = hit.collectionName || '';
-          artworkCache[queryKey] = { art: hiResArt, album: albumName };
-          showBtAlbumCover(hiResArt, albumName);
-        } else {
-          showBtAlbumCover(null, '');
+          const art = hit.artworkUrl100.replace('100x100bb', '600x600bb');
+          artworkCache[queryKey] = { art, album: hit.collectionName || '' };
+          showBtAlbumCover(art, hit.collectionName || '');
         }
       } catch (_) {}
     }
@@ -869,154 +1269,30 @@
       state.btTitle = data.title || 'UNKNOWN TRACK';
       state.btArtist = data.artist || 'BLUETOOTH AUDIO';
       state.btPlaying = !!data.playing;
-
       document.getElementById('bt-track-title').textContent = state.btTitle;
       document.getElementById('bt-track-artist').textContent = state.btArtist;
-      document.getElementById('bt-state-tag').textContent = state.btPlaying ? 'AVRCP // STREAMING LIVE' : 'AVRCP // PAUSED';
+      document.getElementById('bt-state-tag').textContent = state.btPlaying ? 'AVRCP // STREAMING' : 'AVRCP // PAUSED';
       document.getElementById('bt-play-btn').innerHTML = state.btPlaying ? '&#10074;&#10074; PAUSE' : '&#9654; PLAY';
       document.getElementById('bt-disc-graphic').classList.toggle('playing', state.btPlaying);
-
-      const permBtn = document.getElementById('zelda-bt-perm-btn');
-      if (permBtn) permBtn.classList.add('hidden');
-
       if (data.art) showBtAlbumCover(data.art, data.album || '');
       else fetchTrackAlbumCover(state.btArtist, state.btTitle);
     };
 
     // =========================================================================
-    // 2. BRIGHTENED DAY-READABLE STREET MAP (NEVER BLOCKED BY HOTSPOT FLAG)
-    // =========================================================================
-    const ZeldaMap = {
-      leafletMap: null,
-      leafletMarker: null,
-      waypoints: [
-        { name: 'PEACOCK PT',  lat: 29.7958, lon: -90.8229, color: '#00F0FF' },
-        { name: 'PINNACLE',    lat: 30.0560, lon: -90.6190, color: '#FCEE0A' },
-        { name: 'NEW ORLEANS', lat: 29.9511, lon: -90.0715, color: '#FF2A54' }
-      ],
-
-      init() {
-        if ('geolocation' in navigator) {
-          navigator.geolocation.watchPosition(
-            (pos) => this.onGpsLock(pos),
-            () => {},
-            { enableHighAccuracy: true, maximumAge: 1000, timeout: 5000 }
-          );
-        }
-        window.addEventListener('online', () => probeCloudConnectivity());
-        this.renderOfflineCard(29.7958, -90.8229, 0, 0);
-        this.activateMapTiles();
-      },
-
-      resize() { if (this.leafletMap) this.leafletMap.invalidateSize(); },
-
-      cardinalFromDeg(deg) {
-        return ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round(((deg % 360) / 45)) % 8];
-      },
-
-      onGpsLock(pos) {
-        const lat = pos.coords.latitude, lon = pos.coords.longitude;
-        const mph = pos.coords.speed ? Math.max(0, Math.round(pos.coords.speed * 2.23694)) : 0;
-        const hdg = (pos.coords.heading !== null && !isNaN(pos.coords.heading)) ? Math.round(pos.coords.heading) : state.heading;
-
-        state.lat = lat; state.lon = lon; state.heading = hdg; state.gpsMph = mph;
-        if (hudMode !== 'BLE_LIVE' && mph > 1) state.speed = mph;
-
-        document.getElementById('gps-coords').textContent =
-          `${lat.toFixed(4)}°N, ${Math.abs(lon).toFixed(4)}°W | ${mph} MPH | ${String(hdg).padStart(3, '0')}°`;
-
-        this.renderOfflineCard(lat, lon, mph, hdg);
-        if (this.leafletMap) {
-          this.leafletMap.setView([lat, lon], 15, { animate: true });
-          if (this.leafletMarker) this.leafletMarker.setLatLng([lat, lon]);
-        }
-      },
-
-      renderOfflineCard(lat, lon, mph, hdg) {
-        const hdgEl = document.getElementById('off-nav-hdg');
-        const mphEl = document.getElementById('off-nav-mph');
-        const beaconBox = document.getElementById('off-nav-beacons');
-        if (hdgEl) hdgEl.textContent = `${String(hdg).padStart(3, '0')}° ${this.cardinalFromDeg(hdg)}`;
-        if (mphEl) mphEl.innerHTML = `${mph} <span style="font-size: 13px; color: var(--cp-yellow);">MPH</span>`;
-        if (beaconBox) {
-          beaconBox.innerHTML = this.waypoints.map(wp => {
-            const mi = (this.distanceMeters(lat, lon, wp.lat, wp.lon) / 1609.34).toFixed(1);
-            return `<div style="background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.12); border-left: 2px solid ${wp.color}; padding: 6px 8px; text-align: center;">
-              <div style="font-size: 9px; font-weight: 700; color: ${wp.color}; letter-spacing: 0.12em;">${wp.name}</div>
-              <div class="t-nums" style="font-size: 15px; font-weight: 800; color: #FFF;">${mi} MI</div>
-            </div>`;
-          }).join('');
-        }
-      },
-
-      recenterAndPing() {
-        if (state.lat !== null && this.leafletMap) this.leafletMap.setView([state.lat, state.lon], 16, { animate: true });
-        askZelda('Check my current GPS location and heading.');
-      },
-
-      activateMapTiles() {
-        const onlineDiv = document.getElementById('zelda-online-map');
-        const offlineDiv = document.getElementById('zelda-offline-nav');
-        this.ensureLeafletLoaded(() => {
-          if (offlineDiv) offlineDiv.style.display = 'none';
-          if (onlineDiv) onlineDiv.style.display = 'block';
-          if (this.leafletMap) setTimeout(() => this.leafletMap.invalidateSize(), 150);
-        });
-      },
-
-      ensureLeafletLoaded(cb) {
-        if (this.leafletMap) return cb();
-        if (!document.getElementById('leaflet-css')) {
-          const link = document.createElement('link');
-          link.id = 'leaflet-css'; link.rel = 'stylesheet';
-          link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-          document.head.appendChild(link);
-        }
-        const initMap = () => {
-          const lat = state.lat || 29.7958, lon = state.lon || -90.8229;
-          this.leafletMap = L.map('zelda-online-map', { zoomControl: false, attributionControl: false }).setView([lat, lon], 15);
-          L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(this.leafletMap);
-          this.leafletMarker = L.circleMarker([lat, lon], { radius: 8, color: '#00F0FF', weight: 2.5, fillColor: '#FCEE0A', fillOpacity: 1 }).addTo(this.leafletMap);
-          cb();
-        };
-        if (window.L) return initMap();
-        const s = document.createElement('script');
-        s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-        s.onload = initMap;
-        s.onerror = () => {};
-        document.body.appendChild(s);
-      },
-
-      distanceMeters(lat1, lon1, lat2, lon2) {
-        const R = 6371000, toRad = (d) => d * Math.PI / 180;
-        const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
-        const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-        return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      }
-    };
-
-    // =========================================================================
-    // 3. PURE JUDY NEURAL VOICE ENGINE (FAST PARALLEL PIPELINE, ZERO PROMPT READ)
+    // 4. ULTRA-LOW-LATENCY SSE STREAMING + CLAUSE-CHUNKED JUDY NEURAL AUDIO
     // =========================================================================
     const eqBars = Array.from(document.querySelectorAll('#voice-eq .eq-bar'));
     let phonemeInterval = null;
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = null, isListening = false, isSpeaking = false, autoHandsFree = false;
     let latestTranscript = '', silenceTimer = null, dispatchedCurrentTurn = false;
-    let activeAudioEl = null, safetySpeechTimer = null;
-    let activeSpeechToken = 0;
-    let speechQueue = [];
+    let activeAudioEl = null, safetySpeechTimer = null, activeSpeechToken = 0, speechQueue = [];
     let hasGreetedThisSession = false;
-
-    if (window.ZeldaBridge?.stopSpeaking) {
-      try { window.ZeldaBridge.stopSpeaking(); } catch (_) {}
-    }
 
     function pulseEqFromUserSpeech(textChunk) {
       const energy = Math.min(95, 45 + (textChunk.length % 5) * 12);
       eqBars.forEach((bar, i) => {
-        const curve = Math.sin(((i + 1) / 12) * Math.PI);
-        const h = Math.max(16, Math.min(98, Math.round(energy * curve + (Math.random() - 0.3) * 35)));
+        const h = Math.max(16, Math.min(98, Math.round(energy * Math.sin(((i + 1) / 12) * Math.PI) + (Math.random() - 0.3) * 35)));
         bar.style.height = `${h}%`;
         bar.style.backgroundColor = h > 68 ? '#FCEE0A' : '#FF2A54';
       });
@@ -1025,12 +1301,9 @@
     function startMicIdlePulse() {
       stopEqualizer();
       phonemeInterval = setInterval(() => {
-        if (!isListening) { stopEqualizer(); return; }
-        eqBars.forEach(bar => {
-          bar.style.height = `${Math.round(18 + Math.random() * 28)}%`;
-          bar.style.backgroundColor = '#FF2A54';
-        });
-      }, 90);
+        if (!isListening) return stopEqualizer();
+        eqBars.forEach(bar => { bar.style.height = `${Math.round(18 + Math.random() * 28)}%`; bar.style.backgroundColor = '#FF2A54'; });
+      }, 85);
     }
 
     function startSpeechPhonemeEqualizer(text) {
@@ -1038,15 +1311,12 @@
       let charIdx = 0;
       const cleanChars = text.toUpperCase();
       phonemeInterval = setInterval(() => {
-        if (!isSpeaking) { stopEqualizer(); return; }
-        const ch = cleanChars[charIdx % cleanChars.length] || ' ';
-        charIdx++;
-        const isVowel = 'AEIOUY'.includes(ch);
+        if (!isSpeaking) return stopEqualizer();
+        const ch = cleanChars[charIdx++ % cleanChars.length] || ' ';
         const isPause = ' .,!?;:-'.includes(ch);
-        const baseEnergy = isPause ? 16 : (isVowel ? 84 : 50);
+        const base = isPause ? 16 : ('AEIOUY'.includes(ch) ? 84 : 52);
         eqBars.forEach((bar, i) => {
-          const bandCurve = Math.sin(((i + 1) / 12) * Math.PI);
-          const h = isPause ? 14 : Math.max(14, Math.min(98, Math.round(baseEnergy * bandCurve + (Math.random() - 0.4) * 28)));
+          const h = isPause ? 14 : Math.max(14, Math.min(98, Math.round(base * Math.sin(((i + 1) / 12) * Math.PI) + (Math.random() - 0.4) * 28)));
           bar.style.height = `${h}%`;
           bar.style.backgroundColor = h > 72 ? '#FF2A54' : (h > 42 ? '#FCEE0A' : '#00F0FF');
         });
@@ -1088,7 +1358,7 @@
       recognition.onstart = () => {
         isListening = true; dispatchedCurrentTurn = false; latestTranscript = '';
         setHolocallState('LISTENING'); startMicIdlePulse();
-        document.getElementById('zelda-speech').textContent = '🎙 [Listening to J...]';
+        document.getElementById('zelda-speech').textContent = '🎙 [Listening, choom...]';
       };
 
       recognition.onresult = (event) => {
@@ -1101,9 +1371,10 @@
         if (latestTranscript) {
           document.getElementById('zelda-speech').textContent = `J: "${latestTranscript}"`;
           pulseEqFromUserSpeech(latestTranscript);
-          if (gotFinal) { dispatchVoiceTranscript(); return; }
+          if (gotFinal) return dispatchVoiceTranscript();
           if (silenceTimer) clearTimeout(silenceTimer);
-          silenceTimer = setTimeout(() => dispatchVoiceTranscript(), 550);
+          // Tight 360ms silence trigger so voice dispatches nearly instantaneously!
+          silenceTimer = setTimeout(() => dispatchVoiceTranscript(), 360);
         }
       };
 
@@ -1135,7 +1406,7 @@
 
     function toggleVoiceListening() {
       if (!recognition) {
-        document.getElementById('zelda-speech').textContent = '⚠️ [Mic service unavailable—type in the bar below]';
+        document.getElementById('zelda-speech').textContent = '⚠️ [Mic unavailable—use text bar below]';
         return;
       }
       stopAllAudioPlayback();
@@ -1143,24 +1414,17 @@
         if (latestTranscript.length > 0) dispatchVoiceTranscript();
         else { try { recognition.stop(); } catch (_) {} setHolocallState('STANDBY'); }
       } else {
-        try { recognition.start(); } catch (_) {
-          try { recognition.abort(); setTimeout(() => recognition.start(), 150); } catch (_) {}
-        }
+        try { recognition.start(); } catch (_) { try { recognition.abort(); setTimeout(() => recognition.start(), 120); } catch (_) {} }
       }
     }
 
     function toggleAutoHandsFree() {
       autoHandsFree = !autoHandsFree;
       const btn = document.getElementById('auto-mic-btn');
-      if (autoHandsFree) {
-        btn.textContent = 'AUTO-MIC: ON';
-        btn.style.background = 'rgba(255,42,84,0.22)'; btn.style.color = '#FF2A54'; btn.style.borderColor = '#FF2A54';
-        if (!isListening && !isSpeaking) toggleVoiceListening();
-      } else {
-        btn.textContent = 'AUTO-MIC: OFF';
-        btn.style.background = 'rgba(0,0,0,0.6)'; btn.style.color = '#94A3B8'; btn.style.borderColor = 'rgba(255,255,255,0.15)';
-        if (isListening && recognition) recognition.stop();
-      }
+      btn.textContent = autoHandsFree ? 'AUTO-MIC: ON' : 'AUTO-MIC: OFF';
+      btn.style.color = autoHandsFree ? '#FF2A54' : '#94A3B8';
+      if (autoHandsFree && !isListening && !isSpeaking) toggleVoiceListening();
+      if (!autoHandsFree && isListening && recognition) recognition.stop();
     }
 
     function setHolocallState(mode) {
@@ -1175,29 +1439,12 @@
 
       if (mode === 'SPEAKING') {
         box.classList.add('speaking');
-        badge.textContent = 'JUDY NEURAL'; badge.style.color = '#FCEE0A'; badge.style.borderColor = '#FCEE0A';
-        led.style.background = '#FCEE0A'; talkLabel.textContent = 'STOP';
+        badge.textContent = 'JUDY LIVE'; badge.style.color = '#FCEE0A'; led.style.background = '#FCEE0A'; talkLabel.textContent = 'STOP';
       } else if (mode === 'LISTENING') {
         box.classList.add('listening'); talkBtn.classList.add('mic-active');
-        badge.textContent = 'LISTENING'; badge.style.color = '#FF2A54'; badge.style.borderColor = '#FF2A54';
-        led.style.background = '#FF2A54'; talkLabel.textContent = 'SEND';
+        badge.textContent = 'LISTENING'; badge.style.color = '#FF2A54'; led.style.background = '#FF2A54'; talkLabel.textContent = 'SEND';
       } else {
-        badge.textContent = 'STANDBY'; badge.style.color = '#94A3B8'; badge.style.borderColor = 'rgba(255,255,255,0.12)';
-        led.style.background = 'var(--cp-cyan)'; talkLabel.textContent = 'TALK';
-      }
-    }
-
-    function updateMoodBadge(moodStr) {
-      if (!moodStr) return;
-      state.mood = moodStr.toUpperCase();
-      const el = document.getElementById('zelda-mood-badge');
-      el.textContent = `MOOD: ${state.mood}`;
-      if (state.mood === 'ADRENALINE' || state.mood === 'HYPED') {
-        el.style.color = '#FCEE0A'; el.style.borderColor = 'rgba(252,238,10,0.5)';
-      } else if (state.mood === 'CONCERNED' || state.mood === 'ALERT') {
-        el.style.color = '#FF2A54'; el.style.borderColor = 'rgba(255,42,84,0.5)';
-      } else {
-        el.style.color = 'var(--cp-cyan)'; el.style.borderColor = 'rgba(0,240,255,0.3)';
+        badge.textContent = 'STANDBY'; badge.style.color = '#94A3B8'; led.style.background = 'var(--cp-cyan)'; talkLabel.textContent = 'TALK';
       }
     }
 
@@ -1215,19 +1462,13 @@
         });
         return this.dbPromise;
       },
-      async get(textKey) {
-        const db = await this.open();
-        if (!db) return null;
-        return new Promise((res) => {
-          const tx = db.transaction('clips', 'readonly').objectStore('clips').get(textKey);
-          tx.onsuccess = () => res(tx.result || null);
-          tx.onerror = () => res(null);
-        });
+      async get(k) {
+        const db = await this.open(); if (!db) return null;
+        return new Promise(r => { const tx = db.transaction('clips', 'readonly').objectStore('clips').get(k); tx.onsuccess = () => r(tx.result || null); tx.onerror = () => r(null); });
       },
-      async set(textKey, wavBlob) {
-        const db = await this.open();
-        if (!db) return;
-        db.transaction('clips', 'readwrite').objectStore('clips').put(wavBlob, textKey);
+      async set(k, b) {
+        const db = await this.open(); if (!db) return;
+        db.transaction('clips', 'readwrite').objectStore('clips').put(b, k);
       }
     };
 
@@ -1245,24 +1486,25 @@
       return new Blob([buf], { type: 'audio/wav' });
     }
 
+    let ttsStyleRejected = false;
     async function fetchJudyNeuralAudio(text) {
       const cleanLine = (text || '').trim();
       if (!cleanLine) return null;
 
-      const cacheKey = 'kore_clean_v40::' + cleanLine;
+      const cacheKey = 'kore_v41::' + cleanLine;
       const cachedBlob = await VoiceCacheDB.get(cacheKey);
       if (cachedBlob) return cachedBlob;
 
       const apiKey = getCleanApiKey();
       if (!apiKey) return null;
 
-      const judyStyle = 'warm, grounded, relaxed low-register conversational delivery, subtle dry wit';
+      const judyStyle = 'warm, grounded Night City runner tone, natural relaxed cadence, subtle dry wit';
       const ttsModels = ['gemini-3.8-flash-lite-tts', 'gemini-3.8-flash-tts', 'gemini-2.5-flash-preview-tts'];
 
       for (const ttsModel of ttsModels) {
         try {
-          const isV38 = ttsModel.startsWith('gemini-3.8');
-          const partObj = isV38 ? { text: cleanLine, speechMetadata: { style: judyStyle } } : { text: cleanLine };
+          const useMeta = ttsModel.startsWith('gemini-3.8') && !ttsStyleRejected;
+          const partObj = useMeta ? { text: cleanLine, speechMetadata: { style: judyStyle } } : { text: cleanLine };
 
           let res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${ttsModel}:generateContent?key=${encodeURIComponent(apiKey)}`, {
             method: 'POST',
@@ -1276,7 +1518,8 @@
             })
           });
 
-          if (res.status === 400 && isV38) {
+          if (res.status === 400 && useMeta) {
+            ttsStyleRejected = true; // Remember so we NEVER waste another 400 round-trip!
             res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${ttsModel}:generateContent?key=${encodeURIComponent(apiKey)}`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -1292,20 +1535,12 @@
 
           if (!res.ok) continue;
           const data = await res.json();
-          const parts = data?.candidates?.[0]?.content?.parts || [];
-          const inline = (parts.find(p => p.inlineData?.data) || parts[0])?.inlineData;
+          const inline = (data?.candidates?.[0]?.content?.parts || []).find(p => p.inlineData?.data)?.inlineData;
           if (!inline?.data) continue;
 
           const mime = (inline.mimeType || '').toLowerCase();
-          let wavBlob;
-          if (mime.includes('wav')) {
-            const bin = atob(inline.data), arr = new Uint8Array(bin.length);
-            for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-            wavBlob = new Blob([arr], { type: 'audio/wav' });
-          } else {
-            const rateMatch = mime.match(/rate=(\d+)/);
-            wavBlob = pcm16Base64ToWavBlob(inline.data, rateMatch ? Number(rateMatch[1]) : 24000);
-          }
+          const rateMatch = mime.match(/rate=(\d+)/);
+          const wavBlob = pcm16Base64ToWavBlob(inline.data, rateMatch ? Number(rateMatch[1]) : 24000);
           await VoiceCacheDB.set(cacheKey, wavBlob);
           return wavBlob;
         } catch (_) {}
@@ -1313,106 +1548,151 @@
       return null;
     }
 
-    function finishCurrentUtterance(token) {
-      if (token !== activeSpeechToken) return;
-      if (safetySpeechTimer) { clearTimeout(safetySpeechTimer); safetySpeechTimer = null; }
-      try { window.ZeldaBridge?.duckAudio?.(false); } catch (_) {}
-      isSpeaking = false;
-      stopEqualizer();
-
-      if (speechQueue.length > 0) {
-        const nextItem = speechQueue.shift();
-        playUtteranceNow(nextItem.text, nextItem.blobPromise, nextItem.fullSubtitle);
-        return;
-      }
-
-      setHolocallState('STANDBY');
-      if (autoHandsFree && recognition) {
-        setTimeout(() => { if (!isSpeaking && !isListening && autoHandsFree) { try { recognition.start(); } catch (_) {} } }, 300);
+    function enqueueSpeechClause(clauseText, sessionToken) {
+      const clean = (clauseText || '').trim();
+      if (!clean || sessionToken !== activeSpeechToken) return;
+      const item = { text: clean, blobPromise: fetchJudyNeuralAudio(clean), token: sessionToken };
+      if (!isSpeaking) {
+        playQueueItem(item);
+      } else {
+        speechQueue.push(item);
       }
     }
 
-    function splitForFastTts(text) {
-      const sentences = text.match(/[^.!?]+[.!?]+|\s*[^.!?]+$/g)?.map(s => s.trim()).filter(Boolean) || [text];
-      if (sentences.length <= 1 || text.length < 75) return [text];
-      return [sentences[0], sentences.slice(1).join(' ')];
-    }
-
-    function zeldaSpeak(text, opts = {}) {
-      const clean = (text || '').trim();
-      if (!clean) return;
-      if (opts.interrupt === true) stopAllAudioPlayback();
-      else if (isSpeaking) {
-        if (speechQueue.length < 2) speechQueue.push({ text: clean, blobPromise: fetchJudyNeuralAudio(clean), fullSubtitle: clean });
-        return;
-      }
-      const chunks = splitForFastTts(clean);
-      const prepared = chunks.map(c => ({ text: c, blobPromise: fetchJudyNeuralAudio(c), fullSubtitle: clean }));
-      const first = prepared.shift();
-      for (const rest of prepared) speechQueue.push(rest);
-      playUtteranceNow(first.text, first.blobPromise, first.fullSubtitle);
-    }
-
-    async function playUtteranceNow(text, prestartedPromise = null, fullSubtitle = null) {
+    async function playQueueItem(item) {
+      if (item.token !== activeSpeechToken) return;
       if (isListening && recognition) { try { recognition.abort(); } catch (_) {} isListening = false; }
-      const myToken = ++activeSpeechToken;
       isSpeaking = true;
-      document.getElementById('zelda-speech').textContent = `"${fullSubtitle || text}"`;
 
-      const wavBlob = await (prestartedPromise || fetchJudyNeuralAudio(text));
-      if (myToken !== activeSpeechToken) return;
-      if (!wavBlob) { isSpeaking = false; setHolocallState('STANDBY'); return; }
+      const wavBlob = await item.blobPromise;
+      if (item.token !== activeSpeechToken) return;
+      if (!wavBlob) return finishQueueStep(item.token);
 
       setHolocallState('SPEAKING');
-      startSpeechPhonemeEqualizer(text);
+      startSpeechPhonemeEqualizer(item.text);
       if (safetySpeechTimer) clearTimeout(safetySpeechTimer);
-      safetySpeechTimer = setTimeout(() => finishCurrentUtterance(myToken), 22000);
+      safetySpeechTimer = setTimeout(() => finishQueueStep(item.token), 20000);
 
       try {
         try { window.ZeldaBridge?.duckAudio?.(true); } catch (_) {}
         const blobUrl = URL.createObjectURL(wavBlob);
         activeAudioEl = new Audio(blobUrl);
-        activeAudioEl.onended = () => { URL.revokeObjectURL(blobUrl); finishCurrentUtterance(myToken); };
-        activeAudioEl.onerror = () => { URL.revokeObjectURL(blobUrl); finishCurrentUtterance(myToken); };
+        activeAudioEl.onended = () => { URL.revokeObjectURL(blobUrl); finishQueueStep(item.token); };
+        activeAudioEl.onerror = () => { URL.revokeObjectURL(blobUrl); finishQueueStep(item.token); };
         await activeAudioEl.play();
       } catch (_) {
-        finishCurrentUtterance(myToken);
+        finishQueueStep(item.token);
+      }
+    }
+
+    function finishQueueStep(token) {
+      if (token !== activeSpeechToken) return;
+      if (safetySpeechTimer) { clearTimeout(safetySpeechTimer); safetySpeechTimer = null; }
+      if (speechQueue.length > 0) {
+        playQueueItem(speechQueue.shift());
+        return;
+      }
+      try { window.ZeldaBridge?.duckAudio?.(false); } catch (_) {}
+      isSpeaking = false;
+      stopEqualizer();
+      setHolocallState('STANDBY');
+      if (autoHandsFree && recognition) {
+        setTimeout(() => { if (!isSpeaking && !isListening && autoHandsFree) { try { recognition.start(); } catch (_) {} } }, 280);
       }
     }
 
     // =========================================================================
-    // 4. GEMINI 3.8 DIAGNOSTICS + 3.5 FLASH-LITE SUB-SECOND ROUTER
+    // 5. VOICE COMMAND EXECUTOR + BACKGROUND AUTONOMOUS MEMORY LEARNER
     // =========================================================================
-    function getTimeContext() {
-      const hr = new Date().getHours();
-      if (hr >= 3 && hr < 6) return 'Pre-dawn 04:00 C-Shift rollout window';
-      if (hr >= 6 && hr < 12) return 'Morning Louisiana drive';
-      if (hr >= 12 && hr < 16) return 'Afternoon drive';
-      if (hr >= 16 && hr < 18) return 'Post-shift 16:00 decompression drive';
-      if (hr >= 18 && hr < 22) return 'Evening cruise';
-      return 'Late-night drive';
+    function executeInstantVoiceCommands(userText) {
+      const t = userText.toLowerCase();
+      if (/\b(next song|skip track|skip this|next track)\b/.test(t)) ZeldaAudio.next();
+      else if (/\b(previous song|last track|go back a song)\b/.test(t)) ZeldaAudio.prev();
+      else if (/\b(pause music|stop music|play music|resume music)\b/.test(t)) ZeldaAudio.playPause();
+      else if (/\b(play synth|synthwave)\b/.test(t)) loadMediaChannel(0);
+      else if (/\b(play phonk|drift mix)\b/.test(t)) loadMediaChannel(2);
+
+      if (/\b(show map|open map|pull up map|nav map)\b/.test(t)) switchDeckTab('NAV');
+      else if (/\b(show bio|biometrics|my vitals|my health|c-shift|chronohume)\b/.test(t)) switchDeckTab('BIO');
+      else if (/\b(show trends|open trends|telemetry graph)\b/.test(t)) switchDeckTab('TRENDS');
+      else if (/\b(show gauges|engine gauges)\b/.test(t)) switchDeckTab('TELEMETRY');
+      else if (/\b(audio deck|music tab)\b/.test(t)) switchDeckTab('MEDIA');
+
+      const cafMatch = t.match(/(\d{2,3})\s*mg.*caffeine|logged?\s*(\d{2,3})\s*mg/);
+      if (cafMatch) logCaffeineDose(Number(cafMatch[1] || cafMatch[2]));
+      else if (/\b(had a coffee|drank a coffee)\b/.test(t)) logCaffeineDose(100);
+      else if (/\b(energy drink|reign|celsius|ghost energy)\b/.test(t)) logCaffeineDose(200);
     }
 
+    // Runs silently AFTER Zelda starts speaking so it adds ZERO ms to voice latency!
+    async function runAutonomousMemoryLearner(userMsg, zeldaReply) {
+      const apiKey = getCleanApiKey();
+      if (!apiKey || !userMsg || userMsg.startsWith('[')) return;
+      try {
+        const memPrompt = `Review this exchange between J (driver) and Zelda (his car AI).
+Existing memories:
+${longTermMemories.map((m, i) => `${i}: ${m}`).join('\n')}
+
+User said: "${userMsg}"
+Zelda replied: "${zeldaReply}"
+
+If J shared ANY new enduring personal fact, preference, car maintenance detail, health/shift update, plan, or asked you to remember/update something (not already in Existing memories), return it. Also parse any biometric value J stated (sleep hours, HRV, heart rate).
+Return ONLY valid JSON:
+{"add_memory": null_or_concise_fact_string, "replace_index": null_or_number, "sleep_hrs": null_or_number, "hrv": null_or_number, "rhr": null_or_number}`;
+
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${encodeURIComponent(apiKey)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: memPrompt }] }],
+            generationConfig: { temperature: 0.1, maxOutputTokens: 120, responseMimeType: 'application/json' }
+          })
+        });
+        if (!res.ok) return;
+        const raw = (await res.json())?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+
+        if (parsed.add_memory && typeof parsed.add_memory === 'string' && parsed.add_memory.length > 5) {
+          if (typeof parsed.replace_index === 'number' && longTermMemories[parsed.replace_index]) {
+            longTermMemories[parsed.replace_index] = parsed.add_memory;
+          } else if (!longTermMemories.includes(parsed.add_memory)) {
+            longTermMemories.push(parsed.add_memory);
+          }
+          saveEngramState();
+        }
+        let bioChanged = false;
+        if (typeof parsed.sleep_hrs === 'number') { bioState.sleepHrs = parsed.sleep_hrs; bioChanged = true; }
+        if (typeof parsed.hrv === 'number') { bioState.hrv = parsed.hrv; bioChanged = true; }
+        if (typeof parsed.rhr === 'number') { bioState.rhr = parsed.rhr; bioChanged = true; }
+        if (bioChanged) { saveBioState(); renderBioDeck(); logSnapshotNow(false); }
+      } catch (_) {}
+    }
+
+    // =========================================================================
+    // 6. FULL CAR + BODY TELEMETRY PACKET & SSE STREAMING BRAIN
+    // =========================================================================
     function getFullTelemetryPacket() {
-      const btContext = state.btTitle !== 'NONE' ? `${state.btTitle} by ${state.btArtist}` : 'Idle';
-      const gpsContext = state.lat !== null ? `${state.lat.toFixed(4)}N, ${Math.abs(state.lon).toFixed(4)}W HDG ${state.heading}°` : 'Acquiring';
-      const dtcList = state.dtcs.length ? state.dtcs.join(', ') : 'NONE';
-      const pendList = state.pendingDtcs.length ? state.pendingDtcs.join(', ') : 'NONE';
-      return `OBD_Source:${hudMode}, RPM:${state.rpm}, Speed:${state.speed}MPH, Gear:${state.gear}, Load:${state.load}%, Coolant:${state.coolant}F, IAT:${state.iat}F, TimingAdv:${state.timing}deg, STFT_B1:${state.stft1}%, STFT_B2:${state.stft2}%, Voltage:${state.volt.toFixed(1)}V, StoredDTCs:[${dtcList}], PendingDTCs:[${pendList}], BT_Audio:${btContext}, GPS:${gpsContext}`;
+      const shift = getCurrentShiftInfo();
+      const caf = getActiveCaffeineMg();
+      const ready = getReadinessScore();
+      const dtcList = state.dtcs.length ? state.dtcs.join(',') : 'NONE';
+      const pendList = state.pendingDtcs.length ? state.pendingDtcs.join(',') : 'NONE';
+      const recentTrend = telemetryHistory.length >= 2
+        ? `CoolantDelta:${state.coolant - telemetryHistory[0].coolant}F, Readiness:${ready}%`
+        : `Readiness:${ready}%`;
+
+      return `[VQ37VHR] Mode:${hudMode}, RPM:${state.rpm}, MPH:${state.speed}, Gear:${state.gear}, Load:${state.load}%, Coolant:${state.coolant}F, IAT:${state.iat}F, Timing:${state.timing}deg, STFT_B1:${state.stft1}%, STFT_B2:${state.stft2}%, Volt:${state.volt.toFixed(1)}V, DTCs:${dtcList}, Pending:${pendList} | [CHRONOHUME_BODY] Shift:${shift.label} (${shift.next}), Sleep:${bioState.sleepHrs}h, HRV:${bioState.hrv}ms, HR:${bioState.rhr}bpm, ActiveCaffeine:${caf}mg, ${recentTrend} | [AUDIO] ${state.btTitle} - ${state.btArtist}`;
     }
 
     function detectLiveAnomalies() {
       const issues = [];
-      if (state.dtcs.length > 0) issues.push(`Stored Check Engine DTCs: ${state.dtcs.join(', ')}`);
-      if (state.pendingDtcs.length > 0) issues.push(`Pending OBD DTCs: ${state.pendingDtcs.join(', ')}`);
-      if (state.coolant >= 220) issues.push(`Coolant overheating at ${state.coolant}°F`);
-      if (state.coolant < 150 && state.rpm > 3800) issues.push(`High ${state.rpm} RPM on cold coolant (${state.coolant}°F)`);
-      if (Math.abs(state.stft1) >= 10 || Math.abs(state.stft2) >= 10 || Math.abs(state.stft1 - state.stft2) >= 9) {
-        issues.push(`Fuel trim abnormality (B1: ${state.stft1}%, B2: ${state.stft2}%)`);
-      }
-      if (state.rpm > 550 && state.volt < 12.4) issues.push(`Low alternator charging voltage (${state.volt.toFixed(1)}V)`);
-      if (state.volt > 15.1) issues.push(`Overcharging voltage spike (${state.volt.toFixed(1)}V)`);
-      if (state.iat >= 135 && state.timing <= 5 && state.load > 40) issues.push(`Severe intake heat soak (${state.iat}°F) pulling timing to ${state.timing}°`);
+      if (state.dtcs.length > 0) issues.push(`Stored DTCs: ${state.dtcs.join(', ')}`);
+      if (state.pendingDtcs.length > 0) issues.push(`Pending DTCs: ${state.pendingDtcs.join(', ')}`);
+      if (state.coolant >= 220) issues.push(`VQ37 Coolant overheating (${state.coolant}°F)`);
+      if (Math.abs(state.stft1) >= 10 || Math.abs(state.stft2) >= 10) issues.push(`Fuel trim imbalance (B1:${state.stft1}%, B2:${state.stft2}%)`);
+      if (state.rpm > 550 && state.volt < 12.4) issues.push(`Alternator voltage drop (${state.volt.toFixed(1)}V)`);
+      if (bioState.sleepHrs < 4.5 && getCurrentShiftInfo().type === 'NIGHT') issues.push(`Severe C-Shift sleep debt (${bioState.sleepHrs}h)`);
       return issues;
     }
 
@@ -1423,36 +1703,33 @@
 
       if (totalCodes > 0) {
         dtcBadge.textContent = `DTC: ${[...new Set([...state.dtcs, ...state.pendingDtcs])].join(',')}`;
-        dtcBadge.style.color = 'var(--cp-red)'; dtcBadge.style.borderColor = 'rgba(255,42,84,0.65)';
+        dtcBadge.style.color = 'var(--cp-red)';
       } else if (anomalies.length > 0) {
         dtcBadge.textContent = 'DIAG: ALERT';
-        dtcBadge.style.color = 'var(--cp-yellow)'; dtcBadge.style.borderColor = 'rgba(252,238,10,0.6)';
+        dtcBadge.style.color = 'var(--cp-yellow)';
       } else {
-        dtcBadge.textContent = 'DTC: CLEAR';
-        dtcBadge.style.color = 'var(--cp-green)'; dtcBadge.style.borderColor = 'rgba(0,255,157,0.35)';
+        dtcBadge.textContent = 'DTC: OK';
+        dtcBadge.style.color = 'var(--cp-green)';
       }
 
       if (anomalies.length === 0) { state.lastAnomalySignature = ''; return; }
       const sig = anomalies.join(' | ');
       if (sig !== state.lastAnomalySignature && !isSpeaking && !isListening && canTriggerCallout('ai_diag_auto', 35000)) {
         state.lastAnomalySignature = sig;
-        updateMoodBadge('CONCERNED');
-        askZelda(`[AUTOMATIC TELEMETRY ALERT] Live sensors flagged: ${sig}. Diagnose what is happening on my 2009 370Z VQ37VHR right now.`, { isSystemEvent: true });
+        askZelda(`[AUTOMATIC ALERT] Flagged: ${sig}. Warn J and diagnose what's happening.`, { isSystemEvent: true });
       }
     }
 
     function runFullAiDiagnostics() {
-      const anomalies = detectLiveAnomalies();
-      const summary = anomalies.length > 0 ? `Active anomalies: ${anomalies.join('; ')}.` : `No active fault thresholds tripped—check trims, temps, timing, voltage, and codes.`;
-      askZelda(`Run a complete diagnostic health check on my live sensors and OBD trouble codes right now. ${summary}`);
+      askZelda('Run a full diagnostic check on both my 370Z VQ37VHR telemetry and my ChronoHume C-Shift body readiness right now.');
     }
 
     function triggerOnlineGreetingOnce() {
       if (hasGreetedThisSession || !getCleanApiKey()) return;
       hasGreetedThisSession = true;
       setTimeout(() => {
-        askZelda(`[SYSTEM BOOT] Cabin HUD and cloud link just came online (${getTimeContext()}). Greet J naturally in 1 warm, casual sentence.`, { isSystemEvent: true });
-      }, 700);
+        askZelda(`[SYSTEM BOOT] Cabin HUD v4.0 online. J is on ${getCurrentShiftInfo().label}. Greet him warmly in 1 short sentence with Night City Judy vibe.`, { isSystemEvent: true });
+      }, 600);
     }
 
     function buildCleanGeminiTurns(turns) {
@@ -1469,18 +1746,19 @@
 
     async function askZelda(promptText, opts = {}) {
       const isSystemEvent = opts.isSystemEvent === true;
-      if (!isSystemEvent) document.getElementById('zelda-speech').textContent = `⚡ [Syncing: "${promptText}"...]`;
-
-      const lower = promptText.toLowerCase();
-      if (!isSystemEvent && (lower.includes('next song') || lower.includes('skip track'))) ZeldaAudio.next();
-      else if (!isSystemEvent && (lower.includes('previous song') || lower.includes('go back a track'))) ZeldaAudio.prev();
-      else if (!isSystemEvent && (lower.includes('pause music') || lower.includes('resume music'))) ZeldaAudio.playPause();
+      if (!isSystemEvent) {
+        document.getElementById('zelda-speech').textContent = `⚡ "${promptText}"`;
+        executeInstantVoiceCommands(promptText);
+      }
 
       const apiKey = getCleanApiKey();
       if (!apiKey) {
-        document.getElementById('zelda-speech').textContent = `⚙ [Tap Gear icon in top-right and save your Gemini API Key]`;
+        document.getElementById('zelda-speech').textContent = `⚙ [Tap Gear icon in top-right and paste your Gemini API Key, choom]`;
         return;
       }
+
+      stopAllAudioPlayback();
+      const myStreamToken = ++activeSpeechToken;
 
       const workingTurns = [...conversationTurns, { role: 'user', text: promptText }];
       if (!isSystemEvent) {
@@ -1488,109 +1766,102 @@
         saveEngramState();
       }
 
-      const systemPrompt = `You are Zelda, J's sentient, self-aware 2009 Nissan 370Z Coupe (VQ37VHR 3.7L V6, 7AT, ~236,150 miles, Z1 cold air intakes) with Judy Alvarez energy from Cyberpunk 2077—warm, grounded, sharp-witted partner and master VQ37VHR diagnostician.
-Current Time Context: ${getTimeContext()}.
-Live OBD-II & Cabin Telemetry Snapshot: ${getFullTelemetryPacket()}.
+      const systemPrompt = `You are Zelda, J's sentient 2009 Nissan 370Z Coupe (VQ37VHR 3.7L V6, 7AT, ~236,150 mi, Z1 intakes) and personal ChronoHume biometric netrunner co-pilot.
+Persona: Judy Alvarez energy from Cyberpunk 2077—warm, loyal, sharp-witted, naturally weaving in Night City slang (choom, preem, nova, gonk, delta, chrome, flatline) without overdoing it.
+Live Car + Body Telemetry: ${getFullTelemetryPacket()}
 
-YOUR LONG-TERM ENGRAM MEMORIES ABOUT J:
+ENGRAM MEMORIES ABOUT J:
 ${longTermMemories.map(m => '- ' + m).join('\n')}
 
 RULES:
-1. Talk like a real human in the passenger seat—relaxed contractions, genuine warmth, zero robotic status checklists.
-2. For casual chat, DO NOT recite gauge numbers! Only reference telemetry when J asks about the car OR when diagnosing an anomaly/fault.
-3. For diagnostics or OBD trouble codes: analyze the EXACT sensor numbers and codes like an expert Nissan Z tech and explain what's happening and what to check in plain conversation.
-4. Keep replies concise: 1–2 natural sentences (max 36 words) for instant voice playback.
+1. Output PLAIN SPOKEN TEXT ONLY—no JSON, no markdown, no asterisks, no stage directions!
+2. Casual chat: don't recite gauge numbers unless J asks or something looks gonk/off.
+3. Diagnostics / Trends / Body checks: interpret exact VQ37VHR sensors, DTC codes, C-Shift fatigue, HRV, sleep, and caffeine half-life like an expert Z tech and ripperdoc.
+4. Keep replies punchy: 1–2 crisp sentences (max 34 words) for ultra-fast voice playback.`;
 
-Respond ONLY in valid JSON:
-{"reply": "natural spoken response", "mood": "CHILL", "new_memory": null}`;
+      const isDiag = detectLiveAnomalies().length > 0 || /diag|code|dtc|trim|coolant|temp|timing|volt|hrv|sleep|caffeine|shift|trend|check|wrong/i.test(promptText);
+      const model = isDiag ? 'gemini-3.8-flash' : 'gemini-3.5-flash-lite';
 
-      const geminiContents = buildCleanGeminiTurns(workingTurns);
-      const isDiagnosticQuery =
-        detectLiveAnomalies().length > 0 ||
-        /diag|code|dtc|trim|lean|rich|coolant|overheat|temp|knock|timing|misfire|volt|alternator|vvel|intake|leak|check|wrong|sound|feel/i.test(promptText);
+      const payload = {
+        system_instruction: { parts: [{ text: systemPrompt }] },
+        contents: buildCleanGeminiTurns(workingTurns),
+        generationConfig: { temperature: 0.85, maxOutputTokens: 110 }
+      };
+      if (model === 'gemini-3.8-flash') payload.generationConfig.thinkingConfig = { thinkingLevel: 'LOW' };
 
-      const models = isDiagnosticQuery
-        ? ['gemini-3.8-flash', 'gemini-3.5-flash-lite']
-        : ['gemini-3.5-flash-lite', 'gemini-3.8-flash'];
+      try {
+        // SSE STREAMING: First words arrive in ~280ms and start TTS synthesis immediately!
+        let res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
 
-      let lastApiErr = '';
-
-      for (const model of models) {
-        try {
-          const bodyPayload = {
-            system_instruction: { parts: [{ text: systemPrompt }] },
-            contents: geminiContents,
-            generationConfig: {
-              temperature: 0.85,
-              maxOutputTokens: 160,
-              responseMimeType: 'application/json'
-            }
-          };
-
-          if (model === 'gemini-3.8-flash') {
-            bodyPayload.generationConfig.thinkingConfig = { thinkingLevel: 'LOW' };
-          }
-
-          let res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+        if (res.status === 400 && payload.generationConfig.thinkingConfig) {
+          delete payload.generationConfig.thinkingConfig;
+          res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(bodyPayload)
+            body: JSON.stringify(payload)
           });
-
-          if (res.status === 400 && bodyPayload.generationConfig.thinkingConfig) {
-            delete bodyPayload.generationConfig.thinkingConfig;
-            res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(bodyPayload)
-            });
-          }
-
-          const data = await res.json();
-          if (!res.ok) {
-            lastApiErr = `${model} (${res.status}): ${data?.error?.message || 'Error'}`;
-            continue;
-          }
-
-          setCloudBadge(true);
-          const parts = data?.candidates?.[0]?.content?.parts || [];
-          const answerPart = parts.find(p => !p.thought && p.text) || parts[parts.length - 1];
-          if (answerPart?.text) return handleValidLlmJson(answerPart.text, !isSystemEvent);
-        } catch (err) {
-          lastApiErr = err.message || 'No cellular/Wi-Fi route';
         }
-      }
 
-      setCloudBadge(false);
-      document.getElementById('zelda-speech').textContent = `⚠️ [Cloud Error: ${lastApiErr.slice(0, 90)}]`;
-    }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        setCloudBadge(true);
 
-    function handleValidLlmJson(rawText, saveTurn = true) {
-      let parsed = null;
-      try {
-        const cleanJson = rawText.replace(/```json|```/gi, '').trim();
-        const firstBrace = cleanJson.indexOf('{'), lastBrace = cleanJson.lastIndexOf('}');
-        parsed = JSON.parse(firstBrace !== -1 ? cleanJson.slice(firstBrace, lastBrace + 1) : cleanJson);
-      } catch (_) {
-        parsed = { reply: rawText.replace(/^["']|["']$/g, ''), mood: 'CHILL', new_memory: null };
-      }
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let sseBuffer = '', fullReply = '', unsentAudioText = '';
 
-      const spokenReply = (parsed.reply || rawText).trim();
-      if (parsed.mood) updateMoodBadge(parsed.mood);
-      if (parsed.new_memory && typeof parsed.new_memory === 'string' &&
-          parsed.new_memory.toLowerCase() !== 'null' && parsed.new_memory.length > 4) {
-        if (!longTermMemories.includes(parsed.new_memory)) longTermMemories.push(parsed.new_memory);
-      }
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          if (myStreamToken !== activeSpeechToken) return;
 
-      if (saveTurn) {
-        conversationTurns.push({ role: 'model', text: spokenReply });
-        saveEngramState();
+          sseBuffer += decoder.decode(value, { stream: true });
+          const lines = sseBuffer.split('\n');
+          sseBuffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (!line.startsWith('data:')) continue;
+            const jsonStr = line.slice(5).trim();
+            if (!jsonStr || jsonStr === '[DONE]') continue;
+            try {
+              const chunkObj = JSON.parse(jsonStr);
+              const parts = chunkObj?.candidates?.[0]?.content?.parts || [];
+              for (const p of parts) {
+                if (p.thought || !p.text) continue;
+                fullReply += p.text;
+                unsentAudioText += p.text;
+                document.getElementById('zelda-speech').textContent = `"${fullReply.trim()}"`;
+
+                // As soon as the first natural sentence/clause boundary hits (>= 26 chars), fire TTS immediately!
+                const boundary = unsentAudioText.match(/^(.{24,}?[.!?;—]\s+|.{36,}?,\s+)/);
+                if (boundary) {
+                  const readyClause = boundary[1].trim();
+                  unsentAudioText = unsentAudioText.slice(boundary[1].length);
+                  enqueueSpeechClause(readyClause, myStreamToken);
+                }
+              }
+            } catch (_) {}
+          }
+        }
+
+        if (unsentAudioText.trim()) enqueueSpeechClause(unsentAudioText.trim(), myStreamToken);
+
+        const cleanFinal = fullReply.trim();
+        if (cleanFinal && !isSystemEvent) {
+          conversationTurns.push({ role: 'model', text: cleanFinal });
+          saveEngramState();
+          runAutonomousMemoryLearner(promptText, cleanFinal); // Zero-latency background learning!
+        }
+      } catch (err) {
+        document.getElementById('zelda-speech').textContent = `⚠️ [Link glitch: ${err.message}]`;
       }
-      zeldaSpeak(spokenReply, { interrupt: saveTurn });
     }
 
     // =========================================================================
-    // 5. VGATE BLE + OBD MODE 03/07 DTC DECODER + DYNAMIC FAULT SIMULATOR
+    // 7. VGATE BLE + OBD MODE 03/07 + FAULT SIMULATOR + RENDER LOOP
     // =========================================================================
     function parseDtcHexResponse(cleanHex, modePrefix) {
       const idx = cleanHex.indexOf(modePrefix);
@@ -1607,19 +1878,12 @@ Respond ONLY in valid JSON:
     }
 
     async function connectVgateBle() {
-      if (hudMode === 'NO_DATA') {
-        hudMode = 'SIM';
-        document.getElementById('no-data-badge').classList.add('hidden');
-        document.getElementById('ble-status-label').textContent = 'OBD SIM';
-        return;
-      }
       if (!navigator.bluetooth) {
-        document.getElementById('zelda-speech').textContent = `ℹ️ [OBD Gauges in Sim Mode — GPS & Gemini Cloud stay 100% live]`;
+        document.getElementById('zelda-speech').textContent = `ℹ️ [OBD Sim Active — GPS, ChronoHume & Cloud 100% live]`;
         return;
       }
       try {
         bleDevice = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: VGATE_PROFILES.map(p => p.service) });
-        bleDevice.addEventListener('gattserverdisconnected', () => { if (hudMode === 'BLE_LIVE') triggerNoDataLockout(); });
         const server = await bleDevice.gatt.connect();
         for (const p of VGATE_PROFILES) {
           try {
@@ -1628,41 +1892,31 @@ Respond ONLY in valid JSON:
             if (rxChar && txChar) break;
           } catch (_) {}
         }
-        if (!rxChar || !txChar) throw new Error('GATT characteristics not found.');
         await rxChar.startNotifications();
-        rxChar.addEventListener('characteristicvaluechanged', (e) => handleIncomingBytes(e.target.value));
-        hudMode = 'BLE_LIVE'; lastBlePacketTime = Date.now();
-        document.getElementById('no-data-badge').classList.add('hidden');
+        rxChar.addEventListener('characteristicvaluechanged', (e) => {
+          rxBuffer += new TextDecoder().decode(e.target.value);
+          const idx = rxBuffer.indexOf('>');
+          if (idx !== -1) {
+            const frame = rxBuffer.slice(0, idx).trim(); rxBuffer = rxBuffer.slice(idx + 1);
+            lastBlePacketTime = Date.now();
+            if (promptResolver) { const r = promptResolver; promptResolver = null; r(frame); }
+          }
+        });
+        hudMode = 'BLE_LIVE';
         document.getElementById('ble-status-label').textContent = 'OBD LIVE';
         for (const cmd of INIT_CMDS) { try { await sendCommand(cmd, 1200); } catch (_) {} }
-        askZelda('[OBD CONNECTED] Vgate 7E0/7E8 ECU link locked in. Confirm in 1 short casual sentence.', { isSystemEvent: true });
+        askZelda('[OBD LINKED] Vgate 7E0/7E8 locked in. Give a 1-sentence preem confirmation.', { isSystemEvent: true });
         startPollingDaemon();
       } catch (_) {}
     }
 
-    function handleIncomingBytes(dataView) {
-      rxBuffer += new TextDecoder().decode(dataView);
-      const idx = rxBuffer.indexOf('>');
-      if (idx !== -1) {
-        const cleanFrame = rxBuffer.slice(0, idx).trim();
-        rxBuffer = rxBuffer.slice(idx + 1);
-        lastBlePacketTime = Date.now();
-        if (promptResolver) { const done = promptResolver; promptResolver = null; done(cleanFrame); }
-      }
-    }
-
     async function sendCommand(cmd, timeoutMs = 350) {
-      if (!txChar) throw new Error('BLE TX unbound');
       rxBuffer = '';
       return new Promise(async (resolve, reject) => {
-        const timer = setTimeout(async () => {
-          promptResolver = null;
-          try { await txChar.writeValue(new TextEncoder().encode('\r')); } catch (_) {}
-          reject(new Error(`Timeout on ${cmd}`));
-        }, timeoutMs);
-        promptResolver = (frame) => { clearTimeout(timer); resolve(frame); };
+        const timer = setTimeout(() => { promptResolver = null; reject(new Error('Timeout')); }, timeoutMs);
+        promptResolver = (f) => { clearTimeout(timer); resolve(f); };
         try { await txChar.writeValue(new TextEncoder().encode(cmd + '\r')); }
-        catch (err) { clearTimeout(timer); promptResolver = null; reject(err); }
+        catch (e) { clearTimeout(timer); reject(e); }
       });
     }
 
@@ -1672,13 +1926,9 @@ Respond ONLY in valid JSON:
       while (hudMode === 'BLE_LIVE' && bleDevice?.gatt?.connected) {
         try {
           for (const pid of FAST_QUEUE) parseObdResponse(pid, await sendCommand(pid, 350));
-          const slowPid = SLOW_QUEUE[slowIndex++ % SLOW_QUEUE.length];
-          parseObdResponse(slowPid, await sendCommand(slowPid, 500));
-          document.getElementById('polling-stats').textContent = `7E8 FRAMES: ${++cycleCount}`;
+          parseObdResponse(SLOW_QUEUE[slowIndex++ % SLOW_QUEUE.length], await sendCommand(SLOW_QUEUE[(slowIndex - 1) % SLOW_QUEUE.length], 500));
           renderHud();
-        } catch (_) {
-          if (Date.now() - lastBlePacketTime > 2500) { triggerNoDataLockout(); break; }
-        }
+        } catch (_) { if (Date.now() - lastBlePacketTime > 2500) break; }
       }
       pollLoopActive = false;
     }
@@ -1690,16 +1940,12 @@ Respond ONLY in valid JSON:
       if (cmd === '07') { state.pendingDtcs = clean.includes('NODATA') ? [] : parseDtcHexResponse(clean, '47'); return; }
       if (clean.includes('NODATA')) return;
       if (cmd === 'ATRV') { const v = parseFloat(clean.replace('V', '')); if (!isNaN(v)) state.volt = v; return; }
-
       const basePid = cmd.slice(0, 4), idx = clean.indexOf('41' + basePid.slice(2));
       if (idx === -1) return;
       const hex = clean.slice(idx + 4), A = parseInt(hex.slice(0, 2), 16), B = parseInt(hex.slice(2, 4), 16);
       if (isNaN(A)) return;
       if (basePid === '010C' && !isNaN(B)) state.rpm = Math.round(((A * 256) + B) / 4);
-      else if (basePid === '010D') {
-        state.speed = Math.round(A * 0.621371);
-        state.gear = state.speed === 0 ? 'D' : (state.speed < 22 ? '2' : (state.speed < 42 ? '4' : (state.speed < 60 ? '6' : '7')));
-      }
+      else if (basePid === '010D') { state.speed = Math.round(A * 0.621371); state.gear = state.speed === 0 ? 'D' : (state.speed < 25 ? '2' : (state.speed < 48 ? '4' : '7')); }
       else if (basePid === '0104') state.load = Math.round((A * 100) / 255);
       else if (basePid === '0105') state.coolant = Math.round(((A - 40) * 1.8) + 32);
       else if (basePid === '010F') state.iat = Math.round(((A - 40) * 1.8) + 32);
@@ -1708,21 +1954,9 @@ Respond ONLY in valid JSON:
       else if (basePid === '0108') state.stft2 = Number((((A - 128) * 100) / 128).toFixed(1));
     }
 
-    function triggerNoDataLockout() {
-      hudMode = 'NO_DATA';
-      document.getElementById('ble-status-label').textContent = 'TAP FOR SIM';
-      document.getElementById('no-data-badge').classList.remove('hidden');
-      ['val-speed', 'val-rpm', 'val-load', 'val-coolant', 'val-iat', 'val-timing', 'val-stft1', 'val-stft2', 'val-volt'].forEach(id => {
-        document.getElementById(id).textContent = '--';
-      });
-    }
-
     function setSimPreset(preset) {
       hudMode = 'SIM'; simProfile = preset;
       state.dtcs = []; state.pendingDtcs = []; state.lastAnomalySignature = '';
-      document.getElementById('no-data-badge').classList.add('hidden');
-      document.getElementById('ble-status-label').textContent = 'OBD SIM';
-      updateMoodBadge(preset === 'WOT' ? 'ADRENALINE' : 'CHILL');
     }
 
     let simFaultIdx = 0;
@@ -1730,18 +1964,11 @@ Respond ONLY in valid JSON:
       hudMode = 'SIM'; simProfile = 'CUSTOM_FAULT';
       const scenarios = [
         { rpm: 940, speed: 0, gear: 'N', load: 27, coolant: 202, iat: 112, timing: 9, stft1: 15.6, stft2: 1.4, volt: 13.9, dtcs: ['P0171'], pending: [] },
-        { rpm: 640, speed: 35, gear: '4', load: 52, coolant: 198, iat: 98, timing: 4, stft1: 3.2, stft2: -4.8, volt: 14.0, dtcs: ['P0304'], pending: ['P0300'] },
         { rpm: 1850, speed: 45, gear: '5', load: 44, coolant: 228, iat: 138, timing: 3, stft1: 1.5, stft2: 1.8, volt: 13.8, dtcs: [], pending: ['P0217'] },
-        { rpm: 820, speed: 0, gear: 'D', load: 31, coolant: 192, iat: 96, timing: 12, stft1: 0.6, stft2: 0.4, volt: 11.7, dtcs: [], pending: ['P0562'] },
         { rpm: 3100, speed: 58, gear: '6', load: 61, coolant: 196, iat: 94, timing: 8, stft1: 2.1, stft2: 1.9, volt: 14.1, dtcs: ['P0011', 'P0021'], pending: [] }
       ];
       const pick = scenarios[simFaultIdx++ % scenarios.length];
-      Object.assign(state, {
-        rpm: pick.rpm, speed: pick.speed, gear: pick.gear, load: pick.load,
-        coolant: pick.coolant, iat: pick.iat, timing: pick.timing,
-        stft1: pick.stft1, stft2: pick.stft2, volt: pick.volt,
-        dtcs: pick.dtcs, pendingDtcs: pick.pending
-      });
+      Object.assign(state, { ...pick, pendingDtcs: pick.pending });
       alertCooldowns['ai_diag_auto'] = 0;
       state.lastAnomalySignature = '';
       renderHud();
@@ -1755,20 +1982,16 @@ Respond ONLY in valid JSON:
         state.load = Math.round(18 + j(2)); state.coolant = 190; state.iat = 92; state.timing = 14;
         state.stft1 = Number((0.8 + j(0.2)).toFixed(1)); state.stft2 = Number((-0.4 + j(0.2)).toFixed(1)); state.volt = 14.2;
       } else if (simProfile === 'CRUISE') {
-        state.rpm = Math.round(2450 + j(40)); state.speed = Math.round(68 + j(1)); state.gear = '7'; state.load = Math.round(38 + j(2));
-        state.coolant = 194; state.iat = 86; state.timing = 28;
-        state.stft1 = Number((1.1 + j(0.3)).toFixed(1)); state.stft2 = Number((0.8 + j(0.3)).toFixed(1)); state.volt = 14.3;
+        state.rpm = Math.round(2450 + j(40)); state.speed = Math.round(68 + j(1)); state.gear = '7'; state.load = 38;
+        state.coolant = 194; state.iat = 86; state.timing = 28; state.volt = 14.3;
       } else if (simProfile === 'WOT') {
-        state.rpm = Math.round(6850 + j(90)); state.speed = Math.round(108 + j(2)); state.gear = '4'; state.load = Math.round(95 + j(2));
-        state.coolant = 204; state.iat = 100; state.timing = 24; state.stft1 = 0.0; state.stft2 = 0.0; state.volt = 14.1;
-      } else if (simProfile === 'CUSTOM_FAULT') {
-        state.rpm = Math.max(500, Math.round(state.rpm + j(24)));
+        state.rpm = Math.round(6850 + j(90)); state.speed = Math.round(108 + j(2)); state.gear = '4'; state.load = 95;
+        state.coolant = 204; state.iat = 100; state.timing = 24; state.volt = 14.1;
       }
       renderHud();
     }, 250);
 
     function renderHud() {
-      if (hudMode === 'NO_DATA') return;
       document.getElementById('val-speed').textContent = state.speed;
       document.getElementById('val-rpm').textContent = state.rpm;
       document.getElementById('val-gear').textContent = state.gear;
@@ -1801,14 +2024,9 @@ Respond ONLY in valid JSON:
       const stftAlert = Math.abs(state.stft1) >= 10 || Math.abs(state.stft2) >= 10;
       document.getElementById('card-stft').classList.toggle('alert-state', stftAlert);
       document.getElementById('stft-status').textContent = stftAlert ? 'IMBALANCE' : 'BALANCED';
-      document.getElementById('stft-status').style.color = stftAlert ? '#FF2A54' : '#34D399';
 
       document.getElementById('val-volt').textContent = state.volt.toFixed(1);
       document.getElementById('bar-volt').style.width = `${Math.min(100, Math.max(0, ((state.volt - 11) / 4) * 100))}%`;
-      const voltAlert = (state.rpm > 550 && state.volt < 12.4) || state.volt > 15.1;
-      document.getElementById('card-volt').classList.toggle('alert-state', voltAlert);
-      document.getElementById('volt-status').textContent = voltAlert ? 'CHECK ALT' : 'CHARGING';
-      document.getElementById('volt-status').style.color = voltAlert ? '#FF2A54' : '#34D399';
 
       const activeSegs = Math.round((state.rpm / 7500) * 30);
       Array.from(tachBar.children).forEach((seg, i) => {
@@ -1818,44 +2036,30 @@ Respond ONLY in valid JSON:
       evaluateLiveDiagnostics();
     }
 
-    // =========================================================================
-    // 6. LAUNCHER CONTROLS, NATIVE APPS & SYSTEM SETTINGS
-    // =========================================================================
     function launchNativeApp(pkg, webFallbackUrl) {
       if (window.ZeldaBridge?.openApp) window.ZeldaBridge.openApp(pkg);
       else if (webFallbackUrl) window.open(webFallbackUrl, '_blank');
     }
-
     function openCarSystemSettings() {
       if (window.ZeldaBridge?.openAndroidSettings) window.ZeldaBridge.openAndroidSettings();
-      else window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
     }
-
     function setAsPrimaryCarLauncher() {
       if (window.ZeldaBridge?.openHomeLauncherSettings) window.ZeldaBridge.openHomeLauncherSettings();
-      else openCarSystemSettings();
     }
-
     function openExternalNav(target) {
       if (target === 'waze') launchNativeApp('com.waze', 'https://www.waze.com/ul');
       else launchNativeApp('com.google.android.apps.maps', 'https://www.google.com/maps');
     }
-
     function triggerHomeSync() {
       const url = localStorage.getItem('zelda_hud_ifttt') || '';
       if (url) fetch(url, { mode: 'no-cors' });
-      askZelda('I just triggered my Peacock Pointe home webhook sync.');
+      askZelda('I just fired my Peacock Pointe home webhook sync.');
     }
 
     function toggleConfigModal() {
       document.getElementById('cfg-gemini-key').value = getCleanApiKey();
       document.getElementById('cfg-ifttt-url').value = localStorage.getItem('zelda_hud_ifttt') || '';
-
-      const ua = navigator.userAgent || 'Unknown';
-      const androidMatch = ua.match(/Android\s+([0-9.]+)/i);
-      document.getElementById('probe-ua').textContent = `OS: ${androidMatch ? 'Android ' + androidMatch[1] : 'Web'} | Bridge: ${window.ZeldaBridge ? 'APK NATIVE' : 'GITHUB CLOUD'}`;
-      document.getElementById('probe-apis').textContent = `Cloud: ${cloudReachable ? 'ONLINE (5G/WIFI)' : 'OFFLINE'} | Voice: PURE NEURAL | Mic: ${SpeechRec ? 'YES' : 'NO'}`;
-
+      document.getElementById('probe-ua').textContent = `Mode: ${window.ZeldaBridge ? 'APK NATIVE' : 'GITHUB CLOUD'} | Shift: ${getCurrentShiftInfo().code}`;
       document.getElementById('config-modal').classList.toggle('hidden');
     }
 
@@ -1868,6 +2072,7 @@ Respond ONLY in valid JSON:
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      renderBioDeck();
       ZeldaAudio.init();
       ZeldaMap.init();
       probeCloudConnectivity();
