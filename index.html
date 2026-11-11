@@ -6,7 +6,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#05070B" />
-  <title>PROJECT ZELDA v4.4 // YOUTUBE AI DECK + LIVE VOICE</title>
+  <title>PROJECT ZELDA v4.4.1 // DUAL-KEY YOUTUBE AI DECK</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
@@ -251,7 +251,7 @@
   <!-- ROW 1: HEADER BAR -->
   <header class="cp-box cp-box-yellow flex items-center justify-between" style="padding: 0 10px;">
     <div class="flex items-center" style="gap: 6px;">
-      <span class="font-secondary" style="color: var(--cp-yellow); font-size: 13px; font-weight: 900; letter-spacing: 0.08em;">ZELDA // v4.4</span>
+      <span class="font-secondary" style="color: var(--cp-yellow); font-size: 13px; font-weight: 900; letter-spacing: 0.08em;">ZELDA // v4.4.1</span>
       <span id="net-mode-badge" onclick="probeCloudConnectivity()" class="cp-tag cursor-pointer" style="color: var(--cp-green); border: 1px solid rgba(0,255,157,0.45); padding: 1px 5px;">CLOUD // LIVE</span>
       <span id="shift-pill" onclick="switchDeckTab('BIO')" class="cp-tag cursor-pointer" style="color: var(--cp-cyan); border: 1px solid rgba(0,240,255,0.4); padding: 1px 5px;">C-SHIFT</span>
       <span id="dtc-badge" onclick="runFullAiDiagnostics()" class="cp-tag cursor-pointer" style="color: var(--cp-green); border: 1px solid rgba(0,255,157,0.35); padding: 1px 5px;">DTC: OK</span>
@@ -461,7 +461,6 @@
           </div>
         </div>
 
-        <!-- Bluetooth Deck Panel -->
         <div id="bt-deck-panel" class="flex flex-col justify-between flex-1" style="padding: 8px 0;">
           <div class="flex items-center" style="gap: 12px; flex: 1;">
             <div class="relative shrink-0" style="width: 100px; height: 100px;">
@@ -488,7 +487,6 @@
           </div>
         </div>
 
-        <!-- AI YouTube Search & Smart Anti-Vevo Stream Panel -->
         <div id="yt-deck-panel" class="hidden flex-1" style="padding: 6px 0;">
           <div style="display: grid; grid-template-columns: 108px 1fr; gap: 8px; height: 100%; align-items: center;">
             <div class="relative overflow-hidden shrink-0 flex flex-col justify-between" style="width: 108px; height: 132px; border: 1px solid rgba(0,240,255,0.4); background: #000;">
@@ -619,7 +617,7 @@
       </div>
 
       <p id="zelda-speech" class="flex-1" style="font-size: 13px; font-weight: 600; color: #F1F5F9; line-height: 1.24; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-        "v4.4 armed, choom—ask me to pull up any YouTube video or song, or plot a route anywhere."
+        "v4.4.1 online, choom—dual Gemini + YouTube key slots ready inside Gear settings."
       </p>
     </div>
 
@@ -656,26 +654,29 @@
     </div>
   </div>
 
-  <!-- MODAL 2: CONFIG & OTA SYNC -->
+  <!-- MODAL 2: CONFIG & DUAL API KEY SLOTS -->
   <div id="config-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center" style="background: rgba(0,0,0,0.88); padding: 16px;">
     <div class="cp-box cp-box-yellow w-full" style="max-width: 440px; padding: 16px;">
       <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 8px; margin-bottom: 10px;">
-        <span class="font-secondary" style="font-size: 13px; font-weight: 800; color: var(--cp-yellow);">⚙ KIROSHI OS // v4.4</span>
+        <span class="font-secondary" style="font-size: 13px; font-weight: 800; color: var(--cp-yellow);">⚙ KIROSHI OS // v4.4.1</span>
         <button onclick="toggleConfigModal()" class="cp-btn" style="padding: 2px 8px; color: #94A3B8;">✕</button>
       </div>
 
-      <div style="background: rgba(0,0,0,0.75); border: 1px solid rgba(255,255,255,0.12); padding: 9px; font-size: 11px; font-family: monospace; margin-bottom: 10px;">
-        <div style="color: var(--cp-cyan); font-weight: 700;">RUNTIME DIAGNOSTICS (BUILD v4.4):</div>
+      <div style="background: rgba(0,0,0,0.75); border: 1px solid rgba(255,255,255,0.12); padding: 8px; font-size: 11px; font-family: monospace; margin-bottom: 10px;">
+        <div style="color: var(--cp-cyan); font-weight: 700;">RUNTIME DIAGNOSTICS (BUILD v4.4.1):</div>
         <div id="probe-ua" class="truncate" style="color: #CBD5E1; margin-top: 2px;">OS: probing...</div>
-        <div id="probe-apis" style="color: #CBD5E1; margin-top: 2px;">Modules: YT AI SEARCH + ANTI-VEVO + OSRM + 0-THINK LIVE</div>
+        <div id="probe-apis" style="color: #CBD5E1; margin-top: 2px;">Keys: GEMINI AUTH KEY + YOUTUBE DATA v3 KEY</div>
       </div>
 
       <div style="margin-bottom: 10px;">
-        <label class="block" style="font-weight: 700; color: #CBD5E1; margin-bottom: 4px; font-size: 12px;">Gemini API Key</label>
-        <input id="cfg-gemini-key" type="text" placeholder="AIzaSy..." class="w-full select-text" style="background: #000; border: 1px solid rgba(255,255,255,0.22); padding: 8px; color: #FFF; font-size: 12px; margin-bottom: 8px;" />
+        <label class="block" style="font-weight: 700; color: var(--cp-cyan); margin-bottom: 3px; font-size: 11.5px;">1. Gemini API Key (AI Studio Auth Key)</label>
+        <input id="cfg-gemini-key" type="text" placeholder="AIzaSy... (Gemini Key)" class="w-full select-text" style="background: #000; border: 1px solid rgba(0,240,255,0.3); padding: 7px 8px; color: #FFF; font-size: 12px; margin-bottom: 7px;" />
 
-        <label class="block" style="font-weight: 700; color: #CBD5E1; margin-bottom: 4px; font-size: 12px;">IFTTT Webhook URL (Peacock Pointe)</label>
-        <input id="cfg-ifttt-url" type="text" placeholder="https://maker.ifttt.com/trigger/..." class="w-full select-text" style="background: #000; border: 1px solid rgba(255,255,255,0.22); padding: 8px; color: #FFF; font-size: 12px;" />
+        <label class="block" style="font-weight: 700; color: var(--cp-yellow); margin-bottom: 3px; font-size: 11.5px;">2. YouTube Data API v3 Key (Cloud Console Key)</label>
+        <input id="cfg-yt-key" type="text" placeholder="AIzaSy... (Project Zelda YouTube Key)" class="w-full select-text" style="background: #000; border: 1px solid rgba(252,238,10,0.35); padding: 7px 8px; color: #FFF; font-size: 12px; margin-bottom: 7px;" />
+
+        <label class="block" style="font-weight: 700; color: #CBD5E1; margin-bottom: 3px; font-size: 11.5px;">3. IFTTT Webhook URL (Peacock Pointe)</label>
+        <input id="cfg-ifttt-url" type="text" placeholder="https://maker.ifttt.com/trigger/..." class="w-full select-text" style="background: #000; border: 1px solid rgba(255,255,255,0.22); padding: 7px 8px; color: #FFF; font-size: 12px;" />
       </div>
 
       <div class="two-col-grid" style="margin-bottom: 6px;">
@@ -692,7 +693,7 @@
 
   <script>
     // =========================================================================
-    // 0. CORE STATE + CHRONOHUME 28-DAY C-SHIFT + HEALTH CONNECT HOOKS
+    // 0. CORE STATE + DUAL API KEY HELPERS + CHRONOHUME 28-DAY C-SHIFT
     // =========================================================================
     const VGATE_PROFILES = [
       { service: '000018f0-0000-1000-8000-00805f9b34fb', rx: '00002af0-0000-1000-8000-00805f9b34fb', tx: '00002af1-0000-1000-8000-00805f9b34fb' },
@@ -724,6 +725,14 @@
 
     function saveBioState() {
       localStorage.setItem('zelda_bio_state', JSON.stringify(bioState));
+    }
+
+    function getCleanApiKey() {
+      return (localStorage.getItem('zelda_hud_gemini_key') || localStorage.getItem('zelda_key_gemini') || '').replace(/["'\s]+/g, '');
+    }
+
+    function getCleanYouTubeKey() {
+      return (localStorage.getItem('zelda_hud_yt_key') || '').replace(/["'\s]+/g, '') || getCleanApiKey();
     }
 
     window.onZeldaHealthConnectUpdate = function(hcData) {
@@ -845,10 +854,6 @@
       const nearNightCutoff = shift.type === 'NIGHT' && hr >= 1 && hr < 5 && caf > 85;
       document.getElementById('bio-status-caf').textContent = nearNightCutoff ? '⚠️ HIGH FOR 04:00 RACK-OUT' : (caf > 250 ? 'STIM LOAD ELEVATED' : 'CLEAR FOR SLEEP WINDOW');
       document.getElementById('bio-status-caf').style.color = nearNightCutoff ? '#FF2A54' : (caf > 250 ? '#FCEE0A' : '#34D399');
-    }
-
-    function getCleanApiKey() {
-      return (localStorage.getItem('zelda_hud_gemini_key') || localStorage.getItem('zelda_key_gemini') || '').replace(/["'\s]+/g, '');
     }
 
     function setCloudBadge(isLive) {
@@ -1273,7 +1278,7 @@
     };
 
     // =========================================================================
-    // 3. HYBRID YOUTUBE AI SEARCH + ANTI-VEVO EMBED ENGINE + BLUETOOTH DECK
+    // 3. OFFICIAL YOUTUBE DATA API v3 + ZERO-KEY FALLBACK + BLUETOOTH DECK
     // =========================================================================
     let lastArtworkQuery = '';
     const artworkCache = {};
@@ -1301,7 +1306,6 @@
       mountOrLoadVideo(videoId) {
         state.ytVideoId = videoId;
         if (!window.YT || !window.YT.Player) {
-          // Fallback raw iframe if YT JS API hasn't finished loading yet
           document.getElementById('yt-api-mount').innerHTML =
             `<iframe style="width:100%;height:100%;border:0;" src="https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1&controls=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
           return;
@@ -1318,7 +1322,6 @@
           events: {
             onReady: (e) => { try { e.target.playVideo(); } catch (_) {} },
             onError: (e) => {
-              // Error 101 / 150 = Record label blocked embedded playback! Automatically hop to next playable upload!
               if ([100, 101, 150].includes(e.data) && this.queueIdx + 1 < this.queue.length) {
                 this.nextSearchResult(true);
               }
@@ -1382,13 +1385,13 @@
       async searchVideos(rawQuery) {
         const q = (rawQuery || '').trim();
         if (!q) return [];
-        const apiKey = getCleanApiKey();
+        const ytApiKey = getCleanYouTubeKey();
 
-        // Tier 1: Official YouTube Data API v3 (if enabled on J's Google Cloud key — embeddable=true!)
-        if (apiKey) {
+        // Tier 1: Official YouTube Data API v3 using J's dedicated YouTube key!
+        if (ytApiKey) {
           try {
-            const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=6&q=${encodeURIComponent(q)}&key=${encodeURIComponent(apiKey)}`;
-            const res = await this.fetchWithTimeout(ytUrl, 3200);
+            const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=6&q=${encodeURIComponent(q)}&key=${encodeURIComponent(ytApiKey)}`;
+            const res = await this.fetchWithTimeout(ytUrl, 3400);
             if (res.ok) {
               const data = await res.json();
               const items = (data.items || []).map(it => ({
@@ -1453,13 +1456,8 @@
         return [];
       },
 
-      // De-prioritize strict Vevo uploads on slot #0 so embedded playback starts cleanly on the first try!
       rankEmbedFriendlyFirst(items) {
-        return [...items].sort((a, b) => {
-          const aVevo = /vevo/i.test(a.channel) ? 1 : 0;
-          const bVevo = /vevo/i.test(b.channel) ? 1 : 0;
-          return aVevo - bVevo;
-        });
+        return [...items].sort((a, b) => (/vevo/i.test(a.channel) ? 1 : 0) - (/vevo/i.test(b.channel) ? 1 : 0));
       },
 
       async searchAndPlay(query, launchApp = null) {
@@ -1469,13 +1467,12 @@
 
         const results = await this.searchVideos(query);
         if (!results.length) {
-          // Graceful fallback: open live YouTube search results page if all mirrors were unreachable
           const fallbackUrl = launchApp === 'ytmusic'
             ? `https://music.youtube.com/search?q=${encodeURIComponent(query)}`
             : `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
           if (launchApp) window.open(fallbackUrl, '_blank');
           document.getElementById('media-deck-label').textContent = 'YT // TAP APP ↗ FOR FULL SEARCH';
-          return { ok: false, fallbackSearchUrl: fallbackUrl, note: 'Embed mirrors busy—tap APP or ask to open in YouTube app.' };
+          return { ok: false, fallbackSearchUrl: fallbackUrl, note: 'Add YouTube v3 key in Gear settings or tap APP.' };
         }
 
         this.queue = results;
@@ -1868,7 +1865,7 @@ LIVE INTERACTION & TOOL RULES:
         'models/gemini-3.1-flash-live-preview'
       ],
       candidateIdx: 0,
-      setupAttemptStage: 0, // 0 = fast VAD + 0-thinkingBudget, 1 = fast VAD, 2 = plain setup
+      setupAttemptStage: 0,
       scheduledSources: [],
       nextPlayTime: 0,
       inTranscriptBuf: '',
@@ -1959,7 +1956,6 @@ LIVE INTERACTION & TOOL RULES:
             responseModalities: ['AUDIO'],
             speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } }
           };
-          // Stage 0 locks thinkingBudget: 0 so native audio models never stall thinking before speaking!
           if (this.setupAttemptStage === 0) {
             genCfg.thinkingConfig = { thinkingBudget: 0 };
           }
@@ -2013,7 +2009,7 @@ LIVE INTERACTION & TOOL RULES:
               this.openSocketAttempt(apiKey);
               return;
             }
-            this.disconnect(`⚠️ [Live socket rejected (${ev.code}) — verify API key or use text bar]`);
+            this.disconnect(`⚠️ [Live socket rejected (${ev.code}) — verify Gemini key or use text bar]`);
           } else {
             this.disconnect('⚡ [Holocall closed — tap LIVE CALL to reconnect]');
           }
@@ -2240,7 +2236,6 @@ LIVE INTERACTION & TOOL RULES:
     }
 
     async function checkSilentTextCommands(promptText) {
-      // 1. Silent Text YouTube Search Trigger
       const ytMatch = promptText.match(/(?:pull up|search youtube for|play|watch|put on|find)\s+(.+?)(?:\s+(?:on|in)\s+youtube(\s+music)?)?$/i);
       if (ytMatch && (/\byoutube\b/i.test(promptText) || /^(?:pull up|watch|put on)\b/i.test(promptText))) {
         const cleanQuery = ytMatch[1].replace(/\s+(on|in)\s+youtube(\s+music)?$/i, '').replace(/[?.!]+$/, '').trim();
@@ -2248,7 +2243,6 @@ LIVE INTERACTION & TOOL RULES:
         if (cleanQuery) return await ZeldaYouTube.searchAndPlay(cleanQuery, appMode);
       }
 
-      // 2. Silent Text Route Plotting Trigger
       const routeMatch = promptText.match(/(?:set a route to|set a navigation route to|plot a route to|route me to|directions to|navigate to|take me to|head to)\s+(.+)/i);
       if (routeMatch) {
         let dest = routeMatch[1].replace(/[?.!]+$/, '').trim();
@@ -2649,6 +2643,7 @@ LIVE INTERACTION & TOOL RULES:
 
     function toggleConfigModal() {
       document.getElementById('cfg-gemini-key').value = getCleanApiKey();
+      document.getElementById('cfg-yt-key').value = (localStorage.getItem('zelda_hud_yt_key') || '').trim();
       document.getElementById('cfg-ifttt-url').value = localStorage.getItem('zelda_hud_ifttt') || '';
       document.getElementById('probe-ua').textContent = `Mode: ${window.ZeldaBridge ? 'APK NATIVE' : 'GITHUB CLOUD'} | Shift: ${getCurrentShiftInfo().code}`;
       document.getElementById('config-modal').classList.toggle('hidden');
@@ -2656,6 +2651,7 @@ LIVE INTERACTION & TOOL RULES:
 
     function saveHudConfig() {
       localStorage.setItem('zelda_hud_gemini_key', document.getElementById('cfg-gemini-key').value.trim());
+      localStorage.setItem('zelda_hud_yt_key', document.getElementById('cfg-yt-key').value.trim());
       localStorage.setItem('zelda_hud_ifttt', document.getElementById('cfg-ifttt-url').value.trim());
       toggleConfigModal();
       probeCloudConnectivity();
