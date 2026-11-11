@@ -6,7 +6,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#05070B" />
-  <title>PROJECT ZELDA v4.2 // LIVE WEBSOCKET ENGRAM</title>
+  <title>PROJECT ZELDA v4.3 // NIGHT CITY NAV & LIVE VOICE</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
@@ -91,6 +91,7 @@
     .three-col-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
     .two-col-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
     .four-col-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+    .five-col-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; }
 
     .gear-lock-box {
       position: absolute; left: 50%; top: 50%;
@@ -197,14 +198,30 @@
       z-index: 5;
     }
     .cp-quest-pin {
-      width: 18px; height: 18px;
-      background: #FCEE0A; border: 2px solid #05070B;
-      transform: rotate(45deg); box-shadow: 0 0 12px #FCEE0A;
+      width: 16px; height: 16px;
+      background: rgba(252, 238, 10, 0.85); border: 2px solid #05070B;
+      transform: rotate(45deg); box-shadow: 0 0 10px rgba(252, 238, 10, 0.75);
       display: flex; align-items: center; justify-content: center;
     }
     .cp-quest-pin::after {
       content: '!'; transform: rotate(-45deg);
-      color: #000; font-weight: 900; font-size: 11px; font-family: 'Orbitron', sans-serif;
+      color: #000; font-weight: 900; font-size: 10px; font-family: 'Orbitron', sans-serif;
+    }
+    .cp-dest-pin {
+      width: 24px; height: 24px;
+      background: #FCEE0A; border: 2px solid #FF2A54;
+      transform: rotate(45deg);
+      box-shadow: 0 0 20px #FCEE0A, 0 0 32px #FF2A54;
+      display: flex; align-items: center; justify-content: center;
+      animation: pulseDest 1.4s ease-in-out infinite;
+    }
+    .cp-dest-pin::after {
+      content: '◈'; transform: rotate(-45deg);
+      color: #05070B; font-weight: 900; font-size: 12px;
+    }
+    @keyframes pulseDest {
+      0%, 100% { box-shadow: 0 0 14px #FCEE0A, 0 0 24px #FF2A54; }
+      50% { box-shadow: 0 0 26px #FCEE0A, 0 0 42px #00F0FF; }
     }
     .cp-player-chevron {
       width: 22px; height: 22px; border-radius: 999px;
@@ -233,7 +250,7 @@
   <!-- ROW 1: HEADER BAR -->
   <header class="cp-box cp-box-yellow flex items-center justify-between" style="padding: 0 10px;">
     <div class="flex items-center" style="gap: 6px;">
-      <span class="font-secondary" style="color: var(--cp-yellow); font-size: 13px; font-weight: 900; letter-spacing: 0.08em;">ZELDA // v4.2</span>
+      <span class="font-secondary" style="color: var(--cp-yellow); font-size: 13px; font-weight: 900; letter-spacing: 0.08em;">ZELDA // v4.3</span>
       <span id="net-mode-badge" onclick="probeCloudConnectivity()" class="cp-tag cursor-pointer" style="color: var(--cp-green); border: 1px solid rgba(0,255,157,0.45); padding: 1px 5px;">CLOUD // LIVE</span>
       <span id="shift-pill" onclick="switchDeckTab('BIO')" class="cp-tag cursor-pointer" style="color: var(--cp-cyan); border: 1px solid rgba(0,240,255,0.4); padding: 1px 5px;">C-SHIFT</span>
       <span id="dtc-badge" onclick="runFullAiDiagnostics()" class="cp-tag cursor-pointer" style="color: var(--cp-green); border: 1px solid rgba(0,255,157,0.35); padding: 1px 5px;">DTC: OK</span>
@@ -384,7 +401,7 @@
       </div>
     </div>
 
-    <!-- VIEW 2: IN-GAME CYBERPUNK 2077 3D HOLOGRAPHIC MAP -->
+    <!-- VIEW 2: IN-GAME CYBERPUNK 2077 3D HOLOGRAPHIC MAP + LIVE ROUTE ENGINE -->
     <div id="view-NAV" class="h-full hidden flex flex-col">
       <div class="cp-box cp-box-red flex-1 relative flex flex-col justify-between h-full" style="border-color: rgba(255,42,84,0.45);">
         <div class="flex justify-between items-center z-20" style="background: rgba(12, 6, 10, 0.92); padding: 5px 10px; border-bottom: 1px solid rgba(255, 42, 84, 0.45);">
@@ -399,28 +416,33 @@
           <div id="zelda-gl-map"></div>
           <div class="cp2077-scanlines"></div>
 
-          <div class="absolute z-10 pointer-events-none" style="top: 10px; left: 10px; background: rgba(8, 6, 12, 0.78); border-left: 2px solid var(--cp-red); padding: 5px 8px;">
-            <div style="font-size: 9px; font-weight: 800; color: var(--cp-red); letter-spacing: 0.16em;">FILTER // HOLO-3D</div>
-            <div style="font-size: 10px; font-weight: 700; color: var(--cp-cyan); margin-top: 2px;">✚ 3D STRUCTURES: ON</div>
-            <div style="font-size: 10px; font-weight: 700; color: #FCEE0A;">◈ GIG BEACONS: ACTIVE</div>
+          <!-- Top-Left FILTER & Quick Route Input -->
+          <div class="absolute z-10" style="top: 10px; left: 10px; background: rgba(8, 6, 12, 0.85); border-left: 2px solid var(--cp-red); padding: 5px 8px; max-width: 175px;">
+            <div style="font-size: 9px; font-weight: 800; color: var(--cp-red); letter-spacing: 0.16em;">FILTER // HOLO-NAV</div>
+            <div onclick="ZeldaMap.promptDestination()" class="cursor-pointer" style="font-size: 10px; font-weight: 700; color: var(--cp-yellow); margin-top: 2px;">⊕ SET ROUTE TARGET ▸</div>
+            <div id="nc-filter-route-state" style="font-size: 9.5px; font-weight: 700; color: var(--cp-cyan);">◈ GIG BEACONS: ACTIVE</div>
           </div>
 
-          <div class="absolute z-10 text-right pointer-events-none" style="top: 10px; right: 10px; background: rgba(8, 6, 12, 0.78); border-right: 2px solid var(--cp-yellow); padding: 5px 8px;">
-            <div id="nc-quest-title" style="font-size: 10px; font-weight: 800; color: var(--cp-yellow); letter-spacing: 0.12em;">NIGHT RUN // C-SHIFT</div>
-            <div id="nc-quest-sub" style="font-size: 10px; font-weight: 600; color: #F1F5F9;">Monitor VQ37 & Biometrics</div>
+          <!-- Top-Right ACTIVE GIG / LIVE TURN-BY-TURN TRACKER -->
+          <div class="absolute z-10 text-right pointer-events-none" style="top: 10px; right: 10px; background: rgba(8, 6, 12, 0.86); border-right: 2px solid var(--cp-yellow); padding: 5px 9px; max-width: 215px;">
+            <div id="nc-quest-title" class="truncate" style="font-size: 10px; font-weight: 800; color: var(--cp-yellow); letter-spacing: 0.1em;">NIGHT RUN // C-SHIFT</div>
+            <div id="nc-quest-sub" class="truncate" style="font-size: 10.5px; font-weight: 700; color: #F1F5F9;">Ask Zelda: "Set a route to..."</div>
+            <div id="nc-quest-step" class="truncate" style="font-size: 9.5px; font-weight: 700; color: var(--cp-cyan); margin-top: 1px;"></div>
           </div>
 
+          <!-- Bottom-Right District / Sector Readout -->
           <div class="absolute z-10 text-right pointer-events-none" style="bottom: 10px; right: 10px; background: rgba(8, 6, 12, 0.85); border: 1px solid rgba(255,42,84,0.4); padding: 4px 9px;">
             <div id="nc-map-clock" class="t-nums" style="font-size: 10px; font-weight: 700; color: var(--cp-cyan);">--:--</div>
             <div id="nc-sector-name" class="font-secondary" style="font-size: 11px; font-weight: 800; color: var(--cp-red);">LAFOURCHE // SECTOR</div>
           </div>
         </div>
 
-        <div class="four-col-grid z-20" style="background: rgba(8, 6, 12, 0.95); padding: 7px; border-top: 1px solid rgba(255,42,84,0.4);">
-          <button onclick="ZeldaMap.recenter()" class="cp-btn" style="padding: 5px; font-size: 10px; color: var(--cp-cyan); font-weight: 700;">⊕ LOCK Z34</button>
-          <button onclick="ZeldaMap.toggleTilt()" class="cp-btn" style="padding: 5px; font-size: 10px; color: var(--cp-red); font-weight: 700;">◈ 3D / 2D</button>
-          <button onclick="openExternalNav('maps')" class="cp-btn" style="padding: 5px; font-size: 10px; color: var(--cp-yellow); font-weight: 700;">GOOGLE MAPS</button>
-          <button onclick="openExternalNav('waze')" class="cp-btn" style="padding: 5px; font-size: 10px; color: #FFFFFF; font-weight: 700;">WAZE</button>
+        <div class="five-col-grid z-20" style="background: rgba(8, 6, 12, 0.95); padding: 7px; border-top: 1px solid rgba(255,42,84,0.4);">
+          <button onclick="ZeldaMap.recenter()" class="cp-btn" style="padding: 5px 2px; font-size: 9.5px; color: var(--cp-cyan); font-weight: 700;">⊕ LOCK Z</button>
+          <button onclick="ZeldaMap.toggleTilt()" class="cp-btn" style="padding: 5px 2px; font-size: 9.5px; color: var(--cp-red); font-weight: 700;">◈ 3D/2D</button>
+          <button onclick="ZeldaMap.clearRoute()" class="cp-btn" style="padding: 5px 2px; font-size: 9.5px; color: #94A3B8; font-weight: 700;">✕ CLEAR</button>
+          <button onclick="openExternalNav('maps')" class="cp-btn" style="padding: 5px 2px; font-size: 9.5px; color: var(--cp-yellow); font-weight: 700;">G-MAPS</button>
+          <button onclick="openExternalNav('waze')" class="cp-btn" style="padding: 5px 2px; font-size: 9.5px; color: #FFFFFF; font-weight: 700;">WAZE</button>
         </div>
       </div>
     </div>
@@ -490,7 +512,7 @@
       </div>
     </div>
 
-    <!-- VIEW 4: CHRONOHUME BIOMETRICS & C-SHIFT TELEMETRY (HEALTH CONNECT READY) -->
+    <!-- VIEW 4: CHRONOHUME BIOMETRICS & C-SHIFT TELEMETRY -->
     <div id="view-BIO" class="h-full hidden flex flex-col">
       <div class="cp-box flex-1 flex flex-col justify-between h-full" style="padding: 10px; gap: 7px;">
         <div style="background: rgba(0,0,0,0.75); border: 1px solid rgba(0,240,255,0.3); border-left: 3px solid var(--cp-yellow); padding: 7px 10px;" class="flex justify-between items-center">
@@ -564,14 +586,14 @@
 
   </main>
 
-  <!-- ROW 5: REAL-TIME BIDI WEBSOCKET HOLOCALL & DIAGNOSTICS DECK -->
+  <!-- ROW 5: ZERO-HICCUP AUDIOWORKLET HOLOCALL & DIAGNOSTICS DECK -->
   <section class="cp-box cp-box-red flex flex-col justify-between" style="padding: 9px;">
     <div class="flex items-center justify-between">
       <div class="flex items-center" style="gap: 5px;">
         <span id="voice-led" style="width: 8px; height: 8px; border-radius: 999px; background: var(--cp-cyan); display: inline-block;"></span>
         <span class="font-secondary" style="font-size: 12px; font-weight: 700; color: #FFF;">ZELDA</span>
         <span id="voice-state-badge" style="font-size: 9px; font-weight: 700; padding: 1px 5px; background: rgba(255,255,255,0.06); color: #94A3B8; border: 1px solid rgba(255,255,255,0.12);">STANDBY</span>
-        <span id="live-model-pill" style="font-size: 9px; font-weight: 700; padding: 1px 5px; background: rgba(8,51,68,0.6); color: var(--cp-cyan); border: 1px solid rgba(0,240,255,0.3);">WSS // READY</span>
+        <span id="live-model-pill" style="font-size: 9px; font-weight: 700; padding: 1px 5px; background: rgba(8,51,68,0.6); color: var(--cp-cyan); border: 1px solid rgba(0,240,255,0.3);">3.8 LIVE // READY</span>
       </div>
       <div class="flex items-center" style="gap: 4px;">
         <button onclick="setSimPreset('IDLE')" class="cp-btn" style="padding: 2px 5px; font-size: 9px; font-weight: 700;">IDLE</button>
@@ -590,7 +612,7 @@
       </div>
 
       <p id="zelda-speech" class="flex-1" style="font-size: 13px; font-weight: 600; color: #F1F5F9; line-height: 1.24; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-        "Tap LIVE CALL for zero-lag real-time voice with barge-in, choom—or type silently below."
+        "v4.3 online, choom—tap LIVE CALL and ask me to plot a route anywhere."
       </p>
     </div>
 
@@ -599,7 +621,7 @@
         <span>🎙</span><span id="talk-btn-label">LIVE CALL</span>
       </button>
 
-      <input id="direct-chat-input" type="text" placeholder="Silent text mode (or tap LIVE CALL to talk freely)..."
+      <input id="direct-chat-input" type="text" placeholder="Ask Zelda or say 'Set a route to Big Mike's'..."
         class="select-text"
         style="height: 31px; background: rgba(0,0,0,0.82); border: 1px solid rgba(255,255,255,0.22); padding: 0 10px; font-size: 12px; color: #FFF; outline: none;"
         onkeydown="if(event.key==='Enter'){event.preventDefault(); sendTextToZelda();}" />
@@ -631,14 +653,14 @@
   <div id="config-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center" style="background: rgba(0,0,0,0.88); padding: 16px;">
     <div class="cp-box cp-box-yellow w-full" style="max-width: 440px; padding: 16px;">
       <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 8px; margin-bottom: 10px;">
-        <span class="font-secondary" style="font-size: 13px; font-weight: 800; color: var(--cp-yellow);">⚙ KIROSHI OS // v4.2 LIVE</span>
+        <span class="font-secondary" style="font-size: 13px; font-weight: 800; color: var(--cp-yellow);">⚙ KIROSHI OS // v4.3</span>
         <button onclick="toggleConfigModal()" class="cp-btn" style="padding: 2px 8px; color: #94A3B8;">✕</button>
       </div>
 
       <div style="background: rgba(0,0,0,0.75); border: 1px solid rgba(255,255,255,0.12); padding: 9px; font-size: 11px; font-family: monospace; margin-bottom: 10px;">
-        <div style="color: var(--cp-cyan); font-weight: 700;">RUNTIME DIAGNOSTICS (BUILD v4.2):</div>
+        <div style="color: var(--cp-cyan); font-weight: 700;">RUNTIME DIAGNOSTICS (BUILD v4.3):</div>
         <div id="probe-ua" class="truncate" style="color: #CBD5E1; margin-top: 2px;">OS: probing...</div>
-        <div id="probe-apis" style="color: #CBD5E1; margin-top: 2px;">Voice: NATIVE BIDI WEBSOCKET (16kHz -> 24kHz PCM)</div>
+        <div id="probe-apis" style="color: #CBD5E1; margin-top: 2px;">Audio: OFF-THREAD WORKLET + 95ms JITTER BUFFER + OSRM NAV</div>
       </div>
 
       <div style="margin-bottom: 10px;">
@@ -683,6 +705,7 @@
       dtcs: [], pendingDtcs: [],
       lat: 29.7958, lon: -90.8229, heading: 0,
       btTitle: 'NONE', btArtist: 'NONE', btPlaying: false,
+      activeRoute: null, // { name, lat, lon, distanceMi, durationMin, nextStep }
       lastAnomalySignature: '',
       peaks: { load: 18, coolant: 190, iat: 92, timing: 14 }
     };
@@ -702,12 +725,12 @@
       if (typeof hcData.rhr === 'number') bioState.rhr = Math.round(hcData.rhr);
       if (typeof hcData.steps === 'number') bioState.steps = hcData.steps;
       bioState.source = 'HEALTH CONNECT';
-      saveBioState(); renderBioDeck(); logSnapshotNow(false);
+      saveBioState(); renderBioDeck(); logSnapshotNow();
     };
 
     function syncHealthConnectBridge() {
       if (window.ZeldaBridge?.requestHealthConnectSync) window.ZeldaBridge.requestHealthConnectSync();
-      else document.getElementById('zelda-speech').textContent = `"Health Connect bridge hooks are ready for tomorrow's Android Studio APK build, choom. Tap any card or tell me on Live Call to log vitals tonight."`;
+      else document.getElementById('zelda-speech').textContent = `"Health Connect bridge hooks are armed for tomorrow's APK build, choom. Tap any card or tell me on Live Call to log vitals tonight."`;
     }
 
     const CSHIFT_28 = [
@@ -765,7 +788,7 @@
 
     function logCaffeineDose(mg) {
       bioState.caffeineDoses.push({ mg: Number(mg), ts: Date.now() });
-      saveBioState(); renderBioDeck(); logSnapshotNow(false);
+      saveBioState(); renderBioDeck(); logSnapshotNow();
     }
 
     function clearCaffeineLog() {
@@ -784,7 +807,7 @@
         const v = parseInt(prompt('Resting / Current HR (BPM):', bioState.rhr), 10);
         if (!isNaN(v)) bioState.rhr = Math.max(38, Math.min(190, v));
       }
-      saveBioState(); renderBioDeck(); logSnapshotNow(false);
+      saveBioState(); renderBioDeck(); logSnapshotNow();
     }
 
     function renderBioDeck() {
@@ -795,7 +818,9 @@
       document.getElementById('bio-source-tag').textContent = `CHRONOHUME // ${bioState.source === 'HEALTH CONNECT' ? 'HEALTH CONNECT LIVE' : '28-DAY C-SHIFT ENGINE'}`;
       document.getElementById('bio-shift-headline').textContent = shift.label;
       document.getElementById('bio-shift-next').textContent = `${shift.next} • Readiness: ${ready}%`;
-      document.getElementById('nc-quest-title').textContent = `GIG // ${shift.code}`;
+      if (!state.activeRoute) {
+        document.getElementById('nc-quest-title').textContent = `GIG // ${shift.code}`;
+      }
 
       document.getElementById('bio-val-sleep').textContent = bioState.sleepHrs.toFixed(1);
       document.getElementById('bio-status-sleep').textContent = bioState.sleepHrs < 5.5 ? 'SLEEP DEBT HIGH' : 'RECOVERY NOMINAL';
@@ -859,8 +884,8 @@
     const DEFAULT_MEMORIES = [
       "Driver is J (Jacob), my choom, builder, and partner in Thibodaux, Louisiana.",
       "I am Zelda, a sentient 2009 Nissan 370Z Coupe (VQ37VHR 3.7L V6, 7AT, ~236,150 miles) with Z1 cold air intakes.",
-      "J works rotating 12-hour C-Shift schedules at Pinnacle Polymers as ERT Team Captain (anchored Nov 10, 2026 = Night 1 of 3, followed by 3 Off).",
-      "J wears a Samsung Galaxy Watch Ultra (left arm) and Hume 2.0 band (right arm) synced to Health Connect; married to Heather at Peacock Pointe with cats Shaed & Miku and poodle Vella."
+      "J works rotating 12-hour C-Shift schedules at Pinnacle Polymers in Garyville as ERT Team Captain (anchored Nov 10, 2026 = Night 1 of 3, followed by 3 Off).",
+      "J wears a Samsung Galaxy Watch Ultra and Hume 2.0 band synced to Health Connect; married to Heather at Peacock Pointe with cats Shaed & Miku and poodle Vella."
     ];
 
     let longTermMemories = JSON.parse(localStorage.getItem('zelda_engram_memories') || 'null') || DEFAULT_MEMORIES;
@@ -995,10 +1020,25 @@
     saveEngramState();
 
     // =========================================================================
-    // 2. IN-GAME CYBERPUNK 2077 3D WEBGL VECTOR MAP
+    // 2. IN-GAME CYBERPUNK 2077 3D MAP + LIVE GEOCODER & OSRM ROUTE ENGINE
     // =========================================================================
+    const SAVED_PLACES = [
+      { keys: ['home', 'house', 'peacock', 'peacock pointe', 'thibodaux home'], name: 'PEACOCK POINTE (HOME)', lat: 29.7958, lon: -90.8229 },
+      { keys: ['work', 'plant', 'pinnacle', 'pinnacle polymers', 'garyville'], name: 'PINNACLE POLYMERS', lat: 30.0560, lon: -90.6190 },
+      { keys: ['big mike', "big mike's", 'big mikes', 'smokehouse', 'bbq'], name: "BIG MIKE'S BBQ SMOKEHOUSE", lat: 29.7944, lon: -90.8168 },
+      { keys: ['nicholls', 'nicholls state', 'university'], name: 'NICHOLLS STATE UNIV', lat: 29.7909, lon: -90.8035 },
+      { keys: ['new orleans', 'nola', 'french quarter'], name: 'NEW ORLEANS // SECTOR', lat: 29.9511, lon: -90.0715 },
+      { keys: ['baton rouge'], name: 'BATON ROUGE', lat: 30.4515, lon: -91.1871 },
+      { keys: ['houma'], name: 'HOUMA // SECTOR', lat: 29.5958, lon: -90.7195 }
+    ];
+
     const ZeldaMap = {
-      map: null, playerMarker: null, is3D: true,
+      map: null,
+      mapLoaded: false,
+      playerMarker: null,
+      destMarker: null,
+      pendingRouteGeoJson: null,
+      is3D: true,
       waypoints: [
         { name: 'PEACOCK POINTE', lat: 29.7958, lon: -90.8229 },
         { name: 'PINNACLE C-SHIFT', lat: 30.0560, lon: -90.6190 },
@@ -1059,6 +1099,28 @@
           });
 
           this.map.on('load', () => {
+            this.mapLoaded = true;
+
+            // Add Cyberpunk 2077 Dual-Glow Quest Route Layers (Crimson Halo + Neon Yellow Trail)
+            this.map.addSource('zelda-route', {
+              type: 'geojson',
+              data: this.pendingRouteGeoJson || { type: 'FeatureCollection', features: [] }
+            });
+            this.map.addLayer({
+              id: 'zelda-route-glow',
+              type: 'line',
+              source: 'zelda-route',
+              layout: { 'line-join': 'round', 'line-cap': 'round' },
+              paint: { 'line-color': '#FF2A54', 'line-width': 9, 'line-opacity': 0.42, 'line-blur': 3 }
+            });
+            this.map.addLayer({
+              id: 'zelda-route-core',
+              type: 'line',
+              source: 'zelda-route',
+              layout: { 'line-join': 'round', 'line-cap': 'round' },
+              paint: { 'line-color': '#FCEE0A', 'line-width': 4, 'line-opacity': 0.98 }
+            });
+
             const el = document.createElement('div');
             el.className = 'cp-player-chevron';
             el.innerHTML = '<div class="cp-player-chevron-inner"></div>';
@@ -1071,6 +1133,151 @@
             });
           });
         } catch (_) {}
+      },
+
+      async resolveDestination(queryStr) {
+        const clean = (queryStr || '').trim().toLowerCase().replace(/^(to|the|a)\s+/i, '');
+        if (!clean) return null;
+
+        // 1. Instant 0ms match against saved Louisiana spots
+        for (const preset of SAVED_PLACES) {
+          if (preset.keys.some(k => clean === k || clean.includes(k))) {
+            return { name: preset.name, lat: preset.lat, lon: preset.lon };
+          }
+        }
+
+        // 2. Photon Geocoder biased to J's live GPS coordinates
+        try {
+          const pUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(queryStr)}&lat=${state.lat}&lon=${state.lon}&limit=3`;
+          const pRes = await fetch(pUrl);
+          if (pRes.ok) {
+            const pJson = await pRes.json();
+            const feat = pJson?.features?.[0];
+            if (feat?.geometry?.coordinates) {
+              const [lon, lat] = feat.geometry.coordinates;
+              const props = feat.properties || {};
+              const label = [props.name, props.city || props.county || props.state].filter(Boolean).join(', ') || queryStr.toUpperCase();
+              return { name: label.toUpperCase(), lat, lon };
+            }
+          }
+        } catch (_) {}
+
+        // 3. Fallback: OpenStreetMap Nominatim Search (biased to Louisiana region first, then global)
+        try {
+          const nUrl = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(queryStr + ', Louisiana')}`;
+          let nRes = await fetch(nUrl);
+          let nArr = nRes.ok ? await nRes.json() : [];
+          if (!nArr.length) {
+            nRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(queryStr)}`);
+            nArr = nRes.ok ? await nRes.json() : [];
+          }
+          if (nArr[0]) {
+            const shortName = (nArr[0].display_name || queryStr).split(',').slice(0, 2).join(',').toUpperCase();
+            return { name: shortName, lat: parseFloat(nArr[0].lat), lon: parseFloat(nArr[0].lon) };
+          }
+        } catch (_) {}
+
+        return null;
+      },
+
+      async plotRouteToQuery(destinationQuery, launchExternalApp = null) {
+        switchDeckTab('NAV');
+        document.getElementById('nc-filter-route-state').textContent = '⚡ SCANNING SAT-NET...';
+
+        const target = await this.resolveDestination(destinationQuery);
+        if (!target) {
+          document.getElementById('nc-filter-route-state').textContent = '⚠️ TARGET NOT FOUND';
+          return { ok: false, error: `Could not locate "${destinationQuery}" on Sat-Net.` };
+        }
+
+        try {
+          const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${state.lon},${state.lat};${target.lon},${target.lat}?overview=full&geometries=geojson&steps=true`;
+          const rRes = await fetch(osrmUrl);
+          const rData = await rRes.json();
+          const route = rData?.routes?.[0];
+          if (!route) throw new Error('No road path found');
+
+          const distMi = Number((route.distance / 1609.34).toFixed(1));
+          const durMin = Math.max(1, Math.round(route.duration / 60));
+          const firstStep = route.legs?.[0]?.steps?.[1] || route.legs?.[0]?.steps?.[0];
+          const stepRoad = firstStep?.name ? `onto ${firstStep.name}` : 'ahead';
+          const stepManeuver = firstStep?.maneuver?.modifier ? `${firstStep.maneuver.modifier.toUpperCase()} ${stepRoad}` : `PROCEED ${stepRoad.toUpperCase()}`;
+
+          state.activeRoute = {
+            name: target.name,
+            lat: target.lat,
+            lon: target.lon,
+            distanceMi: distMi,
+            durationMin: durMin,
+            nextStep: stepManeuver
+          };
+
+          const geoFeature = {
+            type: 'FeatureCollection',
+            features: [{ type: 'Feature', geometry: route.geometry, properties: {} }]
+          };
+          this.pendingRouteGeoJson = geoFeature;
+
+          if (this.map && this.mapLoaded) {
+            this.map.getSource('zelda-route')?.setData(geoFeature);
+            if (this.destMarker) this.destMarker.remove();
+            const pin = document.createElement('div');
+            pin.className = 'cp-dest-pin';
+            pin.title = target.name;
+            this.destMarker = new maplibregl.Marker({ element: pin }).setLngLat([target.lon, target.lat]).addTo(this.map);
+
+            const coords = route.geometry.coordinates;
+            const bounds = coords.reduce((b, c) => b.extend(c), new maplibregl.LngLatBounds(coords[0], coords[0]));
+            this.map.fitBounds(bounds, { padding: 48, pitch: 52, duration: 900 });
+          }
+
+          document.getElementById('nc-filter-route-state').textContent = `◈ ROUTE ACTIVE: ${distMi} MI`;
+          document.getElementById('nc-quest-title').textContent = `GIG // ${target.name}`;
+          document.getElementById('nc-quest-sub').textContent = `${distMi} MI • ETA ${durMin} MIN`;
+          document.getElementById('nc-quest-step').textContent = `▸ ${stepManeuver}`;
+
+          if (launchExternalApp) {
+            openExternalNav(launchExternalApp);
+          }
+
+          return {
+            ok: true,
+            destination: target.name,
+            distanceMiles: distMi,
+            etaMinutes: durMin,
+            firstTurn: stepManeuver,
+            launchedExternalApp: launchExternalApp || null
+          };
+        } catch (err) {
+          // Even if OSRM road geometry times out, lock straight-line destination coordinates for Waze/G-Maps!
+          state.activeRoute = { name: target.name, lat: target.lat, lon: target.lon, distanceMi: null, durationMin: null, nextStep: 'DIRECT VECTOR' };
+          document.getElementById('nc-quest-title').textContent = `GIG // ${target.name}`;
+          document.getElementById('nc-quest-sub').textContent = `COORDS LOCKED`;
+          if (launchExternalApp) openExternalNav(launchExternalApp);
+          return { ok: true, destination: target.name, note: 'Coordinates locked on map', launchedExternalApp: launchExternalApp || null };
+        }
+      },
+
+      clearRoute() {
+        state.activeRoute = null;
+        this.pendingRouteGeoJson = null;
+        if (this.destMarker) { this.destMarker.remove(); this.destMarker = null; }
+        if (this.map && this.mapLoaded) {
+          this.map.getSource('zelda-route')?.setData({ type: 'FeatureCollection', features: [] });
+          this.recenter();
+        }
+        document.getElementById('nc-filter-route-state').textContent = '◈ GIG BEACONS: ACTIVE';
+        document.getElementById('nc-quest-title').textContent = `GIG // ${getCurrentShiftInfo().code}`;
+        document.getElementById('nc-quest-sub').textContent = 'Ask Zelda: "Set a route to..."';
+        document.getElementById('nc-quest-step').textContent = '';
+        return { status: 'route_cleared' };
+      },
+
+      promptDestination() {
+        const dest = prompt('Enter destination, business, or preset (Home, Pinnacle, Big Mike\'s, NOLA):');
+        if (dest && dest.trim()) {
+          dispatchSmartPrompt(`Set a navigation route to ${dest.trim()}`);
+        }
       },
 
       resize() { if (this.map) this.map.resize(); },
@@ -1192,22 +1399,24 @@
     };
 
     // =========================================================================
-    // 4. REAL-TIME GEMINI MULTIMODAL LIVE WEBSOCKET ENGINE (BidiGenerateContent)
+    // 4. ZERO-HICCUP AUDIOWORKLET + 95ms JITTER BUFFER GEMINI 3.8 LIVE ENGINE
     // =========================================================================
     const eqBars = Array.from(document.querySelectorAll('#voice-eq .eq-bar'));
-    let phonemeInterval = null;
+    let lastEqDraw = 0;
 
     function pulseEqBars(level, activeColor) {
+      const now = performance.now();
+      if (now - lastEqDraw < 55) return; // Throttle DOM updates so audio thread never stutters
+      lastEqDraw = now;
       const energy = Math.min(98, Math.max(15, level));
       eqBars.forEach((bar, i) => {
-        const h = Math.max(14, Math.min(98, Math.round(energy * Math.sin(((i + 1) / 12) * Math.PI) + (Math.random() - 0.35) * 28)));
+        const h = Math.max(14, Math.min(98, Math.round(energy * Math.sin(((i + 1) / 12) * Math.PI) + (Math.random() - 0.35) * 26)));
         bar.style.height = `${h}%`;
         bar.style.backgroundColor = h > 70 ? '#FCEE0A' : activeColor;
       });
     }
 
     function stopEqualizer() {
-      if (phonemeInterval) { clearInterval(phonemeInterval); phonemeInterval = null; }
       eqBars.forEach(bar => { bar.style.height = '14%'; bar.style.backgroundColor = 'rgba(0, 240, 255, 0.35)'; });
     }
 
@@ -1238,20 +1447,21 @@
 
     function getFullTelemetryPacket() {
       const shift = getCurrentShiftInfo(), caf = getActiveCaffeineMg(), ready = getReadinessScore();
-      const dtcList = state.dtcs.length ? state.dtcs.join(',') : 'NONE';
-      const pendList = state.pendingDtcs.length ? state.pendingDtcs.join(',') : 'NONE';
       return {
         vq37vhr: {
           mode: hudMode, rpm: state.rpm, speedMph: state.speed, gear: state.gear,
           loadPct: state.load, coolantF: state.coolant, iatF: state.iat,
           timingDeg: state.timing, stftBank1Pct: state.stft1, stftBank2Pct: state.stft2,
-          batteryVolts: Number(state.volt.toFixed(1)), storedDtcs: dtcList, pendingDtcs: pendList
+          batteryVolts: Number(state.volt.toFixed(1)),
+          storedDtcs: state.dtcs.length ? state.dtcs.join(',') : 'NONE',
+          pendingDtcs: state.pendingDtcs.length ? state.pendingDtcs.join(',') : 'NONE'
         },
         chronohumeBody: {
           shiftCode: shift.code, shiftWindow: shift.label, nextTransition: shift.next,
           sleepHoursLast24h: bioState.sleepHrs, hrvMs: bioState.hrv, heartRateBpm: bioState.rhr,
           activeCaffeineMg: caf, readinessScorePct: ready, source: bioState.source
         },
+        navigation: state.activeRoute || 'NO_ACTIVE_ROUTE',
         cabinAudio: { track: state.btTitle, artist: state.btArtist, playing: state.btPlaying },
         gpsSector: { lat: state.lat, lon: state.lon, headingDeg: state.heading }
       };
@@ -1266,29 +1476,53 @@ LONG-TERM ENGRAM MEMORIES ABOUT J:
 ${longTermMemories.map(m => '- ' + m).join('\n')}
 
 LIVE INTERACTION & TOOL RULES:
-1. Keep spoken replies conversational, natural, and concise (1–2 sentences) so back-and-forth chat flows effortlessly like a real phone call.
+1. Keep spoken replies conversational, natural, and crisp (1–2 short sentences) so real-time voice dialogue flows fast with zero rambling.
 2. Do NOT recite gauge numbers during casual chat unless J asks about the car/vitals OR something is out of spec.
-3. Whenever J asks how the car, engine, gauges, codes, C-Shift, caffeine, sleep, HRV, or trends look, call get_live_telemetry first so you read up-to-the-second numbers.
-4. Whenever J asks to skip/pause music, open map/gauges/biometrics/trends, or toggle 3D map/night mode, call control_cabin_ui immediately.
-5. Whenever J mentions drinking caffeine or states updated sleep/HRV/HR numbers, call log_biometrics.
-6. Whenever J shares a new personal fact, preference, plan, or car maintenance note worth remembering, call save_engram_memory silently and respond naturally.`;
+3. Whenever J asks to set/plot a route, navigate somewhere, head home, head to work, or go to any place/address, call set_navigation_route immediately! Read back the returned miles and ETA naturally.
+4. If J asks to send the route to Waze or Google Maps (or navigate in Waze/Google Maps), pass launch_app="waze" or "maps" in set_navigation_route, or call launch_external_nav if a route is already active.
+5. Whenever J asks how the car, engine, gauges, codes, C-Shift, caffeine, sleep, HRV, or trends look, call get_live_telemetry first.
+6. Whenever J asks to skip/pause music, switch tabs, clear route, or toggle 3D map/night mode, call control_cabin_ui.
+7. Whenever J logs caffeine or states sleep/HRV/HR numbers, call log_biometrics. When J shares a new personal fact or car note, call save_engram_memory.`;
     }
 
     const ZELDA_LIVE_TOOLS = [{
       functionDeclarations: [
         {
+          name: 'set_navigation_route',
+          description: 'Plots a live driving route on Zelda\'s 3D Night City map to any destination, business, city, address, or preset (Home/Peacock Pointe, Work/Pinnacle, Big Mike\'s, Nicholls, New Orleans), and optionally launches Waze or Google Maps.',
+          parameters: {
+            type: 'OBJECT',
+            properties: {
+              destination: { type: 'STRING', description: 'Place name, business, city, street address, or preset like Home or Work' },
+              launch_app: { type: 'STRING', description: 'Optional: pass "waze" or "maps" ONLY if J explicitly asked to open Waze or Google Maps' }
+            },
+            required: ['destination']
+          }
+        },
+        {
+          name: 'launch_external_nav',
+          description: 'Hands off the currently active route (or opens navigation) directly in Waze or Google Maps.',
+          parameters: {
+            type: 'OBJECT',
+            properties: {
+              app: { type: 'STRING', description: '"waze" or "maps"' }
+            },
+            required: ['app']
+          }
+        },
+        {
           name: 'get_live_telemetry',
-          description: 'Reads live 2009 370Z VQ37VHR OBD-II gauges, trouble codes, ChronoHume C-Shift status, HRV, sleep, active caffeine, and recent trend deltas.'
+          description: 'Reads live 2009 370Z VQ37VHR OBD-II gauges, trouble codes, active navigation route, ChronoHume C-Shift status, HRV, sleep, and active caffeine.'
         },
         {
           name: 'control_cabin_ui',
-          description: 'Controls Zelda HUD tabs, Bluetooth music playback, streaming radio channels, 3D Night City map tilt, or night mode.',
+          description: 'Controls Zelda HUD tabs, Bluetooth music playback, radio channels, clearing routes, 3D map tilt, or night mode.',
           parameters: {
             type: 'OBJECT',
             properties: {
               action: {
                 type: 'STRING',
-                description: 'One of: TAB_VQ, TAB_MAP, TAB_AUDIO, TAB_BODY, TAB_TRENDS, MEDIA_NEXT, MEDIA_PREV, MEDIA_PLAY_PAUSE, STREAM_SYNTH, STREAM_PHONK, TOGGLE_3D_MAP, TOGGLE_NIGHT_MODE'
+                description: 'One of: TAB_VQ, TAB_MAP, TAB_AUDIO, TAB_BODY, TAB_TRENDS, MEDIA_NEXT, MEDIA_PREV, MEDIA_PLAY_PAUSE, STREAM_SYNTH, STREAM_PHONK, CLEAR_ROUTE, TOGGLE_3D_MAP, TOGGLE_NIGHT_MODE'
               }
             },
             required: ['action']
@@ -1321,10 +1555,19 @@ LIVE INTERACTION & TOOL RULES:
       ]
     }];
 
-    function executeLiveToolCall(fc) {
+    async function executeLiveToolCallAsync(fc) {
       const name = fc.name;
       const args = fc.args || {};
 
+      if (name === 'set_navigation_route') {
+        const app = args.launch_app ? args.launch_app.toLowerCase() : null;
+        return await ZeldaMap.plotRouteToQuery(args.destination || '', app);
+      }
+      if (name === 'launch_external_nav') {
+        const targetApp = (args.app || '').toLowerCase().includes('waze') ? 'waze' : 'maps';
+        openExternalNav(targetApp);
+        return { status: 'launched', app: targetApp, destination: state.activeRoute?.name || 'map_view' };
+      }
       if (name === 'get_live_telemetry') {
         return getFullTelemetryPacket();
       }
@@ -1340,6 +1583,7 @@ LIVE INTERACTION & TOOL RULES:
         else if (a === 'MEDIA_PLAY_PAUSE') ZeldaAudio.playPause();
         else if (a === 'STREAM_SYNTH') loadMediaChannel(0);
         else if (a === 'STREAM_PHONK') loadMediaChannel(2);
+        else if (a === 'CLEAR_ROUTE') ZeldaMap.clearRoute();
         else if (a === 'TOGGLE_3D_MAP') ZeldaMap.toggleTilt();
         else if (a === 'TOGGLE_NIGHT_MODE') document.body.classList.toggle('night-run');
         return { status: 'executed', action: a };
@@ -1363,54 +1607,68 @@ LIVE INTERACTION & TOOL RULES:
       return { status: 'unknown_tool' };
     }
 
+    // Off-Main-Thread AudioWorklet Processor Code (20ms / 320-sample 16kHz frames = zero UI crackles!)
+    const WORKLET_CODE = `
+      class ZeldaMicProcessor extends AudioWorkletProcessor {
+        constructor() {
+          super();
+          this.buf = new Int16Array(320); // Exact 20ms @ 16kHz for fastest VAD turn detection
+          this.idx = 0;
+        }
+        process(inputs) {
+          const ch = inputs[0]?.[0];
+          if (!ch) return true;
+          const ratio = sampleRate / 16000;
+          let sumSq = 0;
+          const outSamples = Math.floor(ch.length / ratio);
+          for (let i = 0; i < outSamples; i++) {
+            const s = Math.max(-1, Math.min(1, ch[Math.floor(i * ratio)]));
+            sumSq += s * s;
+            this.buf[this.idx++] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+            if (this.idx >= 320) {
+              const copy = this.buf.slice(0);
+              this.port.postMessage({ pcmBuffer: copy.buffer, rms: Math.sqrt(sumSq / Math.max(1, outSamples)) }, [copy.buffer]);
+              this.idx = 0;
+              sumSq = 0;
+            }
+          }
+          return true;
+        }
+      }
+      registerProcessor('zelda-mic-worklet', ZeldaMicProcessor);
+    `;
+
+    function uint8ToBase64Fast(bytes) {
+      let binary = '';
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+      }
+      return btoa(binary);
+    }
+
     const ZeldaLiveWS = {
       ws: null,
       audioCtx: null,
+      outGain: null,
+      workletReady: false,
       micStream: null,
-      processor: null,
+      workletNode: null,
       sourceNode: null,
       active: false,
       setupReady: false,
-      candidateQueue: [],
+      candidateQueue: [
+        'models/gemini-3.8-live',
+        'models/gemini-2.5-flash-native-audio-preview-12-2025',
+        'models/gemini-live-2.5-flash-native-audio',
+        'models/gemini-3.1-flash-live-preview'
+      ],
       candidateIdx: 0,
-      useTranscriptions: true,
+      setupAttemptStage: 0, // 0 = full fast VAD + transcriptions, 1 = standard setup without custom VAD
       scheduledSources: [],
       nextPlayTime: 0,
       inTranscriptBuf: '',
       outTranscriptBuf: '',
-
-      async discoverLiveModels(apiKey) {
-        const defaults = [
-          'models/gemini-3.8-live',
-          'models/gemini-2.5-flash-native-audio-preview-12-2025',
-          'models/gemini-2.5-flash-live-001',
-          'models/gemini-2.0-flash-live-001'
-        ];
-        try {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
-          if (!res.ok) return defaults;
-          const data = await res.json();
-          const bidi = (data.models || [])
-            .filter(m => (m.supportedGenerationMethods || []).includes('bidiGenerateContent'))
-            .map(m => m.name);
-
-          if (!bidi.length) return defaults;
-
-          // Prioritize newest 3.8 Live / Native Audio models first
-          const score = (n) => {
-            if (n.includes('3.8') && n.includes('live')) return 100;
-            if (n.includes('3.8')) return 90;
-            if (n.includes('3.5') && n.includes('live')) return 85;
-            if (n.includes('native-audio')) return 80;
-            if (n.includes('2.5') && n.includes('live')) return 70;
-            return 50;
-          };
-          bidi.sort((a, b) => score(b) - score(a));
-          return bidi;
-        } catch (_) {
-          return defaults;
-        }
-      },
 
       async toggle() {
         if (this.active) {
@@ -1424,13 +1682,24 @@ LIVE INTERACTION & TOOL RULES:
         }
 
         stopAllTextAudio();
-        document.getElementById('zelda-speech').textContent = '⚡ [Opening direct neural WebSocket + cabin mic...]';
+        document.getElementById('zelda-speech').textContent = '⚡ [Locking 3.8 Live neural socket + off-thread mic...]';
 
-        try {
+                try {
           if (!this.audioCtx || this.audioCtx.state === 'closed') {
-            this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            this.audioCtx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
+            this.outGain = this.audioCtx.createGain();
+            this.outGain.gain.value = 1.0;
+            this.outGain.connect(this.audioCtx.destination);
+            this.workletReady = false;
           }
           if (this.audioCtx.state === 'suspended') await this.audioCtx.resume();
+
+          if (!this.workletReady && this.audioCtx.audioWorklet) {
+            const blobUrl = URL.createObjectURL(new Blob([WORKLET_CODE], { type: 'application/javascript' }));
+            await this.audioCtx.audioWorklet.addModule(blobUrl);
+            URL.revokeObjectURL(blobUrl);
+            this.workletReady = true;
+          }
 
           this.micStream = await navigator.mediaDevices.getUserMedia({
             audio: {
@@ -1441,22 +1710,46 @@ LIVE INTERACTION & TOOL RULES:
             }
           });
         } catch (err) {
-          document.getElementById('zelda-speech').textContent = `⚠️ [Mic permission blocked (${err.message}) — allow Mic in browser/app settings]`;
+          document.getElementById('zelda-speech').textContent = `⚠️ [Mic blocked (${err.message}) — allow Mic permission in browser/app settings]`;
           return;
         }
 
         this.active = true;
-        this.useTranscriptions = true;
-        this.candidateQueue = await this.discoverLiveModels(apiKey);
+        this.toolRunning = false;
         this.candidateIdx = 0;
+        this.setupAttemptStage = 0;
+        await this.refreshLiveModelOrder(apiKey);
         this.openSocketAttempt(apiKey);
+      },
+
+      async refreshLiveModelOrder(apiKey) {
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
+          if (!res.ok) return;
+          const data = await res.json();
+          const bidi = (data.models || [])
+            .filter(m => (m.supportedGenerationMethods || []).includes('bidiGenerateContent'))
+            .map(m => m.name);
+          if (!bidi.length) return;
+          const score = (n) => {
+            if (n.includes('3.8') && n.includes('live') && !n.includes('extended')) return 100;
+            if (n.includes('3.8')) return 92;
+            if (n.includes('3.5') && n.includes('live')) return 88;
+            if (n.includes('3.1') && n.includes('live')) return 84;
+            if (n.includes('native-audio')) return 80;
+            if (n.includes('2.5') && n.includes('live')) return 70;
+            return 50;
+          };
+          bidi.sort((a, b) => score(b) - score(a));
+          this.candidateQueue = [...new Set([...bidi, ...this.candidateQueue])];
+        } catch (_) {}
       },
 
       openSocketAttempt(apiKey) {
         if (!this.active) return;
         const modelName = this.candidateQueue[this.candidateIdx] || 'models/gemini-3.8-live';
-        const shortName = modelName.replace('models/', '');
-        document.getElementById('live-model-pill').textContent = `WSS // ${shortName.slice(0, 15).toUpperCase()}`;
+        document.getElementById('live-model-pill').textContent =
+          `${modelName.replace('models/gemini-', '').slice(0, 14).toUpperCase()}`;
 
         const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${encodeURIComponent(apiKey)}`;
         this.setupReady = false;
@@ -1476,18 +1769,29 @@ LIVE INTERACTION & TOOL RULES:
               tools: ZELDA_LIVE_TOOLS
             }
           };
-          if (this.useTranscriptions) {
+
+          // Stage 0: Ultra-responsive 300ms VAD silence detection + live subtitle transcriptions
+          if (this.setupAttemptStage === 0) {
+            setupPayload.setup.realtimeInputConfig = {
+              automaticActivityDetection: {
+                disabled: false,
+                startOfSpeechSensitivity: 'START_SENSITIVITY_HIGH',
+                endOfSpeechSensitivity: 'END_SENSITIVITY_HIGH',
+                prefixPaddingMs: 100,
+                silenceDurationMs: 300
+              }
+            };
             setupPayload.setup.inputAudioTranscription = {};
             setupPayload.setup.outputAudioTranscription = {};
           }
+
           this.ws.send(JSON.stringify(setupPayload));
         };
 
         this.ws.onmessage = async (event) => {
           try {
             const rawText = event.data instanceof Blob ? await event.data.text() : event.data;
-            const msg = JSON.parse(rawText);
-            this.handleServerFrame(msg);
+            await this.handleServerFrame(JSON.parse(rawText));
           } catch (_) {}
         };
 
@@ -1495,46 +1799,50 @@ LIVE INTERACTION & TOOL RULES:
 
         this.ws.onclose = (ev) => {
           if (!this.active) return;
-          // If setup failed before setupComplete, automatically step through fallback config/models!
           if (!this.setupReady) {
-            if (this.useTranscriptions) {
-              this.useTranscriptions = false;
+            if (this.setupAttemptStage === 0) {
+              this.setupAttemptStage = 1;
               this.openSocketAttempt(apiKey);
               return;
             }
             if (this.candidateIdx + 1 < this.candidateQueue.length) {
               this.candidateIdx++;
-              this.useTranscriptions = true;
+              this.setupAttemptStage = 0;
               this.openSocketAttempt(apiKey);
               return;
             }
-            this.disconnect(`⚠️ [Live WebSocket rejected (${ev.code}) — check API key or use text bar]`);
+            this.disconnect(`⚠️ [Live socket rejected (${ev.code}) — verify API key or use text bar]`);
           } else {
-            this.disconnect('⚡ [Holocall link closed — tap LIVE CALL to reconnect]');
+            this.disconnect('⚡ [Holocall closed — tap LIVE CALL to reconnect]');
           }
         };
       },
 
-      handleServerFrame(msg) {
-        // 1. Handshake complete -> Start streaming 16kHz mic PCM!
+      async handleServerFrame(msg) {
+        // 1. Handshake ready -> engage off-thread AudioWorklet mic stream
         if (msg.setupComplete !== undefined) {
           this.setupReady = true;
           setCloudBadge(true);
           setHolocallState('LIVE_OPEN');
-          this.startMicPcmPump();
-          document.getElementById('zelda-speech').textContent = '🟢 [Holocall Live — talk naturally anytime, interrupt freely!]';
+          this.startMicAudioPump();
+          document.getElementById('zelda-speech').textContent = '🟢 [Holocall Live — talk freely or ask me to set a route anywhere, choom!]';
           return;
         }
 
-        // 2. Live Tool Call execution -> Return toolResponse immediately over WebSocket!
+        // 2. Async Tool Execution (mutes mic momentarily so road noise never interrupts geocoding/OSRM)
         if (msg.toolCall?.functionCalls) {
-          const functionResponses = msg.toolCall.functionCalls.map(fc => ({
-            id: fc.id,
-            name: fc.name,
-            response: { result: executeLiveToolCall(fc) }
-          }));
-          if (this.ws?.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify({ toolResponse: { functionResponses } }));
+          this.toolRunning = true;
+          try {
+            const functionResponses = [];
+            for (const fc of msg.toolCall.functionCalls) {
+              const resObj = await executeLiveToolCallAsync(fc);
+              functionResponses.push({ id: fc.id, name: fc.name, response: { result: resObj } });
+            }
+            if (this.ws?.readyState === WebSocket.OPEN) {
+              this.ws.send(JSON.stringify({ toolResponse: { functionResponses } }));
+            }
+          } finally {
+            this.toolRunning = false;
           }
           return;
         }
@@ -1542,7 +1850,7 @@ LIVE INTERACTION & TOOL RULES:
         const sc = msg.serverContent;
         if (!sc) return;
 
-        // 3. Instant Barge-In! User spoke while Zelda was talking -> flush audio immediately!
+        // 3. Natural Barge-In: flush scheduled audio instantly when J speaks over Zelda
         if (sc.interrupted) {
           this.flushPlaybackBuffer();
           this.outTranscriptBuf = '';
@@ -1550,13 +1858,12 @@ LIVE INTERACTION & TOOL RULES:
           return;
         }
 
-        // 4. Live User Input Subtitle Transcription
+        // 4. Live Subtitles
         if (sc.inputTranscription?.text) {
           this.inTranscriptBuf += sc.inputTranscription.text;
           document.getElementById('zelda-speech').textContent = `J: "${this.inTranscriptBuf.trim()}"`;
         }
 
-        // 5. Live Zelda Output Subtitle Transcription
         if (sc.outputTranscription?.text) {
           if (this.inTranscriptBuf.trim()) {
             conversationTurns.push({ role: 'user', text: this.inTranscriptBuf.trim() });
@@ -1566,7 +1873,7 @@ LIVE INTERACTION & TOOL RULES:
           document.getElementById('zelda-speech').textContent = `"${this.outTranscriptBuf.trim()}"`;
         }
 
-        // 6. Streamed 24kHz Native Audio Chunks -> Schedule gaplessly on Web Audio!
+        // 5. Gapless 24kHz PCM Playback with 95ms Jitter Cushion
         const parts = sc.modelTurn?.parts || [];
         for (const p of parts) {
           if (p.inlineData?.data && (p.inlineData.mimeType || '').includes('audio/pcm')) {
@@ -1584,55 +1891,51 @@ LIVE INTERACTION & TOOL RULES:
         }
       },
 
-      startMicPcmPump() {
+      sendRawPcmFrame(pcmArrayBuffer, rms) {
+        if (!this.active || !this.setupReady || this.toolRunning || this.ws?.readyState !== WebSocket.OPEN) return;
+        if (this.scheduledSources.length === 0) {
+          pulseEqBars(rms > 0.014 ? Math.min(95, 24 + rms * 420) : 16, '#00FF9D');
+        }
+        const b64 = uint8ToBase64Fast(new Uint8Array(pcmArrayBuffer));
+        this.ws.send(JSON.stringify({
+          realtimeInput: {
+            audio: { data: b64, mimeType: 'audio/pcm;rate=16000' }
+          }
+        }));
+      },
+
+      startMicAudioPump() {
         if (!this.audioCtx || !this.micStream) return;
         this.cleanupMicNodes();
-
         this.sourceNode = this.audioCtx.createMediaStreamSource(this.micStream);
-        this.processor = this.audioCtx.createScriptProcessor(2048, 1, 1);
-        const nativeRate = this.audioCtx.sampleRate;
 
-        this.processor.onaudioprocess = (e) => {
-          if (!this.active || !this.setupReady || this.ws?.readyState !== WebSocket.OPEN) return;
-          const input = e.inputBuffer.getChannelData(0);
-
-          // Live voice energy visualizer when Zelda isn't currently speaking
-          let sumSq = 0;
-          for (let i = 0; i < input.length; i += 4) sumSq += input[i] * input[i];
-          const rms = Math.sqrt(sumSq / (input.length / 4));
-          if (this.scheduledSources.length === 0) {
-            pulseEqBars(rms > 0.015 ? Math.min(95, 25 + rms * 420) : 16, '#00FF9D');
-          }
-
-          // Downsample native rate (e.g., 48000Hz) -> 16000Hz Int16 Little-Endian PCM
-          const ratio = nativeRate / 16000;
-          const outLen = Math.floor(input.length / ratio);
-          const pcm16 = new Int16Array(outLen);
-          for (let i = 0; i < outLen; i++) {
-            const sample = Math.max(-1, Math.min(1, input[Math.floor(i * ratio)]));
-            pcm16[i] = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
-          }
-
-          const bytes = new Uint8Array(pcm16.buffer);
-          let binary = '';
-          for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
-
-          this.ws.send(JSON.stringify({
-            realtimeInput: {
-              audio: {
-                data: btoa(binary),
-                mimeType: 'audio/pcm;rate=16000'
-              }
+        if (this.workletReady && window.AudioWorkletNode) {
+          this.workletNode = new AudioWorkletNode(this.audioCtx, 'zelda-mic-worklet');
+          this.workletNode.port.onmessage = (ev) => this.sendRawPcmFrame(ev.data.pcmBuffer, ev.data.rms);
+          this.sourceNode.connect(this.workletNode);
+        } else {
+          // Legacy WebView fallback
+          const proc = this.audioCtx.createScriptProcessor(2048, 1, 1);
+          const ratio = this.audioCtx.sampleRate / 16000;
+          proc.onaudioprocess = (e) => {
+            const ch = e.inputBuffer.getChannelData(0);
+            const outLen = Math.floor(ch.length / ratio);
+            const pcm16 = new Int16Array(outLen);
+            let sum = 0;
+            for (let i = 0; i < outLen; i++) {
+              const s = Math.max(-1, Math.min(1, ch[Math.floor(i * ratio)]));
+              sum += s * s;
+              pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
             }
-          }));
-        };
-
-        // Route processor through a muted gain node so mic never loops back to speakers
-        const muteGain = this.audioCtx.createGain();
-        muteGain.gain.value = 0;
-        this.sourceNode.connect(this.processor);
-        this.processor.connect(muteGain);
-        muteGain.connect(this.audioCtx.destination);
+            this.sendRawPcmFrame(pcm16.buffer, Math.sqrt(sum / Math.max(1, outLen)));
+          };
+          const mute = this.audioCtx.createGain();
+          mute.gain.value = 0;
+          this.sourceNode.connect(proc);
+          proc.connect(mute);
+          mute.connect(this.audioCtx.destination);
+          this.workletNode = proc;
+        }
       },
 
       schedulePcm24kChunk(base64Data, sampleRate = 24000) {
@@ -1641,15 +1944,17 @@ LIVE INTERACTION & TOOL RULES:
         const sampleCount = Math.floor(bin.length / 2);
         if (sampleCount === 0) return;
 
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        const view = new DataView(bytes.buffer);
         const float32 = new Float32Array(sampleCount);
-        const view = new DataView(new ArrayBuffer(bin.length));
-        for (let i = 0; i < bin.length; i++) view.setUint8(i, bin.charCodeAt(i));
 
         let peak = 0;
         for (let i = 0; i < sampleCount; i++) {
           const s = view.getInt16(i * 2, true) / 32768;
           float32[i] = s;
-          if (Math.abs(s) > peak) peak = Math.abs(s);
+          const abs = s < 0 ? -s : s;
+          if (abs > peak) peak = abs;
         }
 
         const audioBuf = this.audioCtx.createBuffer(1, sampleCount, sampleRate);
@@ -1657,10 +1962,13 @@ LIVE INTERACTION & TOOL RULES:
 
         const src = this.audioCtx.createBufferSource();
         src.buffer = audioBuf;
-        src.connect(this.audioCtx.destination);
+        src.connect(this.outGain || this.audioCtx.destination);
 
         const now = this.audioCtx.currentTime;
-        if (this.nextPlayTime < now + 0.015) this.nextPlayTime = now + 0.03;
+        // 95ms pre-buffer cushion on the leading chunk eliminates packet-jitter audio hiccups
+        if (this.scheduledSources.length === 0 || this.nextPlayTime < now) {
+          this.nextPlayTime = now + 0.095;
+        }
 
         setHolocallState('SPEAKING');
         try { window.ZeldaBridge?.duckAudio?.(true); } catch (_) {}
@@ -1703,15 +2011,16 @@ LIVE INTERACTION & TOOL RULES:
       },
 
       cleanupMicNodes() {
-        try { this.processor?.disconnect(); } catch (_) {}
+        try { this.workletNode?.disconnect(); } catch (_) {}
         try { this.sourceNode?.disconnect(); } catch (_) {}
-        this.processor = null;
+        this.workletNode = null;
         this.sourceNode = null;
       },
 
       disconnect(statusMsg) {
         this.active = false;
         this.setupReady = false;
+        this.toolRunning = false;
         this.flushPlaybackBuffer();
         this.cleanupMicNodes();
         if (this.micStream) {
@@ -1724,27 +2033,45 @@ LIVE INTERACTION & TOOL RULES:
         }
         stopEqualizer();
         setHolocallState('STANDBY');
-        document.getElementById('live-model-pill').textContent = 'WSS // READY';
+        document.getElementById('live-model-pill').textContent = '3.8 LIVE // READY';
         if (statusMsg) document.getElementById('zelda-speech').textContent = `"${statusMsg}"`;
       }
     };
 
     // =========================================================================
-    // 5. HYBRID DISPATCHER + SILENT TEXT MODE SSE FALLBACK (WHEN MIC IS OFF)
+    // 5. HYBRID DISPATCHER + SILENT TEXT MODE ROUTE & SSE ENGINE
     // =========================================================================
     const zeldaTextPlayer = new Audio();
-    let textAudioToken = 0, textSpeechQueue = [], textSpeaking = false;
+    let textAudioToken = 0;
 
     function stopAllTextAudio() {
       textAudioToken++;
-      textSpeechQueue = [];
-      textSpeaking = false;
       try { zeldaTextPlayer.pause(); } catch (_) {}
     }
 
-    // Routes gauge/button taps over the instant WebSocket if Live Call is open, otherwise SSE!
-    function dispatchSmartPrompt(promptText) {
+    async function checkSilentTextCommands(promptText) {
+      const routeMatch = promptText.match(/(?:set a route to|set a navigation route to|plot a route to|route me to|directions to|navigate to|take me to|head to)\s+(.+)/i);
+      if (routeMatch) {
+        let dest = routeMatch[1].replace(/[?.!]+$/, '').trim();
+        let ext = null;
+        if (/\b(in|on|with)\s+waze\b/i.test(dest)) {
+          ext = 'waze';
+          dest = dest.replace(/\b(in|on|with)\s+waze\b/ig, '').trim();
+        } else if (/\b(in|on|with)\s+(google\s+maps|g-maps|maps)\b/i.test(dest)) {
+          ext = 'maps';
+          dest = dest.replace(/\b(in|on|with)\s+(google\s+maps|g-maps|maps)\b/ig, '').trim();
+        }
+        return await ZeldaMap.plotRouteToQuery(dest, ext);
+      }
+      if (/\b(clear route|cancel route|stop navigation)\b/i.test(promptText)) {
+        return ZeldaMap.clearRoute();
+      }
+      return null;
+    }
+
+    async function dispatchSmartPrompt(promptText) {
       if (ZeldaLiveWS.sendTextTurnOverSocket(promptText)) return;
+      await checkSilentTextCommands(promptText);
       askZeldaTextMode(promptText);
     }
 
@@ -1780,7 +2107,10 @@ LIVE INTERACTION & TOOL RULES:
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               contents: [{ role: 'user', parts: [{ text }] }],
-              generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } } }
+              generationConfig: {
+                responseModalities: ['AUDIO'],
+                speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } }
+              }
             })
           });
           if (!res.ok) continue;
@@ -1808,8 +2138,18 @@ LIVE INTERACTION & TOOL RULES:
         saveEngramState();
       }
 
-      const sys = buildZeldaSystemPrompt() + '\nOutput PLAIN SPOKEN TEXT ONLY (1–2 crisp sentences, no JSON/markdown).';
-      const cleanedTurns = conversationTurns.slice(-6).map(t => ({ role: t.role === 'model' ? 'model' : 'user', parts: [{ text: t.text }] }));
+      const sys = buildZeldaSystemPrompt() + '\nOutput PLAIN SPOKEN TEXT ONLY (1–2 crisp sentences, zero JSON or markdown).';
+      const cleanedTurns = [];
+      for (const t of conversationTurns.slice(-6)) {
+        const role = t.role === 'model' ? 'model' : 'user';
+        const txt = (t.text || '').trim();
+        if (!txt || (cleanedTurns.length === 0 && role === 'model')) continue;
+        if (cleanedTurns.length > 0 && cleanedTurns[cleanedTurns.length - 1].role === role) {
+          cleanedTurns[cleanedTurns.length - 1].parts[0].text += '\n' + txt;
+        } else {
+          cleanedTurns.push({ role, parts: [{ text: txt }] });
+        }
+      }
       if (!cleanedTurns.length) cleanedTurns.push({ role: 'user', parts: [{ text: promptText }] });
 
       for (const model of ['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-2.5-flash']) {
@@ -1831,16 +2171,19 @@ LIVE INTERACTION & TOOL RULES:
             const { value, done } = await reader.read();
             if (done || myTok !== textAudioToken) break;
             buf += dec.decode(value, { stream: true });
-            const lines = buf.split('\n'); buf = lines.pop() || '';
+            const lines = buf.split('\n');
+            buf = lines.pop() || '';
             for (const l of lines) {
               if (!l.startsWith('data:')) continue;
               const js = l.slice(5).trim();
               if (!js || js === '[DONE]') continue;
               try {
-                const p = JSON.parse(js)?.candidates?.[0]?.content?.parts?.[0];
-                if (p?.text && !p.thought) {
-                  full += p.text;
-                  document.getElementById('zelda-speech').textContent = `"${full.trim()}"`;
+                const parts = JSON.parse(js)?.candidates?.[0]?.content?.parts || [];
+                for (const p of parts) {
+                  if (p?.text && !p.thought) {
+                    full += p.text;
+                    document.getElementById('zelda-speech').textContent = `"${full.trim()}"`;
+                  }
                 }
               } catch (_) {}
             }
@@ -1861,7 +2204,7 @@ LIVE INTERACTION & TOOL RULES:
     }
 
     // =========================================================================
-    // 6. DIAGNOSTICS + VGATE BLE + FAULT SIMULATOR + RENDER LOOP
+    // 6. DIAGNOSTICS + VGATE BLE + EXTERNAL NAV DEEP-LINKS + RENDER LOOP
     // =========================================================================
     function detectLiveAnomalies() {
       const issues = [];
@@ -1918,7 +2261,7 @@ LIVE INTERACTION & TOOL RULES:
 
     async function connectVgateBle() {
       if (!navigator.bluetooth) {
-        document.getElementById('zelda-speech').textContent = `ℹ️ [OBD Sim Active — GPS, ChronoHume & Live WebSocket 100% online]`;
+        document.getElementById('zelda-speech').textContent = `ℹ️ [OBD Sim Active — GPS, ChronoHume & 3.8 Live WebSocket 100% online]`;
         return;
       }
       try {
@@ -1936,7 +2279,8 @@ LIVE INTERACTION & TOOL RULES:
           rxBuffer += new TextDecoder().decode(e.target.value);
           const idx = rxBuffer.indexOf('>');
           if (idx !== -1) {
-            const frame = rxBuffer.slice(0, idx).trim(); rxBuffer = rxBuffer.slice(idx + 1);
+            const frame = rxBuffer.slice(0, idx).trim();
+            rxBuffer = rxBuffer.slice(idx + 1);
             lastBlePacketTime = Date.now();
             if (promptResolver) { const r = promptResolver; promptResolver = null; r(frame); }
           }
@@ -2082,10 +2426,21 @@ LIVE INTERACTION & TOOL RULES:
     }
     function openCarSystemSettings() { if (window.ZeldaBridge?.openAndroidSettings) window.ZeldaBridge.openAndroidSettings(); }
     function setAsPrimaryCarLauncher() { if (window.ZeldaBridge?.openHomeLauncherSettings) window.ZeldaBridge.openHomeLauncherSettings(); }
+
+    // Passes active plotted route coordinates straight into Waze or Google Maps turn-by-turn
     function openExternalNav(target) {
-      if (target === 'waze') launchNativeApp('com.waze', 'https://www.waze.com/ul');
-      else launchNativeApp('com.google.android.apps.maps', 'https://www.google.com/maps');
+      const r = state.activeRoute;
+      if (target === 'waze') {
+        const url = r ? `https://waze.com/ul?ll=${r.lat},${r.lon}&navigate=yes` : 'https://waze.com/ul';
+        window.open(url, '_blank');
+      } else {
+        const url = r
+          ? `https://www.google.com/maps/dir/?api=1&destination=${r.lat},${r.lon}&travelmode=driving`
+          : 'https://www.google.com/maps';
+        window.open(url, '_blank');
+      }
     }
+
     function triggerHomeSync() {
       const url = localStorage.getItem('zelda_hud_ifttt') || '';
       if (url) fetch(url, { mode: 'no-cors' });
@@ -2115,3 +2470,4 @@ LIVE INTERACTION & TOOL RULES:
   </script>
 </body>
 </html>
+          
