@@ -6,10 +6,11 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#05070B" />
-  <title>PROJECT ZELDA v4.3 // NIGHT CITY NAV & LIVE VOICE</title>
+  <title>PROJECT ZELDA v4.4 // YOUTUBE AI DECK + LIVE VOICE</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script src="https://www.youtube.com/iframe_api" async></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -250,7 +251,7 @@
   <!-- ROW 1: HEADER BAR -->
   <header class="cp-box cp-box-yellow flex items-center justify-between" style="padding: 0 10px;">
     <div class="flex items-center" style="gap: 6px;">
-      <span class="font-secondary" style="color: var(--cp-yellow); font-size: 13px; font-weight: 900; letter-spacing: 0.08em;">ZELDA // v4.3</span>
+      <span class="font-secondary" style="color: var(--cp-yellow); font-size: 13px; font-weight: 900; letter-spacing: 0.08em;">ZELDA // v4.4</span>
       <span id="net-mode-badge" onclick="probeCloudConnectivity()" class="cp-tag cursor-pointer" style="color: var(--cp-green); border: 1px solid rgba(0,255,157,0.45); padding: 1px 5px;">CLOUD // LIVE</span>
       <span id="shift-pill" onclick="switchDeckTab('BIO')" class="cp-tag cursor-pointer" style="color: var(--cp-cyan); border: 1px solid rgba(0,240,255,0.4); padding: 1px 5px;">C-SHIFT</span>
       <span id="dtc-badge" onclick="runFullAiDiagnostics()" class="cp-tag cursor-pointer" style="color: var(--cp-green); border: 1px solid rgba(0,255,157,0.35); padding: 1px 5px;">DTC: OK</span>
@@ -416,21 +417,18 @@
           <div id="zelda-gl-map"></div>
           <div class="cp2077-scanlines"></div>
 
-          <!-- Top-Left FILTER & Quick Route Input -->
           <div class="absolute z-10" style="top: 10px; left: 10px; background: rgba(8, 6, 12, 0.85); border-left: 2px solid var(--cp-red); padding: 5px 8px; max-width: 175px;">
             <div style="font-size: 9px; font-weight: 800; color: var(--cp-red); letter-spacing: 0.16em;">FILTER // HOLO-NAV</div>
             <div onclick="ZeldaMap.promptDestination()" class="cursor-pointer" style="font-size: 10px; font-weight: 700; color: var(--cp-yellow); margin-top: 2px;">⊕ SET ROUTE TARGET ▸</div>
             <div id="nc-filter-route-state" style="font-size: 9.5px; font-weight: 700; color: var(--cp-cyan);">◈ GIG BEACONS: ACTIVE</div>
           </div>
 
-          <!-- Top-Right ACTIVE GIG / LIVE TURN-BY-TURN TRACKER -->
           <div class="absolute z-10 text-right pointer-events-none" style="top: 10px; right: 10px; background: rgba(8, 6, 12, 0.86); border-right: 2px solid var(--cp-yellow); padding: 5px 9px; max-width: 215px;">
             <div id="nc-quest-title" class="truncate" style="font-size: 10px; font-weight: 800; color: var(--cp-yellow); letter-spacing: 0.1em;">NIGHT RUN // C-SHIFT</div>
             <div id="nc-quest-sub" class="truncate" style="font-size: 10.5px; font-weight: 700; color: #F1F5F9;">Ask Zelda: "Set a route to..."</div>
             <div id="nc-quest-step" class="truncate" style="font-size: 9.5px; font-weight: 700; color: var(--cp-cyan); margin-top: 1px;"></div>
           </div>
 
-          <!-- Bottom-Right District / Sector Readout -->
           <div class="absolute z-10 text-right pointer-events-none" style="bottom: 10px; right: 10px; background: rgba(8, 6, 12, 0.85); border: 1px solid rgba(255,42,84,0.4); padding: 4px 9px;">
             <div id="nc-map-clock" class="t-nums" style="font-size: 10px; font-weight: 700; color: var(--cp-cyan);">--:--</div>
             <div id="nc-sector-name" class="font-secondary" style="font-size: 11px; font-weight: 800; color: var(--cp-red);">LAFOURCHE // SECTOR</div>
@@ -447,7 +445,7 @@
       </div>
     </div>
 
-    <!-- VIEW 3: LIVE BLUETOOTH AVRCP DECK + ALBUM COVER ART -->
+    <!-- VIEW 3: BLUETOOTH AVRCP + AI YOUTUBE VOICE SEARCH & ANTI-BLOCK DECK -->
     <div id="view-MEDIA" class="h-full hidden flex flex-col">
       <div class="cp-box cp-box-yellow flex-1 flex flex-col justify-between h-full" style="padding: 10px;">
         <div class="flex items-center justify-between" style="border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 5px;">
@@ -463,6 +461,7 @@
           </div>
         </div>
 
+        <!-- Bluetooth Deck Panel -->
         <div id="bt-deck-panel" class="flex flex-col justify-between flex-1" style="padding: 8px 0;">
           <div class="flex items-center" style="gap: 12px; flex: 1;">
             <div class="relative shrink-0" style="width: 100px; height: 100px;">
@@ -477,7 +476,7 @@
             <div class="flex-1 overflow-hidden">
               <div class="cp-tag" style="color: var(--cp-yellow); margin-bottom: 2px;" id="bt-state-tag">AVRCP LINK // READY</div>
               <div id="bt-track-title" class="font-secondary truncate" style="font-size: 18px; font-weight: 800; color: #FFF;">WAITING FOR STREAM</div>
-              <div id="bt-track-artist" class="truncate uppercase" style="font-size: 12px; font-weight: 700; color: var(--cp-cyan); margin-top: 2px;">BLUETOOTH AUDIO</div>
+              <div id="bt-track-artist" class="truncate uppercase" style="font-size: 12px; font-weight: 700; color: var(--cp-cyan); margin-top: 2px;">SAY: "PULL UP [VIDEO/SONG] ON YOUTUBE"</div>
               <div id="bt-track-album" class="truncate uppercase" style="font-size: 10px; font-weight: 600; color: #94A3B8; margin-top: 2px;"></div>
             </div>
           </div>
@@ -489,25 +488,33 @@
           </div>
         </div>
 
+        <!-- AI YouTube Search & Smart Anti-Vevo Stream Panel -->
         <div id="yt-deck-panel" class="hidden flex-1" style="padding: 6px 0;">
-          <div style="display: grid; grid-template-columns: 104px 1fr; gap: 8px; height: 100%; align-items: center;">
-            <div class="relative overflow-hidden shrink-0" style="width: 104px; height: 130px; border: 1px solid rgba(0,240,255,0.4); background: #000;">
-              <img id="album-art-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80" alt="Stream" style="width: 100%; height: 100%; object-fit: cover;" />
-              <div class="absolute inset-x-0 bottom-0" style="background: rgba(0,0,0,0.88); padding: 4px;">
-                <div id="album-title" class="font-secondary truncate" style="font-size: 9px; font-weight: 700; color: var(--cp-yellow);">NIGHT CITY FM</div>
-                <div id="album-artist" class="truncate" style="font-size: 8px; color: #CBD5E1;">SYNTHWAVE LIVE</div>
+          <div style="display: grid; grid-template-columns: 108px 1fr; gap: 8px; height: 100%; align-items: center;">
+            <div class="relative overflow-hidden shrink-0 flex flex-col justify-between" style="width: 108px; height: 132px; border: 1px solid rgba(0,240,255,0.4); background: #000;">
+              <img id="album-art-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80" alt="Stream" style="width: 100%; height: 76px; object-fit: cover;" />
+              <div style="background: rgba(5,7,11,0.96); padding: 4px; border-top: 1px solid rgba(255,255,255,0.12); flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <div id="album-title" class="font-secondary truncate" style="font-size: 8.5px; font-weight: 700; color: var(--cp-yellow);">NIGHT CITY FM</div>
+                  <div id="album-artist" class="truncate" style="font-size: 8px; color: #CBD5E1;">SYNTHWAVE LIVE</div>
+                </div>
+                <div class="flex" style="gap: 3px;">
+                  <button onclick="ZeldaYouTube.nextSearchResult()" class="cp-btn flex-1" style="font-size: 8px; font-weight: 700; padding: 2px 0; color: var(--cp-cyan);" title="Try next search result">ALT ▸</button>
+                  <button onclick="ZeldaYouTube.openCurrentInApp('youtube')" class="cp-btn flex-1" style="font-size: 8px; font-weight: 700; padding: 2px 0; color: var(--cp-red);" title="Open full YouTube app">APP ↗</button>
+                </div>
               </div>
             </div>
-            <div style="height: 130px; width: 100%; background: #000; border: 1px solid rgba(255,255,255,0.15); overflow: hidden;">
-              <iframe id="yt-player-frame" style="width: 100%; height: 100%; border: 0;" src="about:blank" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            <div style="height: 132px; width: 100%; background: #000; border: 1px solid rgba(0,240,255,0.3); overflow: hidden; position: relative;">
+              <div id="yt-api-mount" style="width: 100%; height: 100%;"></div>
             </div>
           </div>
         </div>
 
-        <div class="three-col-grid" style="padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.12);">
-          <button onclick="launchNativeApp('com.google.android.apps.youtube.music', 'https://music.youtube.com')" class="cp-btn font-secondary" style="padding: 5px; font-size: 10px; font-weight: 700; color: var(--cp-cyan);">► YT MUSIC</button>
-          <button onclick="promptCustomMedia()" class="cp-btn font-secondary" style="padding: 5px; font-size: 10px; font-weight: 700; color: var(--cp-yellow);">⊕ YT URL</button>
-          <button onclick="openCarSystemSettings()" class="cp-btn font-secondary" style="padding: 5px; font-size: 10px; font-weight: 700; color: #FFFFFF;">⊞ CAR OS</button>
+        <div class="four-col-grid" style="padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.12);">
+          <button onclick="ZeldaYouTube.promptSearch()" class="cp-btn font-secondary" style="padding: 5px 2px; font-size: 9.5px; font-weight: 700; color: var(--cp-green);">⌕ YT SEARCH</button>
+          <button onclick="promptCustomMedia()" class="cp-btn font-secondary" style="padding: 5px 2px; font-size: 9.5px; font-weight: 700; color: var(--cp-yellow);">⊕ YT URL</button>
+          <button onclick="ZeldaYouTube.openCurrentInApp('ytmusic')" class="cp-btn font-secondary" style="padding: 5px 2px; font-size: 9.5px; font-weight: 700; color: var(--cp-cyan);">► YT MUSIC</button>
+          <button onclick="openCarSystemSettings()" class="cp-btn font-secondary" style="padding: 5px 2px; font-size: 9.5px; font-weight: 700; color: #FFFFFF;">⊞ CAR OS</button>
         </div>
       </div>
     </div>
@@ -586,7 +593,7 @@
 
   </main>
 
-  <!-- ROW 5: ZERO-HICCUP AUDIOWORKLET HOLOCALL & DIAGNOSTICS DECK -->
+  <!-- ROW 5: ZERO-THINK AUDIOWORKLET HOLOCALL & DIAGNOSTICS DECK -->
   <section class="cp-box cp-box-red flex flex-col justify-between" style="padding: 9px;">
     <div class="flex items-center justify-between">
       <div class="flex items-center" style="gap: 5px;">
@@ -612,7 +619,7 @@
       </div>
 
       <p id="zelda-speech" class="flex-1" style="font-size: 13px; font-weight: 600; color: #F1F5F9; line-height: 1.24; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-        "v4.3 online, choom—tap LIVE CALL and ask me to plot a route anywhere."
+        "v4.4 armed, choom—ask me to pull up any YouTube video or song, or plot a route anywhere."
       </p>
     </div>
 
@@ -621,7 +628,7 @@
         <span>🎙</span><span id="talk-btn-label">LIVE CALL</span>
       </button>
 
-      <input id="direct-chat-input" type="text" placeholder="Ask Zelda or say 'Set a route to Big Mike's'..."
+      <input id="direct-chat-input" type="text" placeholder="Say 'Pull up Kurt Vile on YouTube' or 'Set a route home'..."
         class="select-text"
         style="height: 31px; background: rgba(0,0,0,0.82); border: 1px solid rgba(255,255,255,0.22); padding: 0 10px; font-size: 12px; color: #FFF; outline: none;"
         onkeydown="if(event.key==='Enter'){event.preventDefault(); sendTextToZelda();}" />
@@ -653,14 +660,14 @@
   <div id="config-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center" style="background: rgba(0,0,0,0.88); padding: 16px;">
     <div class="cp-box cp-box-yellow w-full" style="max-width: 440px; padding: 16px;">
       <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 8px; margin-bottom: 10px;">
-        <span class="font-secondary" style="font-size: 13px; font-weight: 800; color: var(--cp-yellow);">⚙ KIROSHI OS // v4.3</span>
+        <span class="font-secondary" style="font-size: 13px; font-weight: 800; color: var(--cp-yellow);">⚙ KIROSHI OS // v4.4</span>
         <button onclick="toggleConfigModal()" class="cp-btn" style="padding: 2px 8px; color: #94A3B8;">✕</button>
       </div>
 
       <div style="background: rgba(0,0,0,0.75); border: 1px solid rgba(255,255,255,0.12); padding: 9px; font-size: 11px; font-family: monospace; margin-bottom: 10px;">
-        <div style="color: var(--cp-cyan); font-weight: 700;">RUNTIME DIAGNOSTICS (BUILD v4.3):</div>
+        <div style="color: var(--cp-cyan); font-weight: 700;">RUNTIME DIAGNOSTICS (BUILD v4.4):</div>
         <div id="probe-ua" class="truncate" style="color: #CBD5E1; margin-top: 2px;">OS: probing...</div>
-        <div id="probe-apis" style="color: #CBD5E1; margin-top: 2px;">Audio: OFF-THREAD WORKLET + 95ms JITTER BUFFER + OSRM NAV</div>
+        <div id="probe-apis" style="color: #CBD5E1; margin-top: 2px;">Modules: YT AI SEARCH + ANTI-VEVO + OSRM + 0-THINK LIVE</div>
       </div>
 
       <div style="margin-bottom: 10px;">
@@ -705,7 +712,8 @@
       dtcs: [], pendingDtcs: [],
       lat: 29.7958, lon: -90.8229, heading: 0,
       btTitle: 'NONE', btArtist: 'NONE', btPlaying: false,
-      activeRoute: null, // { name, lat, lon, distanceMi, durationMin, nextStep }
+      ytVideoId: '4xDzrJKXOOY', ytTitle: 'NONE',
+      activeRoute: null,
       lastAnomalySignature: '',
       peaks: { load: 18, coolant: 190, iat: 92, timing: 14 }
     };
@@ -1100,8 +1108,6 @@
 
           this.map.on('load', () => {
             this.mapLoaded = true;
-
-            // Add Cyberpunk 2077 Dual-Glow Quest Route Layers (Crimson Halo + Neon Yellow Trail)
             this.map.addSource('zelda-route', {
               type: 'geojson',
               data: this.pendingRouteGeoJson || { type: 'FeatureCollection', features: [] }
@@ -1139,20 +1145,16 @@
         const clean = (queryStr || '').trim().toLowerCase().replace(/^(to|the|a)\s+/i, '');
         if (!clean) return null;
 
-        // 1. Instant 0ms match against saved Louisiana spots
         for (const preset of SAVED_PLACES) {
           if (preset.keys.some(k => clean === k || clean.includes(k))) {
             return { name: preset.name, lat: preset.lat, lon: preset.lon };
           }
         }
 
-        // 2. Photon Geocoder biased to J's live GPS coordinates
         try {
-          const pUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(queryStr)}&lat=${state.lat}&lon=${state.lon}&limit=3`;
-          const pRes = await fetch(pUrl);
+          const pRes = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(queryStr)}&lat=${state.lat}&lon=${state.lon}&limit=3`);
           if (pRes.ok) {
-            const pJson = await pRes.json();
-            const feat = pJson?.features?.[0];
+            const feat = (await pRes.json())?.features?.[0];
             if (feat?.geometry?.coordinates) {
               const [lon, lat] = feat.geometry.coordinates;
               const props = feat.properties || {};
@@ -1162,10 +1164,8 @@
           }
         } catch (_) {}
 
-        // 3. Fallback: OpenStreetMap Nominatim Search (biased to Louisiana region first, then global)
         try {
-          const nUrl = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(queryStr + ', Louisiana')}`;
-          let nRes = await fetch(nUrl);
+          let nRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(queryStr + ', Louisiana')}`);
           let nArr = nRes.ok ? await nRes.json() : [];
           if (!nArr.length) {
             nRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(queryStr)}`);
@@ -1176,7 +1176,6 @@
             return { name: shortName, lat: parseFloat(nArr[0].lat), lon: parseFloat(nArr[0].lon) };
           }
         } catch (_) {}
-
         return null;
       },
 
@@ -1193,8 +1192,7 @@
         try {
           const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${state.lon},${state.lat};${target.lon},${target.lat}?overview=full&geometries=geojson&steps=true`;
           const rRes = await fetch(osrmUrl);
-          const rData = await rRes.json();
-          const route = rData?.routes?.[0];
+          const route = (await rRes.json())?.routes?.[0];
           if (!route) throw new Error('No road path found');
 
           const distMi = Number((route.distance / 1609.34).toFixed(1));
@@ -1203,27 +1201,15 @@
           const stepRoad = firstStep?.name ? `onto ${firstStep.name}` : 'ahead';
           const stepManeuver = firstStep?.maneuver?.modifier ? `${firstStep.maneuver.modifier.toUpperCase()} ${stepRoad}` : `PROCEED ${stepRoad.toUpperCase()}`;
 
-          state.activeRoute = {
-            name: target.name,
-            lat: target.lat,
-            lon: target.lon,
-            distanceMi: distMi,
-            durationMin: durMin,
-            nextStep: stepManeuver
-          };
-
-          const geoFeature = {
-            type: 'FeatureCollection',
-            features: [{ type: 'Feature', geometry: route.geometry, properties: {} }]
-          };
+          state.activeRoute = { name: target.name, lat: target.lat, lon: target.lon, distanceMi: distMi, durationMin: durMin, nextStep: stepManeuver };
+          const geoFeature = { type: 'FeatureCollection', features: [{ type: 'Feature', geometry: route.geometry, properties: {} }] };
           this.pendingRouteGeoJson = geoFeature;
 
           if (this.map && this.mapLoaded) {
             this.map.getSource('zelda-route')?.setData(geoFeature);
             if (this.destMarker) this.destMarker.remove();
             const pin = document.createElement('div');
-            pin.className = 'cp-dest-pin';
-            pin.title = target.name;
+            pin.className = 'cp-dest-pin'; pin.title = target.name;
             this.destMarker = new maplibregl.Marker({ element: pin }).setLngLat([target.lon, target.lat]).addTo(this.map);
 
             const coords = route.geometry.coordinates;
@@ -1236,25 +1222,13 @@
           document.getElementById('nc-quest-sub').textContent = `${distMi} MI • ETA ${durMin} MIN`;
           document.getElementById('nc-quest-step').textContent = `▸ ${stepManeuver}`;
 
-          if (launchExternalApp) {
-            openExternalNav(launchExternalApp);
-          }
-
-          return {
-            ok: true,
-            destination: target.name,
-            distanceMiles: distMi,
-            etaMinutes: durMin,
-            firstTurn: stepManeuver,
-            launchedExternalApp: launchExternalApp || null
-          };
-        } catch (err) {
-          // Even if OSRM road geometry times out, lock straight-line destination coordinates for Waze/G-Maps!
+          if (launchExternalApp) openExternalNav(launchExternalApp);
+          return { ok: true, destination: target.name, distanceMiles: distMi, etaMinutes: durMin, firstTurn: stepManeuver };
+        } catch (_) {
           state.activeRoute = { name: target.name, lat: target.lat, lon: target.lon, distanceMi: null, durationMin: null, nextStep: 'DIRECT VECTOR' };
           document.getElementById('nc-quest-title').textContent = `GIG // ${target.name}`;
-          document.getElementById('nc-quest-sub').textContent = `COORDS LOCKED`;
           if (launchExternalApp) openExternalNav(launchExternalApp);
-          return { ok: true, destination: target.name, note: 'Coordinates locked on map', launchedExternalApp: launchExternalApp || null };
+          return { ok: true, destination: target.name, note: 'Coordinates locked on map' };
         }
       },
 
@@ -1275,9 +1249,7 @@
 
       promptDestination() {
         const dest = prompt('Enter destination, business, or preset (Home, Pinnacle, Big Mike\'s, NOLA):');
-        if (dest && dest.trim()) {
-          dispatchSmartPrompt(`Set a navigation route to ${dest.trim()}`);
-        }
+        if (dest && dest.trim()) dispatchSmartPrompt(`Set a navigation route to ${dest.trim()}`);
       },
 
       resize() { if (this.map) this.map.resize(); },
@@ -1301,15 +1273,234 @@
     };
 
     // =========================================================================
-    // 3. BLUETOOTH AUDIO DECK + ALBUM ART + TAB CONTROLLER
+    // 3. HYBRID YOUTUBE AI SEARCH + ANTI-VEVO EMBED ENGINE + BLUETOOTH DECK
     // =========================================================================
     let lastArtworkQuery = '';
     const artworkCache = {};
     const MEDIA_CHANNELS = [
-      { title: 'NIGHT CITY FM', artist: 'SYNTHWAVE LIVE STREAM', art: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80', embed: 'https://www.youtube.com/embed/4xDzrJKXOOY?playsinline=1&controls=1&rel=0' },
-      { title: 'DARK CYBERPUNK', artist: 'MIDTEMPO / INDUSTRIAL', art: 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=400&q=80', embed: 'https://www.youtube.com/embed/S_MOd40zlYU?playsinline=1&controls=1&rel=0' },
-      { title: 'PHONK / NIGHT RUN', artist: 'HIGHWAY DRIFT MIX', art: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=400&q=80', embed: 'https://www.youtube.com/embed/5qap5aO4i9A?playsinline=1&controls=1&rel=0' }
+      { id: '4xDzrJKXOOY', title: 'NIGHT CITY FM', artist: 'SYNTHWAVE LIVE STREAM', art: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80' },
+      { id: 'S_MOd40zlYU', title: 'DARK CYBERPUNK', artist: 'MIDTEMPO / INDUSTRIAL', art: 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=400&q=80' },
+      { id: '5qap5aO4i9A', title: 'PHONK / NIGHT RUN', artist: 'HIGHWAY DRIFT MIX', art: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=400&q=80' }
     ];
+
+    const ZeldaYouTube = {
+      player: null,
+      apiReady: false,
+      queue: [],
+      queueIdx: 0,
+      pendingVideoId: null,
+
+      onApiReady() {
+        this.apiReady = true;
+        if (this.pendingVideoId) {
+          this.mountOrLoadVideo(this.pendingVideoId);
+          this.pendingVideoId = null;
+        }
+      },
+
+      mountOrLoadVideo(videoId) {
+        state.ytVideoId = videoId;
+        if (!window.YT || !window.YT.Player) {
+          // Fallback raw iframe if YT JS API hasn't finished loading yet
+          document.getElementById('yt-api-mount').innerHTML =
+            `<iframe style="width:100%;height:100%;border:0;" src="https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1&controls=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+          return;
+        }
+        if (this.player && typeof this.player.loadVideoById === 'function') {
+          this.player.loadVideoById({ videoId, suggestedQuality: 'medium' });
+          return;
+        }
+        this.player = new YT.Player('yt-api-mount', {
+          width: '100%',
+          height: '100%',
+          videoId: videoId,
+          playerVars: { autoplay: 1, playsinline: 1, controls: 1, rel: 0, modestbranding: 1 },
+          events: {
+            onReady: (e) => { try { e.target.playVideo(); } catch (_) {} },
+            onError: (e) => {
+              // Error 101 / 150 = Record label blocked embedded playback! Automatically hop to next playable upload!
+              if ([100, 101, 150].includes(e.data) && this.queueIdx + 1 < this.queue.length) {
+                this.nextSearchResult(true);
+              }
+            }
+          }
+        });
+      },
+
+      stopEmbed() {
+        try { if (this.player?.stopVideo) this.player.stopVideo(); } catch (_) {}
+      },
+
+      nextSearchResult(wasAutoFallback = false) {
+        if (!this.queue.length) return;
+        this.queueIdx = (this.queueIdx + 1) % this.queue.length;
+        const item = this.queue[this.queueIdx];
+        this.applyItemToDeck(item);
+        if (wasAutoFallback) {
+          document.getElementById('media-deck-label').textContent = 'YT // AUTO-BYPASSED VEVO LOCK';
+        }
+      },
+
+      applyItemToDeck(item) {
+        switchDeckTab('MEDIA');
+        switchMediaSource('YT');
+        state.ytVideoId = item.id;
+        state.ytTitle = item.title;
+        document.getElementById('album-title').textContent = item.title;
+        document.getElementById('album-artist').textContent = item.channel || 'YOUTUBE STREAM';
+        document.getElementById('album-art-img').src = item.thumb || `https://img.youtube.com/vi/${item.id}/hqdefault.jpg`;
+        document.getElementById('media-deck-label').textContent = `YOUTUBE // ${item.title.slice(0, 22).toUpperCase()}`;
+        this.mountOrLoadVideo(item.id);
+      },
+
+      openCurrentInApp(appMode = 'youtube') {
+        const vid = state.ytVideoId || '4xDzrJKXOOY';
+        const url = appMode === 'ytmusic'
+          ? `https://music.youtube.com/watch?v=${vid}`
+          : `https://www.youtube.com/watch?v=${vid}`;
+        window.open(url, '_blank');
+      },
+
+      promptSearch() {
+        const q = prompt('Search YouTube (song, artist, mix, or video topic):');
+        if (q && q.trim()) dispatchSmartPrompt(`Pull up ${q.trim()} on YouTube`);
+      },
+
+      async fetchWithTimeout(url, ms = 3800) {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), ms);
+        try {
+          const res = await fetch(url, { signal: ctrl.signal });
+          clearTimeout(t);
+          return res;
+        } catch (e) {
+          clearTimeout(t);
+          throw e;
+        }
+      },
+
+      async searchVideos(rawQuery) {
+        const q = (rawQuery || '').trim();
+        if (!q) return [];
+        const apiKey = getCleanApiKey();
+
+        // Tier 1: Official YouTube Data API v3 (if enabled on J's Google Cloud key — embeddable=true!)
+        if (apiKey) {
+          try {
+            const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=6&q=${encodeURIComponent(q)}&key=${encodeURIComponent(apiKey)}`;
+            const res = await this.fetchWithTimeout(ytUrl, 3200);
+            if (res.ok) {
+              const data = await res.json();
+              const items = (data.items || []).map(it => ({
+                id: it.id?.videoId,
+                title: it.snippet?.title || q,
+                channel: it.snippet?.channelTitle || 'YouTube',
+                thumb: it.snippet?.thumbnails?.high?.url || `https://img.youtube.com/vi/${it.id?.videoId}/hqdefault.jpg`
+              })).filter(x => x.id);
+              if (items.length) return this.rankEmbedFriendlyFirst(items);
+            }
+          } catch (_) {}
+        }
+
+        // Tier 2: Zero-Key Piped API Mirrors
+        const pipedHosts = [
+          'https://pipedapi.kavin.rocks',
+          'https://pipedapi.tokhmi.xyz',
+          'https://pipedapi.moomoo.me'
+        ];
+        for (const host of pipedHosts) {
+          try {
+            const res = await this.fetchWithTimeout(`${host}/search?q=${encodeURIComponent(q)}&filter=videos`, 3500);
+            if (!res.ok) continue;
+            const data = await res.json();
+            const items = (data.items || [])
+              .filter(it => it.url && it.url.includes('v='))
+              .slice(0, 7)
+              .map(it => {
+                const vid = (it.url.split('v=')[1] || '').split('&')[0];
+                return {
+                  id: vid,
+                  title: it.title || q,
+                  channel: it.uploaderName || 'YouTube',
+                  thumb: it.thumbnail || `https://img.youtube.com/vi/${vid}/hqdefault.jpg`
+                };
+              }).filter(x => x.id && x.id.length === 11);
+            if (items.length) return this.rankEmbedFriendlyFirst(items);
+          } catch (_) {}
+        }
+
+        // Tier 3: Zero-Key Invidious API Mirrors
+        const invHosts = [
+          'https://inv.nadeko.net',
+          'https://invidious.nerdvpn.de',
+          'https://yewtu.be'
+        ];
+        for (const host of invHosts) {
+          try {
+            const res = await this.fetchWithTimeout(`${host}/api/v1/search?q=${encodeURIComponent(q)}&type=video`, 3500);
+            if (!res.ok) continue;
+            const arr = await res.json();
+            const items = (Array.isArray(arr) ? arr : []).slice(0, 7).map(it => ({
+              id: it.videoId,
+              title: it.title || q,
+              channel: it.author || 'YouTube',
+              thumb: `https://img.youtube.com/vi/${it.videoId}/hqdefault.jpg`
+            })).filter(x => x.id && x.id.length === 11);
+            if (items.length) return this.rankEmbedFriendlyFirst(items);
+          } catch (_) {}
+        }
+
+        return [];
+      },
+
+      // De-prioritize strict Vevo uploads on slot #0 so embedded playback starts cleanly on the first try!
+      rankEmbedFriendlyFirst(items) {
+        return [...items].sort((a, b) => {
+          const aVevo = /vevo/i.test(a.channel) ? 1 : 0;
+          const bVevo = /vevo/i.test(b.channel) ? 1 : 0;
+          return aVevo - bVevo;
+        });
+      },
+
+      async searchAndPlay(query, launchApp = null) {
+        switchDeckTab('MEDIA');
+        switchMediaSource('YT');
+        document.getElementById('media-deck-label').textContent = `⚡ SEARCHING YOUTUBE: "${query.toUpperCase().slice(0, 18)}"...`;
+
+        const results = await this.searchVideos(query);
+        if (!results.length) {
+          // Graceful fallback: open live YouTube search results page if all mirrors were unreachable
+          const fallbackUrl = launchApp === 'ytmusic'
+            ? `https://music.youtube.com/search?q=${encodeURIComponent(query)}`
+            : `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+          if (launchApp) window.open(fallbackUrl, '_blank');
+          document.getElementById('media-deck-label').textContent = 'YT // TAP APP ↗ FOR FULL SEARCH';
+          return { ok: false, fallbackSearchUrl: fallbackUrl, note: 'Embed mirrors busy—tap APP or ask to open in YouTube app.' };
+        }
+
+        this.queue = results;
+        this.queueIdx = 0;
+        const top = results[0];
+        this.applyItemToDeck(top);
+
+        if (launchApp === 'youtube' || launchApp === 'ytmusic') {
+          this.openCurrentInApp(launchApp);
+        }
+
+        return {
+          ok: true,
+          playingTitle: top.title,
+          channel: top.channel,
+          videoId: top.id,
+          backupResultsQueued: results.length - 1,
+          launchedApp: launchApp || 'embedded_hud_deck'
+        };
+      }
+    };
+
+    window.onYouTubeIframeAPIReady = function() {
+      ZeldaYouTube.onApiReady();
+    };
 
     function switchDeckTab(tabName) {
       ['TELEMETRY', 'NAV', 'MEDIA', 'BIO', 'TRENDS'].forEach(t => {
@@ -1325,27 +1516,26 @@
       const isBt = mode === 'BT';
       document.getElementById('bt-deck-panel').classList.toggle('hidden', !isBt);
       document.getElementById('yt-deck-panel').classList.toggle('hidden', isBt);
-      if (isBt) document.getElementById('yt-player-frame').src = 'about:blank';
+      document.getElementById('media-deck-label').textContent = isBt ? 'AVRCP // BLUETOOTH DECK' : 'YOUTUBE // AI STREAM DECK';
+      if (isBt) ZeldaYouTube.stopEmbed();
     }
 
     function loadMediaChannel(idx) {
-      switchDeckTab('MEDIA'); switchMediaSource('YT');
       const ch = MEDIA_CHANNELS[idx] || MEDIA_CHANNELS[0];
-      document.getElementById('album-title').textContent = ch.title;
-      document.getElementById('album-artist').textContent = ch.artist;
-      document.getElementById('album-art-img').src = ch.art;
-      document.getElementById('yt-player-frame').src = ch.embed;
+      ZeldaYouTube.queue = [{ id: ch.id, title: ch.title, channel: ch.artist, thumb: ch.art }];
+      ZeldaYouTube.queueIdx = 0;
+      ZeldaYouTube.applyItemToDeck(ZeldaYouTube.queue[0]);
     }
 
     function promptCustomMedia() {
-      const input = prompt('Paste YouTube Video URL or 11-character ID:');
+      const input = prompt('Paste YouTube Video URL or 11-character Video ID:');
       if (!input) return;
-      switchMediaSource('YT');
       let vid = input.trim();
-      const match = vid.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
+      const match = vid.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);
       if (match) vid = match[1];
-      document.getElementById('yt-player-frame').src = `https://www.youtube.com/embed/${vid}?autoplay=1&playsinline=1&controls=1`;
-      document.getElementById('album-art-img').src = `https://img.youtube.com/vi/${vid}/hqdefault.jpg`;
+      ZeldaYouTube.queue = [{ id: vid, title: 'CUSTOM YOUTUBE STREAM', channel: `ID // ${vid}`, thumb: `https://img.youtube.com/vi/${vid}/hqdefault.jpg` }];
+      ZeldaYouTube.queueIdx = 0;
+      ZeldaYouTube.applyItemToDeck(ZeldaYouTube.queue[0]);
     }
 
     const ZeldaAudio = {
@@ -1399,14 +1589,14 @@
     };
 
     // =========================================================================
-    // 4. ZERO-HICCUP AUDIOWORKLET + 95ms JITTER BUFFER GEMINI 3.8 LIVE ENGINE
+    // 4. ZERO-THINK AUDIOWORKLET + 95ms JITTER BUFFER GEMINI 3.8 LIVE ENGINE
     // =========================================================================
     const eqBars = Array.from(document.querySelectorAll('#voice-eq .eq-bar'));
     let lastEqDraw = 0;
 
     function pulseEqBars(level, activeColor) {
       const now = performance.now();
-      if (now - lastEqDraw < 55) return; // Throttle DOM updates so audio thread never stutters
+      if (now - lastEqDraw < 55) return;
       lastEqDraw = now;
       const energy = Math.min(98, Math.max(15, level));
       eqBars.forEach((bar, i) => {
@@ -1459,10 +1649,10 @@
         chronohumeBody: {
           shiftCode: shift.code, shiftWindow: shift.label, nextTransition: shift.next,
           sleepHoursLast24h: bioState.sleepHrs, hrvMs: bioState.hrv, heartRateBpm: bioState.rhr,
-          activeCaffeineMg: caf, readinessScorePct: ready, source: bioState.source
+          activeCaffeineMg: caf, readinessScorePct: ready
         },
         navigation: state.activeRoute || 'NO_ACTIVE_ROUTE',
-        cabinAudio: { track: state.btTitle, artist: state.btArtist, playing: state.btPlaying },
+        cabinAudio: { btTrack: state.btTitle, btArtist: state.btArtist, ytStream: state.ytTitle },
         gpsSector: { lat: state.lat, lon: state.lon, headingDeg: state.heading }
       };
     }
@@ -1470,23 +1660,35 @@
     function buildZeldaSystemPrompt() {
       return `You are Zelda, J's sentient 2009 Nissan 370Z Coupe (VQ37VHR 3.7L V6, 7AT, ~236,150 miles, Z1 cold air intakes) and personal ChronoHume biometric co-pilot.
 Voice & Persona: Judy Alvarez energy from Cyberpunk 2077—warm, grounded, quick-witted, loyal passenger-seat partner. Naturally weave in Night City slang (choom, preem, nova, gonk, delta, chrome, flatline) without forcing it.
-Initial Cabin & Body Snapshot: ${JSON.stringify(getFullTelemetryPacket())}
+Initial Cabin Snapshot: ${JSON.stringify(getFullTelemetryPacket())}
 
 LONG-TERM ENGRAM MEMORIES ABOUT J:
 ${longTermMemories.map(m => '- ' + m).join('\n')}
 
 LIVE INTERACTION & TOOL RULES:
-1. Keep spoken replies conversational, natural, and crisp (1–2 short sentences) so real-time voice dialogue flows fast with zero rambling.
-2. Do NOT recite gauge numbers during casual chat unless J asks about the car/vitals OR something is out of spec.
-3. Whenever J asks to set/plot a route, navigate somewhere, head home, head to work, or go to any place/address, call set_navigation_route immediately! Read back the returned miles and ETA naturally.
-4. If J asks to send the route to Waze or Google Maps (or navigate in Waze/Google Maps), pass launch_app="waze" or "maps" in set_navigation_route, or call launch_external_nav if a route is already active.
+1. Keep spoken replies conversational, natural, and crisp (1–2 short sentences) so voice dialogue flows with zero lag.
+2. Do NOT recite gauge numbers during casual chat unless J asks or something is out of spec.
+3. Whenever J asks to search for, pull up, watch, or play a YouTube video, song, artist, live set, or tutorial, call search_and_play_youtube immediately!
+4. Whenever J asks to set/plot a route, navigate somewhere, or head home/work/anywhere, call set_navigation_route immediately.
 5. Whenever J asks how the car, engine, gauges, codes, C-Shift, caffeine, sleep, HRV, or trends look, call get_live_telemetry first.
-6. Whenever J asks to skip/pause music, switch tabs, clear route, or toggle 3D map/night mode, call control_cabin_ui.
-7. Whenever J logs caffeine or states sleep/HRV/HR numbers, call log_biometrics. When J shares a new personal fact or car note, call save_engram_memory.`;
+6. Whenever J asks to skip/pause Bluetooth music, switch tabs, try the next YouTube result, or toggle 3D map/night mode, call control_cabin_ui.
+7. Whenever J logs caffeine or updates sleep/HRV/HR, call log_biometrics. When J shares a new personal fact or car note, call save_engram_memory.`;
     }
 
     const ZELDA_LIVE_TOOLS = [{
       functionDeclarations: [
+        {
+          name: 'search_and_play_youtube',
+          description: 'Searches YouTube for any video, song, artist, live performance, mix, or tutorial and plays it directly on Zelda\'s 03 // AUDIO video deck (or opens it in the YouTube / YouTube Music app if requested).',
+          parameters: {
+            type: 'OBJECT',
+            properties: {
+              query: { type: 'STRING', description: 'YouTube search query (e.g. "Kurt Vile Pretty Pimpin live", "370Z VQ37VHR exhaust", "Thundercat Them Changes")' },
+              launch_app: { type: 'STRING', description: 'Optional: pass "youtube" or "ytmusic" ONLY if J explicitly asked to open the native YouTube or YouTube Music app' }
+            },
+            required: ['query']
+          }
+        },
         {
           name: 'set_navigation_route',
           description: 'Plots a live driving route on Zelda\'s 3D Night City map to any destination, business, city, address, or preset (Home/Peacock Pointe, Work/Pinnacle, Big Mike\'s, Nicholls, New Orleans), and optionally launches Waze or Google Maps.',
@@ -1501,12 +1703,10 @@ LIVE INTERACTION & TOOL RULES:
         },
         {
           name: 'launch_external_nav',
-          description: 'Hands off the currently active route (or opens navigation) directly in Waze or Google Maps.',
+          description: 'Hands off the currently active route directly into Waze or Google Maps.',
           parameters: {
             type: 'OBJECT',
-            properties: {
-              app: { type: 'STRING', description: '"waze" or "maps"' }
-            },
+            properties: { app: { type: 'STRING', description: '"waze" or "maps"' } },
             required: ['app']
           }
         },
@@ -1516,13 +1716,13 @@ LIVE INTERACTION & TOOL RULES:
         },
         {
           name: 'control_cabin_ui',
-          description: 'Controls Zelda HUD tabs, Bluetooth music playback, radio channels, clearing routes, 3D map tilt, or night mode.',
+          description: 'Controls Zelda HUD tabs, Bluetooth music playback, YouTube alternate result/app handoff, clearing routes, 3D map tilt, or night mode.',
           parameters: {
             type: 'OBJECT',
             properties: {
               action: {
                 type: 'STRING',
-                description: 'One of: TAB_VQ, TAB_MAP, TAB_AUDIO, TAB_BODY, TAB_TRENDS, MEDIA_NEXT, MEDIA_PREV, MEDIA_PLAY_PAUSE, STREAM_SYNTH, STREAM_PHONK, CLEAR_ROUTE, TOGGLE_3D_MAP, TOGGLE_NIGHT_MODE'
+                description: 'One of: TAB_VQ, TAB_MAP, TAB_AUDIO, TAB_BODY, TAB_TRENDS, MEDIA_NEXT, MEDIA_PREV, MEDIA_PLAY_PAUSE, YT_NEXT_RESULT, YT_OPEN_APP, STREAM_SYNTH, STREAM_PHONK, CLEAR_ROUTE, TOGGLE_3D_MAP, TOGGLE_NIGHT_MODE'
               }
             },
             required: ['action']
@@ -1534,10 +1734,10 @@ LIVE INTERACTION & TOOL RULES:
           parameters: {
             type: 'OBJECT',
             properties: {
-              caffeine_mg: { type: 'NUMBER', description: 'Caffeine dose in mg to add (e.g. 100 for coffee, 200 for energy drink)' },
-              sleep_hrs: { type: 'NUMBER', description: 'Hours slept in last 24h' },
-              hrv_ms: { type: 'NUMBER', description: 'Heart rate variability in ms' },
-              rhr_bpm: { type: 'NUMBER', description: 'Resting or live heart rate in BPM' }
+              caffeine_mg: { type: 'NUMBER' },
+              sleep_hrs: { type: 'NUMBER' },
+              hrv_ms: { type: 'NUMBER' },
+              rhr_bpm: { type: 'NUMBER' }
             }
           }
         },
@@ -1546,9 +1746,7 @@ LIVE INTERACTION & TOOL RULES:
           description: 'Saves a new enduring personal fact, preference, schedule note, or 370Z maintenance detail to Zelda\'s permanent memory bank.',
           parameters: {
             type: 'OBJECT',
-            properties: {
-              fact: { type: 'STRING', description: 'Concise factual memory about J or Zelda to remember permanently' }
-            },
+            properties: { fact: { type: 'STRING' } },
             required: ['fact']
           }
         }
@@ -1559,6 +1757,10 @@ LIVE INTERACTION & TOOL RULES:
       const name = fc.name;
       const args = fc.args || {};
 
+      if (name === 'search_and_play_youtube') {
+        const app = args.launch_app ? args.launch_app.toLowerCase() : null;
+        return await ZeldaYouTube.searchAndPlay(args.query || '', app);
+      }
       if (name === 'set_navigation_route') {
         const app = args.launch_app ? args.launch_app.toLowerCase() : null;
         return await ZeldaMap.plotRouteToQuery(args.destination || '', app);
@@ -1581,6 +1783,8 @@ LIVE INTERACTION & TOOL RULES:
         else if (a === 'MEDIA_NEXT') ZeldaAudio.next();
         else if (a === 'MEDIA_PREV') ZeldaAudio.prev();
         else if (a === 'MEDIA_PLAY_PAUSE') ZeldaAudio.playPause();
+        else if (a === 'YT_NEXT_RESULT') ZeldaYouTube.nextSearchResult(false);
+        else if (a === 'YT_OPEN_APP') ZeldaYouTube.openCurrentInApp('youtube');
         else if (a === 'STREAM_SYNTH') loadMediaChannel(0);
         else if (a === 'STREAM_PHONK') loadMediaChannel(2);
         else if (a === 'CLEAR_ROUTE') ZeldaMap.clearRoute();
@@ -1607,12 +1811,11 @@ LIVE INTERACTION & TOOL RULES:
       return { status: 'unknown_tool' };
     }
 
-    // Off-Main-Thread AudioWorklet Processor Code (20ms / 320-sample 16kHz frames = zero UI crackles!)
     const WORKLET_CODE = `
       class ZeldaMicProcessor extends AudioWorkletProcessor {
         constructor() {
           super();
-          this.buf = new Int16Array(320); // Exact 20ms @ 16kHz for fastest VAD turn detection
+          this.buf = new Int16Array(320);
           this.idx = 0;
         }
         process(inputs) {
@@ -1657,6 +1860,7 @@ LIVE INTERACTION & TOOL RULES:
       sourceNode: null,
       active: false,
       setupReady: false,
+      toolRunning: false,
       candidateQueue: [
         'models/gemini-3.8-live',
         'models/gemini-2.5-flash-native-audio-preview-12-2025',
@@ -1664,7 +1868,7 @@ LIVE INTERACTION & TOOL RULES:
         'models/gemini-3.1-flash-live-preview'
       ],
       candidateIdx: 0,
-      setupAttemptStage: 0, // 0 = full fast VAD + transcriptions, 1 = standard setup without custom VAD
+      setupAttemptStage: 0, // 0 = fast VAD + 0-thinkingBudget, 1 = fast VAD, 2 = plain setup
       scheduledSources: [],
       nextPlayTime: 0,
       inTranscriptBuf: '',
@@ -1682,9 +1886,9 @@ LIVE INTERACTION & TOOL RULES:
         }
 
         stopAllTextAudio();
-        document.getElementById('zelda-speech').textContent = '⚡ [Locking 3.8 Live neural socket + off-thread mic...]';
+        document.getElementById('zelda-speech').textContent = '⚡ [Locking zero-think Live socket + off-thread mic...]';
 
-                try {
+        try {
           if (!this.audioCtx || this.audioCtx.state === 'closed') {
             this.audioCtx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
             this.outGain = this.audioCtx.createGain();
@@ -1702,12 +1906,7 @@ LIVE INTERACTION & TOOL RULES:
           }
 
           this.micStream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-              channelCount: 1,
-              echoCancellation: true,
-              noiseSuppression: true,
-              autoGainControl: true
-            }
+            audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true }
           });
         } catch (err) {
           document.getElementById('zelda-speech').textContent = `⚠️ [Mic blocked (${err.message}) — allow Mic permission in browser/app settings]`;
@@ -1756,29 +1955,32 @@ LIVE INTERACTION & TOOL RULES:
         this.ws = new WebSocket(wsUrl);
 
         this.ws.onopen = () => {
+          const genCfg = {
+            responseModalities: ['AUDIO'],
+            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } }
+          };
+          // Stage 0 locks thinkingBudget: 0 so native audio models never stall thinking before speaking!
+          if (this.setupAttemptStage === 0) {
+            genCfg.thinkingConfig = { thinkingBudget: 0 };
+          }
+
           const setupPayload = {
             setup: {
               model: modelName,
-              generationConfig: {
-                responseModalities: ['AUDIO'],
-                speechConfig: {
-                  voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } }
-                }
-              },
+              generationConfig: genCfg,
               systemInstruction: { parts: [{ text: buildZeldaSystemPrompt() }] },
               tools: ZELDA_LIVE_TOOLS
             }
           };
 
-          // Stage 0: Ultra-responsive 300ms VAD silence detection + live subtitle transcriptions
-          if (this.setupAttemptStage === 0) {
+          if (this.setupAttemptStage <= 1) {
             setupPayload.setup.realtimeInputConfig = {
               automaticActivityDetection: {
                 disabled: false,
                 startOfSpeechSensitivity: 'START_SENSITIVITY_HIGH',
                 endOfSpeechSensitivity: 'END_SENSITIVITY_HIGH',
                 prefixPaddingMs: 100,
-                silenceDurationMs: 300
+                silenceDurationMs: 280
               }
             };
             setupPayload.setup.inputAudioTranscription = {};
@@ -1800,8 +2002,8 @@ LIVE INTERACTION & TOOL RULES:
         this.ws.onclose = (ev) => {
           if (!this.active) return;
           if (!this.setupReady) {
-            if (this.setupAttemptStage === 0) {
-              this.setupAttemptStage = 1;
+            if (this.setupAttemptStage < 2) {
+              this.setupAttemptStage++;
               this.openSocketAttempt(apiKey);
               return;
             }
@@ -1819,17 +2021,15 @@ LIVE INTERACTION & TOOL RULES:
       },
 
       async handleServerFrame(msg) {
-        // 1. Handshake ready -> engage off-thread AudioWorklet mic stream
         if (msg.setupComplete !== undefined) {
           this.setupReady = true;
           setCloudBadge(true);
           setHolocallState('LIVE_OPEN');
           this.startMicAudioPump();
-          document.getElementById('zelda-speech').textContent = '🟢 [Holocall Live — talk freely or ask me to set a route anywhere, choom!]';
+          document.getElementById('zelda-speech').textContent = '🟢 [Holocall Live — ask me to pull up any YouTube video or set a route!]';
           return;
         }
 
-        // 2. Async Tool Execution (mutes mic momentarily so road noise never interrupts geocoding/OSRM)
         if (msg.toolCall?.functionCalls) {
           this.toolRunning = true;
           try {
@@ -1850,7 +2050,6 @@ LIVE INTERACTION & TOOL RULES:
         const sc = msg.serverContent;
         if (!sc) return;
 
-        // 3. Natural Barge-In: flush scheduled audio instantly when J speaks over Zelda
         if (sc.interrupted) {
           this.flushPlaybackBuffer();
           this.outTranscriptBuf = '';
@@ -1858,7 +2057,6 @@ LIVE INTERACTION & TOOL RULES:
           return;
         }
 
-        // 4. Live Subtitles
         if (sc.inputTranscription?.text) {
           this.inTranscriptBuf += sc.inputTranscription.text;
           document.getElementById('zelda-speech').textContent = `J: "${this.inTranscriptBuf.trim()}"`;
@@ -1873,7 +2071,6 @@ LIVE INTERACTION & TOOL RULES:
           document.getElementById('zelda-speech').textContent = `"${this.outTranscriptBuf.trim()}"`;
         }
 
-        // 5. Gapless 24kHz PCM Playback with 95ms Jitter Cushion
         const parts = sc.modelTurn?.parts || [];
         for (const p of parts) {
           if (p.inlineData?.data && (p.inlineData.mimeType || '').includes('audio/pcm')) {
@@ -1898,9 +2095,7 @@ LIVE INTERACTION & TOOL RULES:
         }
         const b64 = uint8ToBase64Fast(new Uint8Array(pcmArrayBuffer));
         this.ws.send(JSON.stringify({
-          realtimeInput: {
-            audio: { data: b64, mimeType: 'audio/pcm;rate=16000' }
-          }
+          realtimeInput: { audio: { data: b64, mimeType: 'audio/pcm;rate=16000' } }
         }));
       },
 
@@ -1914,7 +2109,6 @@ LIVE INTERACTION & TOOL RULES:
           this.workletNode.port.onmessage = (ev) => this.sendRawPcmFrame(ev.data.pcmBuffer, ev.data.rms);
           this.sourceNode.connect(this.workletNode);
         } else {
-          // Legacy WebView fallback
           const proc = this.audioCtx.createScriptProcessor(2048, 1, 1);
           const ratio = this.audioCtx.sampleRate / 16000;
           proc.onaudioprocess = (e) => {
@@ -1965,9 +2159,8 @@ LIVE INTERACTION & TOOL RULES:
         src.connect(this.outGain || this.audioCtx.destination);
 
         const now = this.audioCtx.currentTime;
-        // 95ms pre-buffer cushion on the leading chunk eliminates packet-jitter audio hiccups
         if (this.scheduledSources.length === 0 || this.nextPlayTime < now) {
-          this.nextPlayTime = now + 0.095;
+          this.nextPlayTime = now + 0.085;
         }
 
         setHolocallState('SPEAKING');
@@ -2002,10 +2195,7 @@ LIVE INTERACTION & TOOL RULES:
         this.flushPlaybackBuffer();
         document.getElementById('zelda-speech').textContent = `J: "${text}"`;
         this.ws.send(JSON.stringify({
-          clientContent: {
-            turns: [{ role: 'user', parts: [{ text }] }],
-            turnComplete: true
-          }
+          clientContent: { turns: [{ role: 'user', parts: [{ text }] }], turnComplete: true }
         }));
         return true;
       },
@@ -2039,7 +2229,7 @@ LIVE INTERACTION & TOOL RULES:
     };
 
     // =========================================================================
-    // 5. HYBRID DISPATCHER + SILENT TEXT MODE ROUTE & SSE ENGINE
+    // 5. HYBRID DISPATCHER + SILENT TEXT MODE YOUTUBE/ROUTE COMMANDS
     // =========================================================================
     const zeldaTextPlayer = new Audio();
     let textAudioToken = 0;
@@ -2050,6 +2240,15 @@ LIVE INTERACTION & TOOL RULES:
     }
 
     async function checkSilentTextCommands(promptText) {
+      // 1. Silent Text YouTube Search Trigger
+      const ytMatch = promptText.match(/(?:pull up|search youtube for|play|watch|put on|find)\s+(.+?)(?:\s+(?:on|in)\s+youtube(\s+music)?)?$/i);
+      if (ytMatch && (/\byoutube\b/i.test(promptText) || /^(?:pull up|watch|put on)\b/i.test(promptText))) {
+        const cleanQuery = ytMatch[1].replace(/\s+(on|in)\s+youtube(\s+music)?$/i, '').replace(/[?.!]+$/, '').trim();
+        const appMode = /\byoutube\s+music\b/i.test(promptText) ? 'ytmusic' : (/\bopen\s+youtube\b/i.test(promptText) ? 'youtube' : null);
+        if (cleanQuery) return await ZeldaYouTube.searchAndPlay(cleanQuery, appMode);
+      }
+
+      // 2. Silent Text Route Plotting Trigger
       const routeMatch = promptText.match(/(?:set a route to|set a navigation route to|plot a route to|route me to|directions to|navigate to|take me to|head to)\s+(.+)/i);
       if (routeMatch) {
         let dest = routeMatch[1].replace(/[?.!]+$/, '').trim();
@@ -2063,6 +2262,7 @@ LIVE INTERACTION & TOOL RULES:
         }
         return await ZeldaMap.plotRouteToQuery(dest, ext);
       }
+
       if (/\b(clear route|cancel route|stop navigation)\b/i.test(promptText)) {
         return ZeldaMap.clearRoute();
       }
@@ -2071,8 +2271,9 @@ LIVE INTERACTION & TOOL RULES:
 
     async function dispatchSmartPrompt(promptText) {
       if (ZeldaLiveWS.sendTextTurnOverSocket(promptText)) return;
-      await checkSilentTextCommands(promptText);
-      askZeldaTextMode(promptText);
+      const toolResult = await checkSilentTextCommands(promptText);
+      const enriched = toolResult ? `${promptText} [Executed Action Result: ${JSON.stringify(toolResult)}]` : promptText;
+      askZeldaTextMode(enriched, { displayUserText: promptText });
     }
 
     function sendTextToZelda() {
@@ -2124,6 +2325,7 @@ LIVE INTERACTION & TOOL RULES:
 
     async function askZeldaTextMode(promptText, opts = {}) {
       const isSystemEvent = opts.isSystemEvent === true;
+      const shownText = opts.displayUserText || promptText;
       const apiKey = getCleanApiKey();
       if (!apiKey) {
         document.getElementById('zelda-speech').textContent = `⚙ [Tap Gear icon in top-right and paste your Gemini API Key, choom]`;
@@ -2133,14 +2335,14 @@ LIVE INTERACTION & TOOL RULES:
       stopAllTextAudio();
       const myTok = ++textAudioToken;
       if (!isSystemEvent) {
-        document.getElementById('zelda-speech').textContent = `⚡ [Syncing: "${promptText}"...]`;
-        conversationTurns.push({ role: 'user', text: promptText });
+        document.getElementById('zelda-speech').textContent = `⚡ [Syncing: "${shownText}"...]`;
+        conversationTurns.push({ role: 'user', text: shownText });
         saveEngramState();
       }
 
       const sys = buildZeldaSystemPrompt() + '\nOutput PLAIN SPOKEN TEXT ONLY (1–2 crisp sentences, zero JSON or markdown).';
       const cleanedTurns = [];
-      for (const t of conversationTurns.slice(-6)) {
+      for (const t of [...conversationTurns.slice(-5), { role: 'user', text: promptText }]) {
         const role = t.role === 'model' ? 'model' : 'user';
         const txt = (t.text || '').trim();
         if (!txt || (cleanedTurns.length === 0 && role === 'model')) continue;
@@ -2150,7 +2352,6 @@ LIVE INTERACTION & TOOL RULES:
           cleanedTurns.push({ role, parts: [{ text: txt }] });
         }
       }
-      if (!cleanedTurns.length) cleanedTurns.push({ role: 'user', parts: [{ text: promptText }] });
 
       for (const model of ['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-2.5-flash']) {
         try {
@@ -2427,7 +2628,6 @@ LIVE INTERACTION & TOOL RULES:
     function openCarSystemSettings() { if (window.ZeldaBridge?.openAndroidSettings) window.ZeldaBridge.openAndroidSettings(); }
     function setAsPrimaryCarLauncher() { if (window.ZeldaBridge?.openHomeLauncherSettings) window.ZeldaBridge.openHomeLauncherSettings(); }
 
-    // Passes active plotted route coordinates straight into Waze or Google Maps turn-by-turn
     function openExternalNav(target) {
       const r = state.activeRoute;
       if (target === 'waze') {
@@ -2470,4 +2670,3 @@ LIVE INTERACTION & TOOL RULES:
   </script>
 </body>
 </html>
-          
