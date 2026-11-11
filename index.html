@@ -6,7 +6,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#05070B" />
-  <title>PROJECT ZELDA v4.4.1 // DUAL-KEY YOUTUBE AI DECK</title>
+  <title>PROJECT ZELDA v4.4.2 // DUAL-KEY YOUTUBE + CLEAN LIVE VOICE</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
@@ -251,7 +251,7 @@
   <!-- ROW 1: HEADER BAR -->
   <header class="cp-box cp-box-yellow flex items-center justify-between" style="padding: 0 10px;">
     <div class="flex items-center" style="gap: 6px;">
-      <span class="font-secondary" style="color: var(--cp-yellow); font-size: 13px; font-weight: 900; letter-spacing: 0.08em;">ZELDA // v4.4.1</span>
+      <span class="font-secondary" style="color: var(--cp-yellow); font-size: 13px; font-weight: 900; letter-spacing: 0.08em;">ZELDA // v4.4.2</span>
       <span id="net-mode-badge" onclick="probeCloudConnectivity()" class="cp-tag cursor-pointer" style="color: var(--cp-green); border: 1px solid rgba(0,255,157,0.45); padding: 1px 5px;">CLOUD // LIVE</span>
       <span id="shift-pill" onclick="switchDeckTab('BIO')" class="cp-tag cursor-pointer" style="color: var(--cp-cyan); border: 1px solid rgba(0,240,255,0.4); padding: 1px 5px;">C-SHIFT</span>
       <span id="dtc-badge" onclick="runFullAiDiagnostics()" class="cp-tag cursor-pointer" style="color: var(--cp-green); border: 1px solid rgba(0,255,157,0.35); padding: 1px 5px;">DTC: OK</span>
@@ -591,7 +591,7 @@
 
   </main>
 
-  <!-- ROW 5: ZERO-THINK AUDIOWORKLET HOLOCALL & DIAGNOSTICS DECK -->
+  <!-- ROW 5: FRACTIONAL AUDIOWORKLET HOLOCALL & DIAGNOSTICS DECK -->
   <section class="cp-box cp-box-red flex flex-col justify-between" style="padding: 9px;">
     <div class="flex items-center justify-between">
       <div class="flex items-center" style="gap: 5px;">
@@ -617,7 +617,7 @@
       </div>
 
       <p id="zelda-speech" class="flex-1" style="font-size: 13px; font-weight: 600; color: #F1F5F9; line-height: 1.24; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-        "v4.4.1 online, choom—dual Gemini + YouTube key slots ready inside Gear settings."
+        "v4.4.2 online, choom—fractional 16kHz resampler & instant Live Call locked in."
       </p>
     </div>
 
@@ -658,14 +658,14 @@
   <div id="config-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center" style="background: rgba(0,0,0,0.88); padding: 16px;">
     <div class="cp-box cp-box-yellow w-full" style="max-width: 440px; padding: 16px;">
       <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 8px; margin-bottom: 10px;">
-        <span class="font-secondary" style="font-size: 13px; font-weight: 800; color: var(--cp-yellow);">⚙ KIROSHI OS // v4.4.1</span>
+        <span class="font-secondary" style="font-size: 13px; font-weight: 800; color: var(--cp-yellow);">⚙ KIROSHI OS // v4.4.2</span>
         <button onclick="toggleConfigModal()" class="cp-btn" style="padding: 2px 8px; color: #94A3B8;">✕</button>
       </div>
 
       <div style="background: rgba(0,0,0,0.75); border: 1px solid rgba(255,255,255,0.12); padding: 8px; font-size: 11px; font-family: monospace; margin-bottom: 10px;">
-        <div style="color: var(--cp-cyan); font-weight: 700;">RUNTIME DIAGNOSTICS (BUILD v4.4.1):</div>
+        <div style="color: var(--cp-cyan); font-weight: 700;">RUNTIME DIAGNOSTICS (BUILD v4.4.2):</div>
         <div id="probe-ua" class="truncate" style="color: #CBD5E1; margin-top: 2px;">OS: probing...</div>
-        <div id="probe-apis" style="color: #CBD5E1; margin-top: 2px;">Keys: GEMINI AUTH KEY + YOUTUBE DATA v3 KEY</div>
+        <div id="probe-apis" style="color: #CBD5E1; margin-top: 2px;">Audio: 100ms FRACTIONAL 16kHz + 500ms VAD NUDGE</div>
       </div>
 
       <div style="margin-bottom: 10px;">
@@ -770,7 +770,7 @@
       { code: 'OFF 7/7', label: 'LONG CHANGE OFF 7 OF 7', type: 'OFF', next: 'Pre-shift nap — Night 1 of 4 at 16:00' },
       { code: 'N1/4', label: 'NIGHT 1 OF 4 (16:00–04:00)', type: 'NIGHT', next: '3 more Nights in block' },
       { code: 'N2/4', label: 'NIGHT 2 OF 4 (16:00–04:00)', type: 'NIGHT', next: '2 more Nights in block' },
-      { code: 'N3/4', label: 'NIGHT 3 OF 4 (16:00–04:00)', type: 'NIGHT', next: '1 more Night before 3 OFF' },
+            { code: 'N3/4', label: 'NIGHT 3 OF 4 (16:00–04:00)', type: 'NIGHT', next: '1 more Night before 3 OFF' },
       { code: 'N4/4', label: 'NIGHT 4 OF 4 (16:00–04:00)', type: 'NIGHT', next: '3 OFF starts at 04:00!' },
       { code: 'OFF 1/3', label: 'RECOVERY OFF 1 OF 3', type: 'OFF', next: 'Post-night recovery window' },
       { code: 'OFF 2/3', label: 'OFF DAY 2 OF 3', type: 'OFF', next: '1 more day off before 3 Days' },
@@ -1387,7 +1387,7 @@
         if (!q) return [];
         const ytApiKey = getCleanYouTubeKey();
 
-        // Tier 1: Official YouTube Data API v3 using J's dedicated YouTube key!
+        // Tier 1: Official YouTube Data API v3 using dedicated YouTube key
         if (ytApiKey) {
           try {
             const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=6&q=${encodeURIComponent(q)}&key=${encodeURIComponent(ytApiKey)}`;
@@ -1472,7 +1472,7 @@
             : `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
           if (launchApp) window.open(fallbackUrl, '_blank');
           document.getElementById('media-deck-label').textContent = 'YT // TAP APP ↗ FOR FULL SEARCH';
-          return { ok: false, fallbackSearchUrl: fallbackUrl, note: 'Add YouTube v3 key in Gear settings or tap APP.' };
+          return { ok: false, fallbackSearchUrl: fallbackUrl, note: 'Verify YouTube v3 key in Gear settings or tap APP.' };
         }
 
         this.queue = results;
@@ -1586,7 +1586,7 @@
     };
 
     // =========================================================================
-    // 4. ZERO-THINK AUDIOWORKLET + 95ms JITTER BUFFER GEMINI 3.8 LIVE ENGINE
+    // 4. FRACTIONAL 16kHz AUDIOWORKLET + CLEAN GEMINI LIVE WEBSOCKET (v4.4.2)
     // =========================================================================
     const eqBars = Array.from(document.querySelectorAll('#voice-eq .eq-bar'));
     let lastEqDraw = 0;
@@ -1663,7 +1663,7 @@ LONG-TERM ENGRAM MEMORIES ABOUT J:
 ${longTermMemories.map(m => '- ' + m).join('\n')}
 
 LIVE INTERACTION & TOOL RULES:
-1. Keep spoken replies conversational, natural, and crisp (1–2 short sentences) so voice dialogue flows with zero lag.
+1. Keep spoken replies conversational, natural, and crisp (1–2 short sentences) so voice dialogue flows fast.
 2. Do NOT recite gauge numbers during casual chat unless J asks or something is out of spec.
 3. Whenever J asks to search for, pull up, watch, or play a YouTube video, song, artist, live set, or tutorial, call search_and_play_youtube immediately!
 4. Whenever J asks to set/plot a route, navigate somewhere, or head home/work/anywhere, call set_navigation_route immediately.
@@ -1808,30 +1808,39 @@ LIVE INTERACTION & TOOL RULES:
       return { status: 'unknown_tool' };
     }
 
+    // Fractional 16kHz resampler + 100ms (1600-sample) batching = zero dropped samples & 10 clean frames/sec
     const WORKLET_CODE = `
       class ZeldaMicProcessor extends AudioWorkletProcessor {
         constructor() {
           super();
-          this.buf = new Int16Array(320);
+          this.buf = new Int16Array(1600);
           this.idx = 0;
+          this.phase = 0;
+          this.sumSq = 0;
+          this.count = 0;
         }
         process(inputs) {
           const ch = inputs[0]?.[0];
-          if (!ch) return true;
-          const ratio = sampleRate / 16000;
-          let sumSq = 0;
-          const outSamples = Math.floor(ch.length / ratio);
-          for (let i = 0; i < outSamples; i++) {
-            const s = Math.max(-1, Math.min(1, ch[Math.floor(i * ratio)]));
-            sumSq += s * s;
+          if (!ch || !ch.length) return true;
+          const step = sampleRate / 16000;
+
+          while (this.phase < ch.length) {
+            const s = Math.max(-1, Math.min(1, ch[Math.floor(this.phase)]));
+            this.sumSq += s * s;
+            this.count++;
             this.buf[this.idx++] = s < 0 ? s * 0x8000 : s * 0x7FFF;
-            if (this.idx >= 320) {
-              const copy = this.buf.slice(0);
-              this.port.postMessage({ pcmBuffer: copy.buffer, rms: Math.sqrt(sumSq / Math.max(1, outSamples)) }, [copy.buffer]);
+
+            if (this.idx >= 1600) {
+              const copy = new Int16Array(this.buf);
+              const rms = Math.sqrt(this.sumSq / Math.max(1, this.count));
+              this.port.postMessage({ pcmBuffer: copy.buffer, rms }, [copy.buffer]);
               this.idx = 0;
-              sumSq = 0;
+              this.sumSq = 0;
+              this.count = 0;
             }
+            this.phase += step;
           }
+          this.phase -= ch.length;
           return true;
         }
       }
@@ -1851,6 +1860,7 @@ LIVE INTERACTION & TOOL RULES:
       ws: null,
       audioCtx: null,
       outGain: null,
+      silentSink: null,
       workletReady: false,
       micStream: null,
       workletNode: null,
@@ -1858,14 +1868,16 @@ LIVE INTERACTION & TOOL RULES:
       active: false,
       setupReady: false,
       toolRunning: false,
+      modelsCached: false,
+      activeModelName: 'models/gemini-3.8-live',
       candidateQueue: [
         'models/gemini-3.8-live',
         'models/gemini-2.5-flash-native-audio-preview-12-2025',
         'models/gemini-live-2.5-flash-native-audio',
-        'models/gemini-3.1-flash-live-preview'
+        'models/gemini-2.0-flash-live-001'
       ],
       candidateIdx: 0,
-      setupAttemptStage: 0,
+      setupStage: 0, // 0 = fast 320ms VAD + transcriptions (same proven v4.3 handshake), 1 = plain setup
       scheduledSources: [],
       nextPlayTime: 0,
       inTranscriptBuf: '',
@@ -1883,7 +1895,7 @@ LIVE INTERACTION & TOOL RULES:
         }
 
         stopAllTextAudio();
-        document.getElementById('zelda-speech').textContent = '⚡ [Locking zero-think Live socket + off-thread mic...]';
+        document.getElementById('zelda-speech').textContent = '⚡ [Opening instant Live WebSocket...]';
 
         try {
           if (!this.audioCtx || this.audioCtx.state === 'closed') {
@@ -1913,14 +1925,21 @@ LIVE INTERACTION & TOOL RULES:
         this.active = true;
         this.toolRunning = false;
         this.candidateIdx = 0;
-        this.setupAttemptStage = 0;
-        await this.refreshLiveModelOrder(apiKey);
+        this.setupStage = 0;
+
+        if (!this.modelsCached) {
+          await this.refreshLiveModelOrder(apiKey);
+          this.modelsCached = true;
+        }
         this.openSocketAttempt(apiKey);
       },
 
       async refreshLiveModelOrder(apiKey) {
         try {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
+          const ctrl = new AbortController();
+          const t = setTimeout(() => ctrl.abort(), 1600);
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`, { signal: ctrl.signal });
+          clearTimeout(t);
           if (!res.ok) return;
           const data = await res.json();
           const bidi = (data.models || [])
@@ -1931,9 +1950,8 @@ LIVE INTERACTION & TOOL RULES:
             if (n.includes('3.8') && n.includes('live') && !n.includes('extended')) return 100;
             if (n.includes('3.8')) return 92;
             if (n.includes('3.5') && n.includes('live')) return 88;
-            if (n.includes('3.1') && n.includes('live')) return 84;
-            if (n.includes('native-audio')) return 80;
-            if (n.includes('2.5') && n.includes('live')) return 70;
+            if (n.includes('native-audio')) return 82;
+            if (n.includes('2.5') && n.includes('live')) return 75;
             return 50;
           };
           bidi.sort((a, b) => score(b) - score(a));
@@ -1944,6 +1962,7 @@ LIVE INTERACTION & TOOL RULES:
       openSocketAttempt(apiKey) {
         if (!this.active) return;
         const modelName = this.candidateQueue[this.candidateIdx] || 'models/gemini-3.8-live';
+        this.activeModelName = modelName;
         document.getElementById('live-model-pill').textContent =
           `${modelName.replace('models/gemini-', '').slice(0, 14).toUpperCase()}`;
 
@@ -1952,31 +1971,27 @@ LIVE INTERACTION & TOOL RULES:
         this.ws = new WebSocket(wsUrl);
 
         this.ws.onopen = () => {
-          const genCfg = {
-            responseModalities: ['AUDIO'],
-            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } }
-          };
-          if (this.setupAttemptStage === 0) {
-            genCfg.thinkingConfig = { thinkingBudget: 0 };
-          }
-
+          // Proven v4.3 handshake without rejected thinkingConfig
           const setupPayload = {
             setup: {
               model: modelName,
-              generationConfig: genCfg,
+              generationConfig: {
+                responseModalities: ['AUDIO'],
+                speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } }
+              },
               systemInstruction: { parts: [{ text: buildZeldaSystemPrompt() }] },
               tools: ZELDA_LIVE_TOOLS
             }
           };
 
-          if (this.setupAttemptStage <= 1) {
+          if (this.setupStage === 0) {
             setupPayload.setup.realtimeInputConfig = {
               automaticActivityDetection: {
                 disabled: false,
                 startOfSpeechSensitivity: 'START_SENSITIVITY_HIGH',
                 endOfSpeechSensitivity: 'END_SENSITIVITY_HIGH',
-                prefixPaddingMs: 100,
-                silenceDurationMs: 280
+                prefixPaddingMs: 120,
+                silenceDurationMs: 320
               }
             };
             setupPayload.setup.inputAudioTranscription = {};
@@ -1998,14 +2013,14 @@ LIVE INTERACTION & TOOL RULES:
         this.ws.onclose = (ev) => {
           if (!this.active) return;
           if (!this.setupReady) {
-            if (this.setupAttemptStage < 2) {
-              this.setupAttemptStage++;
+            if (this.setupStage === 0) {
+              this.setupStage = 1;
               this.openSocketAttempt(apiKey);
               return;
             }
             if (this.candidateIdx + 1 < this.candidateQueue.length) {
               this.candidateIdx++;
-              this.setupAttemptStage = 0;
+              this.setupStage = 0;
               this.openSocketAttempt(apiKey);
               return;
             }
@@ -2086,13 +2101,22 @@ LIVE INTERACTION & TOOL RULES:
 
       sendRawPcmFrame(pcmArrayBuffer, rms) {
         if (!this.active || !this.setupReady || this.toolRunning || this.ws?.readyState !== WebSocket.OPEN) return;
+
         if (this.scheduledSources.length === 0) {
-          pulseEqBars(rms > 0.014 ? Math.min(95, 24 + rms * 420) : 16, '#00FF9D');
+          pulseEqBars(rms > 0.012 ? Math.min(95, 24 + rms * 450) : 16, '#00FF9D');
         }
+
         const b64 = uint8ToBase64Fast(new Uint8Array(pcmArrayBuffer));
-        this.ws.send(JSON.stringify({
-          realtimeInput: { audio: { data: b64, mimeType: 'audio/pcm;rate=16000' } }
-        }));
+        // Support both 3.x/2.5 audio payload and 2.0 mediaChunks fallback seamlessly
+        if (this.activeModelName.includes('2.0')) {
+          this.ws.send(JSON.stringify({
+            realtimeInput: { mediaChunks: [{ mimeType: 'audio/pcm;rate=16000', data: b64 }] }
+          }));
+        } else {
+          this.ws.send(JSON.stringify({
+            realtimeInput: { audio: { data: b64, mimeType: 'audio/pcm;rate=16000' } }
+          }));
+        }
       },
 
       startMicAudioPump() {
@@ -2103,9 +2127,13 @@ LIVE INTERACTION & TOOL RULES:
         if (this.workletReady && window.AudioWorkletNode) {
           this.workletNode = new AudioWorkletNode(this.audioCtx, 'zelda-mic-worklet');
           this.workletNode.port.onmessage = (ev) => this.sendRawPcmFrame(ev.data.pcmBuffer, ev.data.rms);
+          this.silentSink = this.audioCtx.createGain();
+          this.silentSink.gain.value = 0;
           this.sourceNode.connect(this.workletNode);
+          this.workletNode.connect(this.silentSink);
+          this.silentSink.connect(this.audioCtx.destination);
         } else {
-          const proc = this.audioCtx.createScriptProcessor(2048, 1, 1);
+          const proc = this.audioCtx.createScriptProcessor(4096, 1, 1);
           const ratio = this.audioCtx.sampleRate / 16000;
           proc.onaudioprocess = (e) => {
             const ch = e.inputBuffer.getChannelData(0);
@@ -2119,11 +2147,11 @@ LIVE INTERACTION & TOOL RULES:
             }
             this.sendRawPcmFrame(pcm16.buffer, Math.sqrt(sum / Math.max(1, outLen)));
           };
-          const mute = this.audioCtx.createGain();
-          mute.gain.value = 0;
+          this.silentSink = this.audioCtx.createGain();
+          this.silentSink.gain.value = 0;
           this.sourceNode.connect(proc);
-          proc.connect(mute);
-          mute.connect(this.audioCtx.destination);
+          proc.connect(this.silentSink);
+          this.silentSink.connect(this.audioCtx.destination);
           this.workletNode = proc;
         }
       },
@@ -2156,7 +2184,7 @@ LIVE INTERACTION & TOOL RULES:
 
         const now = this.audioCtx.currentTime;
         if (this.scheduledSources.length === 0 || this.nextPlayTime < now) {
-          this.nextPlayTime = now + 0.085;
+          this.nextPlayTime = now + 0.095;
         }
 
         setHolocallState('SPEAKING');
@@ -2198,8 +2226,10 @@ LIVE INTERACTION & TOOL RULES:
 
       cleanupMicNodes() {
         try { this.workletNode?.disconnect(); } catch (_) {}
+        try { this.silentSink?.disconnect(); } catch (_) {}
         try { this.sourceNode?.disconnect(); } catch (_) {}
         this.workletNode = null;
+        this.silentSink = null;
         this.sourceNode = null;
       },
 
@@ -2665,4 +2695,4 @@ LIVE INTERACTION & TOOL RULES:
     });
   </script>
 </body>
-</html>
+</html> 
