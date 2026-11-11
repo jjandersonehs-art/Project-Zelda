@@ -6,7 +6,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#05070B" />
-  <title>PROJECT ZELDA v4.0 // NIGHT CITY x CHRONOHUME</title>
+  <title>PROJECT ZELDA v4.1 // NIGHT CITY x CHRONOHUME</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
@@ -174,7 +174,6 @@
       transition: height 0.05s linear, background-color 0.08s ease;
     }
 
-    /* IN-GAME CYBERPUNK 2077 3D HOLOGRAPHIC MAP STAGE */
     #zelda-map-stage {
       position: relative;
       flex: 1 1 0%;
@@ -183,16 +182,9 @@
       background: radial-gradient(circle at 50% 50%, #0A1926 0%, #04080F 100%);
       overflow: hidden;
     }
-    #zelda-gl-map {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-    }
+    #zelda-gl-map { position: absolute; inset: 0; width: 100%; height: 100%; }
     .cp2077-scanlines {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
+      position: absolute; inset: 0; pointer-events: none;
       background:
         repeating-linear-gradient(0deg, rgba(0, 240, 255, 0.03) 0px, rgba(0, 240, 255, 0.03) 1px, transparent 1px, transparent 3px),
         radial-gradient(circle at 50% 50%, transparent 58%, rgba(255, 42, 84, 0.18) 100%);
@@ -200,33 +192,23 @@
     }
     .cp-quest-pin {
       width: 18px; height: 18px;
-      background: #FCEE0A;
-      border: 2px solid #05070B;
-      transform: rotate(45deg);
-      box-shadow: 0 0 12px #FCEE0A;
+      background: #FCEE0A; border: 2px solid #05070B;
+      transform: rotate(45deg); box-shadow: 0 0 12px #FCEE0A;
       display: flex; align-items: center; justify-content: center;
     }
     .cp-quest-pin::after {
-      content: '!';
-      transform: rotate(-45deg);
-      color: #000;
-      font-weight: 900;
-      font-size: 11px;
-      font-family: 'Orbitron', sans-serif;
+      content: '!'; transform: rotate(-45deg);
+      color: #000; font-weight: 900; font-size: 11px; font-family: 'Orbitron', sans-serif;
     }
     .cp-player-chevron {
-      width: 22px; height: 22px;
-      border-radius: 999px;
-      background: rgba(0, 240, 255, 0.22);
-      border: 2px solid #00F0FF;
+      width: 22px; height: 22px; border-radius: 999px;
+      background: rgba(0, 240, 255, 0.22); border: 2px solid #00F0FF;
       box-shadow: 0 0 16px #00F0FF;
       display: flex; align-items: center; justify-content: center;
     }
     .cp-player-chevron-inner {
       width: 0; height: 0;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      border-bottom: 10px solid #FFFFFF;
+      border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 10px solid #FFFFFF;
     }
 
     @keyframes spinSlow { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
@@ -245,7 +227,7 @@
   <!-- ROW 1: HEADER BAR -->
   <header class="cp-box cp-box-yellow flex items-center justify-between" style="padding: 0 10px;">
     <div class="flex items-center" style="gap: 6px;">
-      <span class="font-secondary" style="color: var(--cp-yellow); font-size: 13px; font-weight: 900; letter-spacing: 0.08em;">ZELDA // v4</span>
+      <span class="font-secondary" style="color: var(--cp-yellow); font-size: 13px; font-weight: 900; letter-spacing: 0.08em;">ZELDA // v4.1</span>
       <span id="net-mode-badge" onclick="probeCloudConnectivity()" class="cp-tag cursor-pointer" style="color: var(--cp-green); border: 1px solid rgba(0,255,157,0.45); padding: 1px 5px;">CLOUD // LIVE</span>
       <span id="shift-pill" onclick="switchDeckTab('BIO')" class="cp-tag cursor-pointer" style="color: var(--cp-cyan); border: 1px solid rgba(0,240,255,0.4); padding: 1px 5px;">C-SHIFT</span>
       <span id="dtc-badge" onclick="runFullAiDiagnostics()" class="cp-tag cursor-pointer" style="color: var(--cp-green); border: 1px solid rgba(0,255,157,0.35); padding: 1px 5px;">DTC: OK</span>
@@ -322,7 +304,7 @@
       </div>
 
       <div class="relative z-10 gauges-grid">
-        <div id="card-load" onclick="askZelda('Check my engine load and RPM behavior right now.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 9px;">
+        <div id="card-load" onclick="unlockAudioOnGesture(); askZelda('Check my engine load and RPM behavior right now.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 9px;">
           <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
             <span style="color: var(--cp-cyan); font-size: 11px; font-weight: 700;">ENGINE LOAD</span>
             <span id="pk-load" class="t-nums" style="color: #94A3B8; font-size: 10px; font-weight: 700;">PK 18%</span>
@@ -334,7 +316,7 @@
           <div style="width: 100%; background: rgba(0,0,0,0.7); height: 5px;"><div id="bar-load" style="background: var(--cp-cyan); height: 100%; width: 18%;"></div></div>
         </div>
 
-        <div id="card-coolant" onclick="askZelda('Check my coolant temp and thermal state right now.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 9px;">
+        <div id="card-coolant" onclick="unlockAudioOnGesture(); askZelda('Check my coolant temp and thermal state right now.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 9px;">
           <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
             <span style="color: var(--cp-cyan); font-size: 11px; font-weight: 700;">COOLANT TEMP</span>
             <span id="pk-coolant" class="t-nums" style="color: #94A3B8; font-size: 10px; font-weight: 700;">PK 190°F</span>
@@ -346,7 +328,7 @@
           <div style="width: 100%; background: rgba(0,0,0,0.7); height: 5px;"><div id="bar-coolant" style="background: var(--cp-cyan); height: 100%; width: 65%;"></div></div>
         </div>
 
-        <div id="card-iat" onclick="askZelda('Check my Z1 intake air temps for heat soak.')" class="cp-box cp-box-yellow flex flex-col justify-between cursor-pointer" style="padding: 9px;">
+        <div id="card-iat" onclick="unlockAudioOnGesture(); askZelda('Check my Z1 intake air temps for heat soak.')" class="cp-box cp-box-yellow flex flex-col justify-between cursor-pointer" style="padding: 9px;">
           <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
             <span style="color: var(--cp-yellow); font-size: 11px; font-weight: 700;">INTAKE AIR</span>
             <span id="pk-iat" class="t-nums" style="color: #94A3B8; font-size: 10px; font-weight: 700;">PK 94°F</span>
@@ -358,7 +340,7 @@
           <div style="width: 100%; background: rgba(0,0,0,0.7); height: 5px;"><div id="bar-iat" style="background: var(--cp-yellow); height: 100%; width: 45%;"></div></div>
         </div>
 
-        <div id="card-timing" onclick="askZelda('Check my ignition timing advance right now.')" class="cp-box cp-box-yellow flex flex-col justify-between cursor-pointer" style="padding: 9px;">
+        <div id="card-timing" onclick="unlockAudioOnGesture(); askZelda('Check my ignition timing advance right now.')" class="cp-box cp-box-yellow flex flex-col justify-between cursor-pointer" style="padding: 9px;">
           <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
             <span style="color: var(--cp-yellow); font-size: 11px; font-weight: 700;">TIMING ADV</span>
             <span id="pk-timing" class="t-nums" style="color: #94A3B8; font-size: 10px; font-weight: 700;">PK 15°</span>
@@ -370,7 +352,7 @@
           <div style="width: 100%; background: rgba(0,0,0,0.7); height: 5px;"><div id="bar-timing" style="background: var(--cp-yellow); height: 100%; width: 50%;"></div></div>
         </div>
 
-        <div id="card-stft" onclick="askZelda('Analyze my Bank 1 and Bank 2 fuel trims right now.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 9px;">
+        <div id="card-stft" onclick="unlockAudioOnGesture(); askZelda('Analyze my Bank 1 and Bank 2 fuel trims right now.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 9px;">
           <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
             <span style="color: var(--cp-cyan); font-size: 11px; font-weight: 700;">DUAL TRIM B1/B2</span>
             <span id="stft-status" style="color: #34D399; font-size: 9px; font-weight: 700;">BALANCED</span>
@@ -382,7 +364,7 @@
           <div style="width: 100%; background: rgba(0,0,0,0.7); height: 5px;"><div style="background: #34D399; height: 100%; width: 50%;"></div></div>
         </div>
 
-        <div id="card-volt" onclick="askZelda('Check my battery and alternator charging health.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 9px;">
+        <div id="card-volt" onclick="unlockAudioOnGesture(); askZelda('Check my battery and alternator charging health.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 9px;">
           <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
             <span style="color: var(--cp-cyan); font-size: 11px; font-weight: 700;">BATTERY / ALT</span>
             <span id="volt-status" style="color: #34D399; font-size: 9px; font-weight: 700;">CHARGING</span>
@@ -399,7 +381,6 @@
     <!-- VIEW 2: IN-GAME CYBERPUNK 2077 3D HOLOGRAPHIC MAP -->
     <div id="view-NAV" class="h-full hidden flex flex-col">
       <div class="cp-box cp-box-red flex-1 relative flex flex-col justify-between h-full" style="border-color: rgba(255,42,84,0.45);">
-        <!-- Night City Top Red HUD Header -->
         <div class="flex justify-between items-center z-20" style="background: rgba(12, 6, 10, 0.92); padding: 5px 10px; border-bottom: 1px solid rgba(255, 42, 84, 0.45);">
           <div class="flex items-center" style="gap: 8px;">
             <span class="font-secondary" style="color: var(--cp-cyan); font-size: 10px; font-weight: 800;">32 STREET CRED</span>
@@ -408,32 +389,27 @@
           <span id="gps-coords" class="t-nums" style="color: var(--cp-yellow); font-size: 10px; font-weight: 700;">29.7958°N 90.8229°W | 0 MPH</span>
         </div>
 
-        <!-- 3D MapLibre GL Stage + Cyberpunk 2077 HUD Overlays -->
         <div id="zelda-map-stage">
           <div id="zelda-gl-map"></div>
           <div class="cp2077-scanlines"></div>
 
-          <!-- Top-Left In-Game FILTER Overlay -->
           <div class="absolute z-10 pointer-events-none" style="top: 10px; left: 10px; background: rgba(8, 6, 12, 0.78); border-left: 2px solid var(--cp-red); padding: 5px 8px;">
             <div style="font-size: 9px; font-weight: 800; color: var(--cp-red); letter-spacing: 0.16em;">FILTER // HOLO-3D</div>
             <div style="font-size: 10px; font-weight: 700; color: var(--cp-cyan); margin-top: 2px;">✚ 3D STRUCTURES: ON</div>
             <div style="font-size: 10px; font-weight: 700; color: #FCEE0A;">◈ GIG BEACONS: ACTIVE</div>
           </div>
 
-          <!-- Top-Right In-Game ACTIVE GIG / QUEST Tracker -->
           <div class="absolute z-10 text-right pointer-events-none" style="top: 10px; right: 10px; background: rgba(8, 6, 12, 0.78); border-right: 2px solid var(--cp-yellow); padding: 5px 8px;">
             <div id="nc-quest-title" style="font-size: 10px; font-weight: 800; color: var(--cp-yellow); letter-spacing: 0.12em;">NIGHT RUN // C-SHIFT</div>
             <div id="nc-quest-sub" style="font-size: 10px; font-weight: 600; color: #F1F5F9;">Monitor VQ37 & Biometrics</div>
           </div>
 
-          <!-- Bottom-Right District / Sector Readout -->
           <div class="absolute z-10 text-right pointer-events-none" style="bottom: 10px; right: 10px; background: rgba(8, 6, 12, 0.85); border: 1px solid rgba(255,42,84,0.4); padding: 4px 9px;">
             <div id="nc-map-clock" class="t-nums" style="font-size: 10px; font-weight: 700; color: var(--cp-cyan);">--:--</div>
             <div id="nc-sector-name" class="font-secondary" style="font-size: 11px; font-weight: 800; color: var(--cp-red);">LAFOURCHE // SECTOR</div>
           </div>
         </div>
 
-        <!-- Bottom Action Bar -->
         <div class="four-col-grid z-20" style="background: rgba(8, 6, 12, 0.95); padding: 7px; border-top: 1px solid rgba(255,42,84,0.4);">
           <button onclick="ZeldaMap.recenter()" class="cp-btn" style="padding: 5px; font-size: 10px; color: var(--cp-cyan); font-weight: 700;">⊕ LOCK Z34</button>
           <button onclick="ZeldaMap.toggleTilt()" class="cp-btn" style="padding: 5px; font-size: 10px; color: var(--cp-red); font-weight: 700;">◈ 3D / 2D</button>
@@ -508,35 +484,33 @@
       </div>
     </div>
 
-    <!-- VIEW 4: CHRONOHUME BIOMETRICS & C-SHIFT TELEMETRY -->
+    <!-- VIEW 4: CHRONOHUME BIOMETRICS & C-SHIFT TELEMETRY (HEALTH CONNECT READY) -->
     <div id="view-BIO" class="h-full hidden flex flex-col">
       <div class="cp-box flex-1 flex flex-col justify-between h-full" style="padding: 10px; gap: 7px;">
-        <!-- C-Shift 28-Day Engine Banner -->
         <div style="background: rgba(0,0,0,0.75); border: 1px solid rgba(0,240,255,0.3); border-left: 3px solid var(--cp-yellow); padding: 7px 10px;" class="flex justify-between items-center">
           <div>
-            <div class="cp-tag" style="color: var(--cp-yellow);">CHRONOHUME // 28-DAY C-SHIFT ENGINE</div>
+            <div class="cp-tag" style="color: var(--cp-yellow);" id="bio-source-tag">CHRONOHUME // 28-DAY C-SHIFT ENGINE</div>
             <div id="bio-shift-headline" class="font-secondary" style="font-size: 14px; font-weight: 800; color: #FFF; margin-top: 1px;">NIGHT 1 OF 3 (16:00–04:00)</div>
             <div id="bio-shift-next" style="font-size: 11px; color: var(--cp-cyan); font-weight: 600;">Next Block: 3 OFF starting Fri Nov 13</div>
           </div>
-          <button onclick="askZelda('Analyze my current C-Shift fatigue, active caffeine, and body readiness right now.')" class="cp-btn font-secondary" style="padding: 6px 9px; font-size: 10px; font-weight: 700; color: var(--cp-yellow);">⚡ BIO CHECK</button>
+          <button onclick="unlockAudioOnGesture(); askZelda('Analyze my current C-Shift fatigue, active caffeine, and body readiness right now.')" class="cp-btn font-secondary" style="padding: 6px 9px; font-size: 10px; font-weight: 700; color: var(--cp-yellow);">⚡ BIO CHECK</button>
         </div>
 
-        <!-- 4 Vital Telemetry Cards (Tap any card to log/update) -->
         <div class="two-col-grid flex-1">
           <div onclick="promptBioUpdate('sleep')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 8px;">
-            <div class="flex justify-between"><span style="color: var(--cp-cyan); font-size: 11px; font-weight: 700;">SLEEP (LAST 24H)</span><span class="cp-tag">TAP TO LOG</span></div>
+            <div class="flex justify-between"><span style="color: var(--cp-cyan); font-size: 11px; font-weight: 700;">SLEEP (LAST 24H)</span><span class="cp-tag">TAP / HC</span></div>
             <div><span id="bio-val-sleep" class="t-nums" style="font-size: 26px; font-weight: 800; color: #FFF;">6.8</span><span style="font-size: 11px; color: var(--cp-cyan); font-weight: 700; margin-left: 3px;">HRS</span></div>
             <div id="bio-status-sleep" style="font-size: 10px; font-weight: 700; color: #34D399;">RECOVERY NOMINAL</div>
           </div>
 
           <div onclick="promptBioUpdate('hrv')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 8px;">
-            <div class="flex justify-between"><span style="color: var(--cp-cyan); font-size: 11px; font-weight: 700;">HRV // WATCH ULTRA</span><span class="cp-tag">TAP TO LOG</span></div>
+            <div class="flex justify-between"><span style="color: var(--cp-cyan); font-size: 11px; font-weight: 700;">HRV // WATCH + HUME</span><span class="cp-tag">TAP / HC</span></div>
             <div><span id="bio-val-hrv" class="t-nums" style="font-size: 26px; font-weight: 800; color: #FFF;">58</span><span style="font-size: 11px; color: var(--cp-cyan); font-weight: 700; margin-left: 3px;">MS</span></div>
             <div id="bio-status-hrv" style="font-size: 10px; font-weight: 700; color: #34D399;">AUTONOMIC BALANCED</div>
           </div>
 
           <div onclick="promptBioUpdate('rhr')" class="cp-box cp-box-yellow flex flex-col justify-between cursor-pointer" style="padding: 8px;">
-            <div class="flex justify-between"><span style="color: var(--cp-yellow); font-size: 11px; font-weight: 700;">RESTING / LIVE HR</span><span class="cp-tag">TAP TO LOG</span></div>
+            <div class="flex justify-between"><span style="color: var(--cp-yellow); font-size: 11px; font-weight: 700;">RESTING / LIVE HR</span><span class="cp-tag">TAP / HC</span></div>
             <div><span id="bio-val-rhr" class="t-nums" style="font-size: 26px; font-weight: 800; color: #FFF;">61</span><span style="font-size: 11px; color: var(--cp-yellow); font-weight: 700; margin-left: 3px;">BPM</span></div>
             <div id="bio-status-rhr" style="font-size: 10px; font-weight: 700; color: #94A3B8;">BASELINE STEADY</div>
           </div>
@@ -548,12 +522,11 @@
           </div>
         </div>
 
-        <!-- Pharmacokinetic Caffeine Quick-Logger -->
         <div class="four-col-grid">
           <button onclick="logCaffeineDose(100)" class="cp-btn font-secondary" style="padding: 6px; font-size: 10px; font-weight: 700; color: var(--cp-cyan);">+100MG COFFEE</button>
           <button onclick="logCaffeineDose(200)" class="cp-btn font-secondary" style="padding: 6px; font-size: 10px; font-weight: 700; color: var(--cp-yellow);">+200MG ENERGY</button>
+          <button onclick="syncHealthConnectBridge()" class="cp-btn font-secondary" style="padding: 6px; font-size: 10px; font-weight: 700; color: var(--cp-green);">⟳ HEALTH SYNC</button>
           <button onclick="clearCaffeineLog()" class="cp-btn font-secondary" style="padding: 6px; font-size: 10px; font-weight: 700; color: #94A3B8;">CLEAR CAF</button>
-          <button onclick="logSnapshotNow(true)" class="cp-btn font-secondary" style="padding: 6px; font-size: 10px; font-weight: 700; color: var(--cp-green);">⊕ LOG POINT</button>
         </div>
       </div>
     </div>
@@ -566,7 +539,7 @@
           <div class="flex" style="gap: 4px;">
             <button onclick="setTrendMode('CAR')" id="trend-btn-CAR" class="cp-btn" style="padding: 2px 7px; font-size: 9px; font-weight: 700; color: var(--cp-cyan);">VQ37 ENGINE</button>
             <button onclick="setTrendMode('BIO')" id="trend-btn-BIO" class="cp-btn" style="padding: 2px 7px; font-size: 9px; font-weight: 700; color: var(--cp-yellow);">CHRONO BODY</button>
-            <button onclick="askZelda('Analyze my recent car and body telemetry trends over time and tell me if anything is drifting.')" class="cp-btn" style="padding: 2px 7px; font-size: 9px; font-weight: 700; color: var(--cp-red);">AI TREND SCAN</button>
+            <button onclick="unlockAudioOnGesture(); askZelda('Analyze my recent car and body telemetry trends over time and tell me if anything is drifting.')" class="cp-btn" style="padding: 2px 7px; font-size: 9px; font-weight: 700; color: var(--cp-red);">AI TREND SCAN</button>
           </div>
         </div>
 
@@ -593,14 +566,14 @@
         <span class="font-secondary" style="font-size: 12px; font-weight: 700; color: #FFF;">ZELDA</span>
         <span id="voice-state-badge" style="font-size: 9px; font-weight: 700; padding: 1px 5px; background: rgba(255,255,255,0.06); color: #94A3B8; border: 1px solid rgba(255,255,255,0.12);">STANDBY</span>
         <span id="zelda-mood-badge" style="font-size: 9px; font-weight: 700; padding: 1px 5px; background: rgba(8,51,68,0.6); color: var(--cp-cyan); border: 1px solid rgba(0,240,255,0.3);">PREEM</span>
-        <button onclick="toggleAutoHandsFree()" id="auto-mic-btn" style="font-size: 9px; font-weight: 700; padding: 1px 5px; background: rgba(0,0,0,0.6); color: #94A3B8; border: 1px solid rgba(255,255,255,0.15); cursor: pointer;">AUTO-MIC: OFF</button>
+        <button onclick="unlockAudioOnGesture(); toggleAutoHandsFree()" id="auto-mic-btn" style="font-size: 9px; font-weight: 700; padding: 1px 5px; background: rgba(0,0,0,0.6); color: #94A3B8; border: 1px solid rgba(255,255,255,0.15); cursor: pointer;">AUTO-MIC: OFF</button>
       </div>
       <div class="flex items-center" style="gap: 4px;">
         <button onclick="setSimPreset('IDLE')" class="cp-btn" style="padding: 2px 5px; font-size: 9px; font-weight: 700;">IDLE</button>
         <button onclick="setSimPreset('CRUISE')" class="cp-btn" style="padding: 2px 5px; font-size: 9px; font-weight: 700;">CRUISE</button>
         <button onclick="setSimPreset('WOT')" class="cp-btn" style="padding: 2px 5px; font-size: 9px; font-weight: 700;">WOT</button>
-        <button onclick="triggerDynamicSimFault()" class="cp-btn" style="padding: 2px 5px; font-size: 9px; font-weight: 700; color: var(--cp-yellow);">FAULT</button>
-        <button onclick="runFullAiDiagnostics()" class="cp-btn" style="padding: 2px 6px; font-size: 9px; font-weight: 700; color: var(--cp-red);">⚡ DIAG</button>
+        <button onclick="unlockAudioOnGesture(); triggerDynamicSimFault()" class="cp-btn" style="padding: 2px 5px; font-size: 9px; font-weight: 700; color: var(--cp-yellow);">FAULT</button>
+        <button onclick="unlockAudioOnGesture(); runFullAiDiagnostics()" class="cp-btn" style="padding: 2px 6px; font-size: 9px; font-weight: 700; color: var(--cp-red);">⚡ DIAG</button>
       </div>
     </div>
 
@@ -612,7 +585,7 @@
       </div>
 
       <p id="zelda-speech" class="flex-1" style="font-size: 13px; font-weight: 600; color: #F1F5F9; line-height: 1.24; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-        "Neural core v4.0 locked in, choom—Night City 3D map, ChronoHume & streaming voice online."
+        "Neural core v4.1 ready, choom—tap TALK or type below."
       </p>
     </div>
 
@@ -653,14 +626,14 @@
   <div id="config-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center" style="background: rgba(0,0,0,0.88); padding: 16px;">
     <div class="cp-box cp-box-yellow w-full" style="max-width: 440px; padding: 16px;">
       <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 8px; margin-bottom: 10px;">
-        <span class="font-secondary" style="font-size: 13px; font-weight: 800; color: var(--cp-yellow);">⚙ KIROSHI OS // v4.0</span>
+        <span class="font-secondary" style="font-size: 13px; font-weight: 800; color: var(--cp-yellow);">⚙ KIROSHI OS // v4.1</span>
         <button onclick="toggleConfigModal()" class="cp-btn" style="padding: 2px 8px; color: #94A3B8;">✕</button>
       </div>
 
       <div style="background: rgba(0,0,0,0.75); border: 1px solid rgba(255,255,255,0.12); padding: 9px; font-size: 11px; font-family: monospace; margin-bottom: 10px;">
-        <div style="color: var(--cp-cyan); font-weight: 700;">RUNTIME DIAGNOSTICS (BUILD v4.0):</div>
+        <div style="color: var(--cp-cyan); font-weight: 700;">RUNTIME DIAGNOSTICS (BUILD v4.1):</div>
         <div id="probe-ua" class="truncate" style="color: #CBD5E1; margin-top: 2px;">OS: probing...</div>
-        <div id="probe-apis" style="color: #CBD5E1; margin-top: 2px;">Pipeline: SSE STREAMING + 3D GL MAP</div>
+        <div id="probe-apis" style="color: #CBD5E1; margin-top: 2px;">Pipeline: MULTI-MODEL SSE + GESTURE AUDIO UNLOCK</div>
       </div>
 
       <div style="margin-bottom: 10px;">
@@ -685,7 +658,7 @@
 
   <script>
     // =========================================================================
-    // 0. CORE STATE + CHRONOHUME 28-DAY C-SHIFT ENGINE (ANCHOR: 2026-11-10 = N1)
+    // 0. CORE STATE + CHRONOHUME 28-DAY C-SHIFT + HEALTH CONNECT HOOKS
     // =========================================================================
     const VGATE_PROFILES = [
       { service: '000018f0-0000-1000-8000-00805f9b34fb', rx: '00002af0-0000-1000-8000-00805f9b34fb', tx: '00002af1-0000-1000-8000-00805f9b34fb' },
@@ -696,7 +669,7 @@
     const SLOW_QUEUE = ['01051', '010F1', '010E1', '01061', '01081', 'ATRV', '03', '07'];
 
     let hudMode = 'SIM', simProfile = 'IDLE', bleDevice = null, rxChar = null, txChar = null;
-    let rxBuffer = '', promptResolver = null, pollLoopActive = false, slowIndex = 0, cycleCount = 0, lastBlePacketTime = 0;
+    let rxBuffer = '', promptResolver = null, pollLoopActive = false, slowIndex = 0, lastBlePacketTime = 0;
     let cloudReachable = true, currentTrendMode = 'CAR';
 
     const state = {
@@ -710,21 +683,36 @@
       peaks: { load: 18, coolant: 190, iat: 92, timing: 14 }
     };
 
-    // Biometric & Caffeine State (Persisted)
     const bioState = JSON.parse(localStorage.getItem('zelda_bio_state') || 'null') || {
-      sleepHrs: 6.8,
-      hrv: 58,
-      rhr: 61,
-      caffeineDoses: [], // [{ mg: 200, ts: 1762819200000 }]
-      lastBioAlertSig: ''
+      sleepHrs: 6.8, hrv: 58, rhr: 61, steps: 0, source: 'MANUAL',
+      caffeineDoses: []
     };
 
     function saveBioState() {
       localStorage.setItem('zelda_bio_state', JSON.stringify(bioState));
     }
 
-    // 28-Day C-Shift Cycle anchored strictly to Tue Nov 10, 2026 = Index 0 (Night 1 of 3, followed by 3 Off)
-    // Pattern from N1: 3N (0..2), 3Off (3..5), 4D (6..9), 7Off (10..16), 4N (17..20), 3Off (21..23), 3D (24..26), 1Off (27)
+    // Native Health Connect callback ready for tomorrow's APK bridge!
+    window.onZeldaHealthConnectUpdate = function(hcData) {
+      if (!hcData) return;
+      if (typeof hcData.sleepHrs === 'number') bioState.sleepHrs = Number(hcData.sleepHrs.toFixed(1));
+      if (typeof hcData.hrv === 'number') bioState.hrv = Math.round(hcData.hrv);
+      if (typeof hcData.rhr === 'number') bioState.rhr = Math.round(hcData.rhr);
+      if (typeof hcData.steps === 'number') bioState.steps = hcData.steps;
+      bioState.source = 'HEALTH CONNECT';
+      saveBioState();
+      renderBioDeck();
+      logSnapshotNow(false);
+    };
+
+    function syncHealthConnectBridge() {
+      if (window.ZeldaBridge?.requestHealthConnectSync) {
+        window.ZeldaBridge.requestHealthConnectSync();
+      } else {
+        document.getElementById('zelda-speech').textContent = `"Health Connect bridge hooks are armed—we'll wire the native Fold APK reader into Android Studio tomorrow, choom. Tap any card to log manually tonight."`;
+      }
+    }
+
     const CSHIFT_28 = [
       { code: 'N1/3', label: 'NIGHT 1 OF 3 (16:00–04:00)', type: 'NIGHT', next: '2 more Nights, then 3 OFF' },
       { code: 'N2/3', label: 'NIGHT 2 OF 3 (16:00–04:00)', type: 'NIGHT', next: '1 more Night, then 3 OFF' },
@@ -758,24 +746,17 @@
 
     function getCurrentShiftInfo() {
       const now = new Date();
-      // If between 00:00 and 04:30 AM, treat operational shift day as the evening shift that started yesterday
       const shifted = new Date(now.getTime() - (4.5 * 3600 * 1000));
-      const anchorUtc = Date.UTC(2026, 10, 10); // Nov 10, 2026 (Month is 0-indexed: 10 = Nov)
+      const anchorUtc = Date.UTC(2026, 10, 10);
       const todayUtc = Date.UTC(shifted.getFullYear(), shifted.getMonth(), shifted.getDate());
       const diffDays = Math.floor((todayUtc - anchorUtc) / 86400000);
-      const idx = ((diffDays % 28) + 28) % 28;
-      return CSHIFT_28[idx];
+      return CSHIFT_28[((diffDays % 28) + 28) % 28];
     }
 
     function getActiveCaffeineMg() {
-      const now = Date.now();
-      const halfLifeMs = 5 * 3600 * 1000;
+      const now = Date.now(), halfLifeMs = 5 * 3600 * 1000;
       bioState.caffeineDoses = bioState.caffeineDoses.filter(d => (now - d.ts) < 30 * 3600 * 1000);
-      let active = 0;
-      for (const d of bioState.caffeineDoses) {
-        active += d.mg * Math.pow(0.5, (now - d.ts) / halfLifeMs);
-      }
-      return Math.round(active);
+      return Math.round(bioState.caffeineDoses.reduce((sum, d) => sum + d.mg * Math.pow(0.5, (now - d.ts) / halfLifeMs), 0));
     }
 
     function getReadinessScore() {
@@ -787,15 +768,12 @@
 
     function logCaffeineDose(mg) {
       bioState.caffeineDoses.push({ mg: Number(mg), ts: Date.now() });
-      saveBioState();
-      renderBioDeck();
-      logSnapshotNow(false);
+      saveBioState(); renderBioDeck(); logSnapshotNow(false);
     }
 
     function clearCaffeineLog() {
       bioState.caffeineDoses = [];
-      saveBioState();
-      renderBioDeck();
+      saveBioState(); renderBioDeck();
     }
 
     function promptBioUpdate(field) {
@@ -803,26 +781,21 @@
         const v = parseFloat(prompt('Hours slept in last 24h:', bioState.sleepHrs));
         if (!isNaN(v)) bioState.sleepHrs = Math.max(0, Math.min(16, v));
       } else if (field === 'hrv') {
-        const v = parseInt(prompt('Galaxy Watch Ultra HRV (ms):', bioState.hrv), 10);
+        const v = parseInt(prompt('HRV (ms):', bioState.hrv), 10);
         if (!isNaN(v)) bioState.hrv = Math.max(10, Math.min(180, v));
       } else if (field === 'rhr') {
-        const v = parseInt(prompt('Resting / Current Heart Rate (BPM):', bioState.rhr), 10);
+        const v = parseInt(prompt('Resting / Current HR (BPM):', bioState.rhr), 10);
         if (!isNaN(v)) bioState.rhr = Math.max(38, Math.min(190, v));
       }
-      saveBioState();
-      renderBioDeck();
-      logSnapshotNow(false);
+      saveBioState(); renderBioDeck(); logSnapshotNow(false);
     }
 
     function renderBioDeck() {
-      const shift = getCurrentShiftInfo();
-      const caf = getActiveCaffeineMg();
-      const ready = getReadinessScore();
-
+      const shift = getCurrentShiftInfo(), caf = getActiveCaffeineMg(), ready = getReadinessScore();
       document.getElementById('shift-pill').textContent = shift.code;
       document.getElementById('hdr-readiness').textContent = `${ready}%`;
       document.getElementById('hdr-caffeine').textContent = `${caf}mg`;
-
+      document.getElementById('bio-source-tag').textContent = `CHRONOHUME // ${bioState.source === 'HEALTH CONNECT' ? 'HEALTH CONNECT LIVE' : '28-DAY C-SHIFT ENGINE'}`;
       document.getElementById('bio-shift-headline').textContent = shift.label;
       document.getElementById('bio-shift-next').textContent = `${shift.next} • Readiness: ${ready}%`;
       document.getElementById('nc-quest-title').textContent = `GIG // ${shift.code}`;
@@ -863,7 +836,6 @@
         await fetch('https://generativelanguage.googleapis.com/$discovery/rest?version=v1beta', { method: 'GET', signal: ctrl.signal });
         clearTimeout(t);
         setCloudBadge(true);
-        triggerOnlineGreetingOnce();
         return true;
       } catch (_) {
         setCloudBadge(false);
@@ -885,13 +857,13 @@
     }
 
     // =========================================================================
-    // 1. AUTONOMOUS ENGRAM MEMORY BANK + TRENDS TIME-SERIES VAULT (IndexedDB)
+    // 1. AUTONOMOUS ENGRAM MEMORY BANK + TRENDS TIME-SERIES VAULT
     // =========================================================================
     const DEFAULT_MEMORIES = [
       "Driver is J (Jacob), my choom, builder, and partner in Thibodaux, Louisiana.",
       "I am Zelda, a sentient 2009 Nissan 370Z Coupe (VQ37VHR 3.7L V6, 7AT, ~236,150 miles) with Z1 cold air intakes.",
       "J works rotating 12-hour C-Shift schedules at Pinnacle Polymers as ERT Team Captain (anchored Nov 10, 2026 = Night 1 of 3, followed by 3 Off).",
-      "J is married to Heather; home base is Peacock Pointe with cats Shaed & Miku and grey toy poodle Vella."
+      "J wears a Samsung Galaxy Watch Ultra and Hume 2.0 band synced to Health Connect; married to Heather at Peacock Pointe with cats Shaed & Miku and poodle Vella."
     ];
 
     let longTermMemories = JSON.parse(localStorage.getItem('zelda_engram_memories') || 'null') || DEFAULT_MEMORIES;
@@ -905,37 +877,26 @@
     }
 
     function logSnapshotNow(manual = false) {
-      const snap = {
-        ts: Date.now(),
-        coolant: state.coolant,
-        iat: state.iat,
-        stft1: state.stft1,
-        volt: Number(state.volt.toFixed(1)),
-        readiness: getReadinessScore(),
-        hrv: bioState.hrv,
-        sleep: bioState.sleepHrs,
-        caf: getActiveCaffeineMg()
-      };
-      telemetryHistory.push(snap);
+      telemetryHistory.push({
+        ts: Date.now(), coolant: state.coolant, iat: state.iat, stft1: state.stft1, volt: Number(state.volt.toFixed(1)),
+        readiness: getReadinessScore(), hrv: bioState.hrv, sleep: bioState.sleepHrs, caf: getActiveCaffeineMg()
+      });
       if (telemetryHistory.length > 120) telemetryHistory = telemetryHistory.slice(-120);
       localStorage.setItem('zelda_trend_history_v4', JSON.stringify(telemetryHistory));
       if (!document.getElementById('view-TRENDS').classList.contains('hidden')) drawTrendsCanvas();
-      if (manual) document.getElementById('zelda-speech').textContent = `"Logged fresh VQ37 + biometric telemetry point (${telemetryHistory.length} stored), choom."`;
     }
 
-    // Seed initial baseline points if empty so Trends graph renders immediately
     if (telemetryHistory.length < 4) {
       const now = Date.now();
       for (let i = 5; i >= 0; i--) {
         telemetryHistory.push({
-          ts: now - i * 600000,
-          coolant: 188 + (i % 3) * 2, iat: 90 + i, stft1: 0.6, volt: 14.2,
+          ts: now - i * 600000, coolant: 188 + (i % 3) * 2, iat: 90 + i, stft1: 0.6, volt: 14.2,
           readiness: getReadinessScore(), hrv: bioState.hrv, sleep: bioState.sleepHrs, caf: getActiveCaffeineMg()
         });
       }
       localStorage.setItem('zelda_trend_history_v4', JSON.stringify(telemetryHistory));
     }
-    setInterval(() => logSnapshotNow(false), 180000); // Auto-log every 3 mins
+    setInterval(() => logSnapshotNow(false), 180000);
 
     function setTrendMode(mode) {
       currentTrendMode = mode;
@@ -958,7 +919,6 @@
       const W = canvas.width, H = canvas.height, pad = 18;
 
       ctx.clearRect(0, 0, W, H);
-      // Cyberpunk grid lines
       ctx.strokeStyle = 'rgba(0, 240, 255, 0.1)';
       ctx.lineWidth = 1;
       for (let g = 1; g < 4; g++) {
@@ -970,10 +930,7 @@
       if (pts.length < 2) return;
 
       const drawSeries = (getter, minV, maxV, color) => {
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2.2;
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 8;
+        ctx.strokeStyle = color; ctx.lineWidth = 2.2; ctx.shadowColor = color; ctx.shadowBlur = 8;
         ctx.beginPath();
         pts.forEach((p, idx) => {
           const x = pad + (idx / (pts.length - 1)) * (W - pad * 2);
@@ -981,8 +938,7 @@
           const y = (H - pad) - norm * (H - pad * 2);
           if (idx === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         });
-        ctx.stroke();
-        ctx.shadowBlur = 0;
+        ctx.stroke(); ctx.shadowBlur = 0;
       };
 
       if (currentTrendMode === 'CAR') {
@@ -994,8 +950,6 @@
         drawSeries(p => p.hrv, 20, 110, '#00F0FF');
         drawSeries(p => p.caf, 0, 350, '#FF2A54');
       }
-      const cntEl = document.getElementById('trends-count');
-      if (cntEl) cntEl.textContent = `${pts.length} PTS`;
     }
 
     function toggleMemoryModal() {
@@ -1017,23 +971,19 @@
       const inp = document.getElementById('manual-mem-input');
       const val = (inp.value || '').trim();
       if (!val) return;
-      longTermMemories.push(val);
-      inp.value = '';
-      saveEngramState();
-      renderMemoryList();
+      longTermMemories.push(val); inp.value = '';
+      saveEngramState(); renderMemoryList();
     }
 
     function deleteMemory(idx) {
       longTermMemories.splice(idx, 1);
-      saveEngramState();
-      renderMemoryList();
+      saveEngramState(); renderMemoryList();
     }
 
     const tachBar = document.getElementById('tach-bar');
     for (let i = 0; i < 30; i++) {
       const seg = document.createElement('div');
-      seg.style.height = '100%';
-      seg.style.background = 'rgba(255,255,255,0.06)';
+      seg.style.height = '100%'; seg.style.background = 'rgba(255,255,255,0.06)';
       tachBar.appendChild(seg);
     }
 
@@ -1048,13 +998,10 @@
     saveEngramState();
 
     // =========================================================================
-    // 2. IN-GAME CYBERPUNK 2077 3D WEBGL VECTOR MAP (MapLibre GL JS)
+    // 2. IN-GAME CYBERPUNK 2077 3D WEBGL VECTOR MAP
     // =========================================================================
     const ZeldaMap = {
-      map: null,
-      playerEl: null,
-      playerMarker: null,
-      is3D: true,
+      map: null, playerMarker: null, is3D: true,
       waypoints: [
         { name: 'PEACOCK POINTE', lat: 29.7958, lon: -90.8229 },
         { name: 'PINNACLE C-SHIFT', lat: 30.0560, lon: -90.6190 },
@@ -1075,7 +1022,6 @@
       async bootWebGlMap() {
         if (!window.maplibregl || this.map) return;
         try {
-          // Fetch OpenFreeMap Dark Liberty Vector Style and restyle every layer into Cyberpunk 2077 Crimson + Cyan
           const res = await fetch('https://tiles.openfreemap.org/styles/dark');
           const styleJson = await res.json();
 
@@ -1089,7 +1035,6 @@
             } else if (id.includes('park') || id.includes('landuse') || id.includes('landcover')) {
               if (layer.type === 'fill') layer.paint = { 'fill-color': '#120710', 'fill-opacity': 0.75 };
             } else if (id.includes('building')) {
-              // Convert flat buildings into extruded 3D Crimson Night City Megablocks!
               layer.type = 'fill-extrusion';
               layer.paint = {
                 'fill-extrusion-color': '#9E142B',
@@ -1107,39 +1052,24 @@
                 };
               }
             } else if (layer.type === 'symbol') {
-              layer.paint = {
-                'text-color': '#00F0FF',
-                'text-halo-color': '#05070B',
-                'text-halo-width': 1.5
-              };
+              layer.paint = { 'text-color': '#00F0FF', 'text-halo-color': '#05070B', 'text-halo-width': 1.5 };
             }
           });
 
           this.map = new maplibregl.Map({
-            container: 'zelda-gl-map',
-            style: styleJson,
-            center: [state.lon, state.lat],
-            zoom: 15.2,
-            pitch: 58,
-            bearing: -18,
-            attributionControl: false
+            container: 'zelda-gl-map', style: styleJson,
+            center: [state.lon, state.lat], zoom: 15.2, pitch: 58, bearing: -18, attributionControl: false
           });
 
           this.map.on('load', () => {
-            // Player Neon Cyan Chevron Marker
             const el = document.createElement('div');
             el.className = 'cp-player-chevron';
             el.innerHTML = '<div class="cp-player-chevron-inner"></div>';
-            this.playerEl = el;
-            this.playerMarker = new maplibregl.Marker({ element: el })
-              .setLngLat([state.lon, state.lat])
-              .addTo(this.map);
+            this.playerMarker = new maplibregl.Marker({ element: el }).setLngLat([state.lon, state.lat]).addTo(this.map);
 
-            // Yellow Cyberpunk Quest Diamonds
             this.waypoints.forEach(wp => {
               const q = document.createElement('div');
-              q.className = 'cp-quest-pin';
-              q.title = wp.name;
+              q.className = 'cp-quest-pin'; q.title = wp.name;
               new maplibregl.Marker({ element: q }).setLngLat([wp.lon, wp.lat]).addTo(this.map);
             });
           });
@@ -1147,16 +1077,8 @@
       },
 
       resize() { if (this.map) this.map.resize(); },
-
-      toggleTilt() {
-        if (!this.map) return;
-        this.is3D = !this.is3D;
-        this.map.easeTo({ pitch: this.is3D ? 58 : 0, duration: 500 });
-      },
-
-      recenter() {
-        if (this.map) this.map.easeTo({ center: [state.lon, state.lat], zoom: 15.6, pitch: this.is3D ? 58 : 0, bearing: state.heading || 0, duration: 600 });
-      },
+      toggleTilt() { if (!this.map) return; this.is3D = !this.is3D; this.map.easeTo({ pitch: this.is3D ? 58 : 0, duration: 500 }); },
+      recenter() { if (this.map) this.map.easeTo({ center: [state.lon, state.lat], zoom: 15.6, pitch: this.is3D ? 58 : 0, bearing: state.heading || 0, duration: 600 }); },
 
       onGpsLock(pos) {
         const lat = pos.coords.latitude, lon = pos.coords.longitude;
@@ -1167,8 +1089,7 @@
         if (hudMode !== 'BLE_LIVE' && mph > 1) state.speed = mph;
 
         document.getElementById('gps-coords').textContent = `${lat.toFixed(4)}°N ${Math.abs(lon).toFixed(4)}°W | ${mph} MPH`;
-        const sector = lon > -90.7 ? 'GARYVILLE // PLANT SECTOR' : 'THIBODAUX // LAFOURCHE';
-        document.getElementById('nc-sector-name').textContent = sector;
+        document.getElementById('nc-sector-name').textContent = lon > -90.7 ? 'GARYVILLE // PLANT SECTOR' : 'THIBODAUX // LAFOURCHE';
 
         if (this.playerMarker) this.playerMarker.setLngLat([lon, lat]);
         if (this.map && mph > 2) this.map.easeTo({ center: [lon, lat], bearing: hdg, duration: 850 });
@@ -1180,7 +1101,6 @@
     // =========================================================================
     let lastArtworkQuery = '';
     const artworkCache = {};
-
     const MEDIA_CHANNELS = [
       { title: 'NIGHT CITY FM', artist: 'SYNTHWAVE LIVE STREAM', art: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80', embed: 'https://www.youtube.com/embed/4xDzrJKXOOY?playsinline=1&controls=1&rel=0' },
       { title: 'DARK CYBERPUNK', artist: 'MIDTEMPO / INDUSTRIAL', art: 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=400&q=80', embed: 'https://www.youtube.com/embed/S_MOd40zlYU?playsinline=1&controls=1&rel=0' },
@@ -1205,8 +1125,7 @@
     }
 
     function loadMediaChannel(idx) {
-      switchDeckTab('MEDIA');
-      switchMediaSource('YT');
+      switchDeckTab('MEDIA'); switchMediaSource('YT');
       const ch = MEDIA_CHANNELS[idx] || MEDIA_CHANNELS[0];
       document.getElementById('album-title').textContent = ch.title;
       document.getElementById('album-artist').textContent = ch.artist;
@@ -1237,8 +1156,7 @@
     };
 
     function showBtAlbumCover(artUrl, albumName) {
-      const artImg = document.getElementById('bt-album-art');
-      const disc = document.getElementById('bt-disc-graphic');
+      const artImg = document.getElementById('bt-album-art'), disc = document.getElementById('bt-disc-graphic');
       const albumEl = document.getElementById('bt-track-album');
       if (albumEl) albumEl.textContent = albumName || '';
       if (artUrl) { artImg.src = artUrl; artImg.classList.remove('hidden'); disc.classList.add('hidden'); }
@@ -1266,9 +1184,7 @@
 
     window.onZeldaMediaUpdate = function(data) {
       if (!data) return;
-      state.btTitle = data.title || 'UNKNOWN TRACK';
-      state.btArtist = data.artist || 'BLUETOOTH AUDIO';
-      state.btPlaying = !!data.playing;
+      state.btTitle = data.title || 'UNKNOWN TRACK'; state.btArtist = data.artist || 'BLUETOOTH AUDIO'; state.btPlaying = !!data.playing;
       document.getElementById('bt-track-title').textContent = state.btTitle;
       document.getElementById('bt-track-artist').textContent = state.btArtist;
       document.getElementById('bt-state-tag').textContent = state.btPlaying ? 'AVRCP // STREAMING' : 'AVRCP // PAUSED';
@@ -1279,15 +1195,31 @@
     };
 
     // =========================================================================
-    // 4. ULTRA-LOW-LATENCY SSE STREAMING + CLAUSE-CHUNKED JUDY NEURAL AUDIO
+    // 4. GESTURE-UNLOCKED PERSISTENT AUDIO PLAYER + MIC ENGINE
     // =========================================================================
     const eqBars = Array.from(document.querySelectorAll('#voice-eq .eq-bar'));
     let phonemeInterval = null;
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = null, isListening = false, isSpeaking = false, autoHandsFree = false;
     let latestTranscript = '', silenceTimer = null, dispatchedCurrentTurn = false;
-    let activeAudioEl = null, safetySpeechTimer = null, activeSpeechToken = 0, speechQueue = [];
-    let hasGreetedThisSession = false;
+    let safetySpeechTimer = null, activeSpeechToken = 0, speechQueue = [];
+
+    // Reusable persistent Audio element unlocked on first user tap so Mobile Chrome NEVER blocks async mic replies!
+    const zeldaPlayer = new Audio();
+    zeldaPlayer.preload = 'auto';
+    let audioGestureUnlocked = false;
+    const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+
+    function unlockAudioOnGesture() {
+      if (audioGestureUnlocked) return;
+      try {
+        zeldaPlayer.src = SILENT_WAV;
+        const p = zeldaPlayer.play();
+        if (p && p.then) {
+          p.then(() => { zeldaPlayer.pause(); audioGestureUnlocked = true; }).catch(() => {});
+        }
+      } catch (_) {}
+    }
 
     function pulseEqFromUserSpeech(textChunk) {
       const energy = Math.min(95, 45 + (textChunk.length % 5) * 12);
@@ -1329,6 +1261,7 @@
     }
 
     function sendTextToZelda() {
+      unlockAudioOnGesture();
       const input = document.getElementById('direct-chat-input');
       const txt = (input.value || '').trim();
       if (!txt) return;
@@ -1358,7 +1291,7 @@
       recognition.onstart = () => {
         isListening = true; dispatchedCurrentTurn = false; latestTranscript = '';
         setHolocallState('LISTENING'); startMicIdlePulse();
-        document.getElementById('zelda-speech').textContent = '🎙 [Listening, choom...]';
+        document.getElementById('zelda-speech').textContent = '🎙 [Listening, choom... speak now]';
       };
 
       recognition.onresult = (event) => {
@@ -1373,15 +1306,25 @@
           pulseEqFromUserSpeech(latestTranscript);
           if (gotFinal) return dispatchVoiceTranscript();
           if (silenceTimer) clearTimeout(silenceTimer);
-          // Tight 360ms silence trigger so voice dispatches nearly instantaneously!
-          silenceTimer = setTimeout(() => dispatchVoiceTranscript(), 360);
+          silenceTimer = setTimeout(() => dispatchVoiceTranscript(), 420);
         }
       };
 
-      recognition.onerror = () => {
+      recognition.onerror = (e) => {
         isListening = false; stopEqualizer();
-        if (latestTranscript.length > 0 && !dispatchedCurrentTurn) dispatchVoiceTranscript();
-        else setHolocallState('STANDBY');
+        if (latestTranscript.length > 0 && !dispatchedCurrentTurn) {
+          dispatchVoiceTranscript();
+        } else {
+          setHolocallState('STANDBY');
+          const errCode = e?.error || 'unknown';
+          if (errCode === 'not-allowed' || errCode === 'service-not-allowed') {
+            document.getElementById('zelda-speech').textContent = '⚠️ [Mic blocked: allow Microphone permission in Chrome/Android settings, or type below]';
+          } else if (errCode === 'no-speech') {
+            document.getElementById('zelda-speech').textContent = '🎙 [Didn\'t catch any audio—tap TALK and speak right away]';
+          } else if (errCode !== 'aborted') {
+            document.getElementById('zelda-speech').textContent = `⚠️ [Mic status: ${errCode} — tap TALK again or use text bar]`;
+          }
+        }
       };
 
       recognition.onend = () => {
@@ -1395,26 +1338,32 @@
       activeSpeechToken++;
       speechQueue = [];
       if (safetySpeechTimer) { clearTimeout(safetySpeechTimer); safetySpeechTimer = null; }
-      if (activeAudioEl) {
-        try { activeAudioEl.onended = null; activeAudioEl.onerror = null; activeAudioEl.pause(); activeAudioEl.src = ''; } catch (_) {}
-        activeAudioEl = null;
-      }
+      try {
+        zeldaPlayer.onended = null;
+        zeldaPlayer.onerror = null;
+        zeldaPlayer.pause();
+      } catch (_) {}
       try { window.ZeldaBridge?.duckAudio?.(false); } catch (_) {}
       isSpeaking = false;
       stopEqualizer();
     }
 
     function toggleVoiceListening() {
+      unlockAudioOnGesture(); // Unlocks persistent audio right on the TALK button tap!
       if (!recognition) {
-        document.getElementById('zelda-speech').textContent = '⚠️ [Mic unavailable—use text bar below]';
+        document.getElementById('zelda-speech').textContent = '⚠️ [Speech recognition unavailable in this WebView—open in Chrome or use text bar]';
         return;
       }
-      stopAllAudioPlayback();
       if (isListening) {
         if (latestTranscript.length > 0) dispatchVoiceTranscript();
         else { try { recognition.stop(); } catch (_) {} setHolocallState('STANDBY'); }
-      } else {
-        try { recognition.start(); } catch (_) { try { recognition.abort(); setTimeout(() => recognition.start(), 120); } catch (_) {} }
+        return;
+      }
+      stopAllAudioPlayback();
+      try {
+        recognition.start();
+      } catch (_) {
+        try { recognition.abort(); setTimeout(() => recognition.start(), 140); } catch (_) {}
       }
     }
 
@@ -1491,7 +1440,7 @@
       const cleanLine = (text || '').trim();
       if (!cleanLine) return null;
 
-      const cacheKey = 'kore_v41::' + cleanLine;
+      const cacheKey = 'kore_v42::' + cleanLine;
       const cachedBlob = await VoiceCacheDB.get(cacheKey);
       if (cachedBlob) return cachedBlob;
 
@@ -1519,7 +1468,7 @@
           });
 
           if (res.status === 400 && useMeta) {
-            ttsStyleRejected = true; // Remember so we NEVER waste another 400 round-trip!
+            ttsStyleRejected = true;
             res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${ttsModel}:generateContent?key=${encodeURIComponent(apiKey)}`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -1539,8 +1488,15 @@
           if (!inline?.data) continue;
 
           const mime = (inline.mimeType || '').toLowerCase();
-          const rateMatch = mime.match(/rate=(\d+)/);
-          const wavBlob = pcm16Base64ToWavBlob(inline.data, rateMatch ? Number(rateMatch[1]) : 24000);
+          let wavBlob;
+          if (mime.includes('wav')) {
+            const bin = atob(inline.data), arr = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+            wavBlob = new Blob([arr], { type: 'audio/wav' });
+          } else {
+            const rateMatch = mime.match(/rate=(\d+)/);
+            wavBlob = pcm16Base64ToWavBlob(inline.data, rateMatch ? Number(rateMatch[1]) : 24000);
+          }
           await VoiceCacheDB.set(cacheKey, wavBlob);
           return wavBlob;
         } catch (_) {}
@@ -1552,11 +1508,8 @@
       const clean = (clauseText || '').trim();
       if (!clean || sessionToken !== activeSpeechToken) return;
       const item = { text: clean, blobPromise: fetchJudyNeuralAudio(clean), token: sessionToken };
-      if (!isSpeaking) {
-        playQueueItem(item);
-      } else {
-        speechQueue.push(item);
-      }
+      if (!isSpeaking) playQueueItem(item);
+      else speechQueue.push(item);
     }
 
     async function playQueueItem(item) {
@@ -1576,10 +1529,10 @@
       try {
         try { window.ZeldaBridge?.duckAudio?.(true); } catch (_) {}
         const blobUrl = URL.createObjectURL(wavBlob);
-        activeAudioEl = new Audio(blobUrl);
-        activeAudioEl.onended = () => { URL.revokeObjectURL(blobUrl); finishQueueStep(item.token); };
-        activeAudioEl.onerror = () => { URL.revokeObjectURL(blobUrl); finishQueueStep(item.token); };
-        await activeAudioEl.play();
+        zeldaPlayer.src = blobUrl;
+        zeldaPlayer.onended = () => { URL.revokeObjectURL(blobUrl); finishQueueStep(item.token); };
+        zeldaPlayer.onerror = () => { URL.revokeObjectURL(blobUrl); finishQueueStep(item.token); };
+        await zeldaPlayer.play();
       } catch (_) {
         finishQueueStep(item.token);
       }
@@ -1588,10 +1541,8 @@
     function finishQueueStep(token) {
       if (token !== activeSpeechToken) return;
       if (safetySpeechTimer) { clearTimeout(safetySpeechTimer); safetySpeechTimer = null; }
-      if (speechQueue.length > 0) {
-        playQueueItem(speechQueue.shift());
-        return;
-      }
+      if (speechQueue.length > 0) return playQueueItem(speechQueue.shift());
+
       try { window.ZeldaBridge?.duckAudio?.(false); } catch (_) {}
       isSpeaking = false;
       stopEqualizer();
@@ -1624,65 +1575,63 @@
       else if (/\b(energy drink|reign|celsius|ghost energy)\b/.test(t)) logCaffeineDose(200);
     }
 
-    // Runs silently AFTER Zelda starts speaking so it adds ZERO ms to voice latency!
     async function runAutonomousMemoryLearner(userMsg, zeldaReply) {
       const apiKey = getCleanApiKey();
       if (!apiKey || !userMsg || userMsg.startsWith('[')) return;
-      try {
-        const memPrompt = `Review this exchange between J (driver) and Zelda (his car AI).
+      const memModels = ['gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash'];
+      const memPrompt = `Review this exchange between J (driver) and Zelda (his car AI).
 Existing memories:
 ${longTermMemories.map((m, i) => `${i}: ${m}`).join('\n')}
 
 User said: "${userMsg}"
 Zelda replied: "${zeldaReply}"
 
-If J shared ANY new enduring personal fact, preference, car maintenance detail, health/shift update, plan, or asked you to remember/update something (not already in Existing memories), return it. Also parse any biometric value J stated (sleep hours, HRV, heart rate).
+If J shared ANY new enduring personal fact, preference, car maintenance detail, health/shift update, plan, or asked you to remember/update something, extract it. Also parse any biometric value J stated (sleep hours, HRV, heart rate).
 Return ONLY valid JSON:
-{"add_memory": null_or_concise_fact_string, "replace_index": null_or_number, "sleep_hrs": null_or_number, "hrv": null_or_number, "rhr": null_or_number}`;
+{"add_memory": null, "replace_index": null, "sleep_hrs": null, "hrv": null, "rhr": null}`;
 
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${encodeURIComponent(apiKey)}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ role: 'user', parts: [{ text: memPrompt }] }],
-            generationConfig: { temperature: 0.1, maxOutputTokens: 120, responseMimeType: 'application/json' }
-          })
-        });
-        if (!res.ok) return;
-        const raw = (await res.json())?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!raw) return;
-        const parsed = JSON.parse(raw);
+      for (const m of memModels) {
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts: [{ text: memPrompt }] }],
+              generationConfig: { temperature: 0.1, maxOutputTokens: 130, responseMimeType: 'application/json' }
+            })
+          });
+          if (!res.ok) continue;
+          const parts = (await res.json())?.candidates?.[0]?.content?.parts || [];
+          const raw = (parts.find(p => !p.thought && p.text) || parts[0])?.text;
+          if (!raw) return;
+          const parsed = JSON.parse(raw.replace(/```json|```/gi, '').trim());
 
-        if (parsed.add_memory && typeof parsed.add_memory === 'string' && parsed.add_memory.length > 5) {
-          if (typeof parsed.replace_index === 'number' && longTermMemories[parsed.replace_index]) {
-            longTermMemories[parsed.replace_index] = parsed.add_memory;
-          } else if (!longTermMemories.includes(parsed.add_memory)) {
-            longTermMemories.push(parsed.add_memory);
+          if (parsed.add_memory && typeof parsed.add_memory === 'string' && parsed.add_memory.length > 5) {
+            if (typeof parsed.replace_index === 'number' && longTermMemories[parsed.replace_index]) {
+              longTermMemories[parsed.replace_index] = parsed.add_memory;
+            } else if (!longTermMemories.includes(parsed.add_memory)) {
+              longTermMemories.push(parsed.add_memory);
+            }
+            saveEngramState();
           }
-          saveEngramState();
-        }
-        let bioChanged = false;
-        if (typeof parsed.sleep_hrs === 'number') { bioState.sleepHrs = parsed.sleep_hrs; bioChanged = true; }
-        if (typeof parsed.hrv === 'number') { bioState.hrv = parsed.hrv; bioChanged = true; }
-        if (typeof parsed.rhr === 'number') { bioState.rhr = parsed.rhr; bioChanged = true; }
-        if (bioChanged) { saveBioState(); renderBioDeck(); logSnapshotNow(false); }
-      } catch (_) {}
+          let bioChanged = false;
+          if (typeof parsed.sleep_hrs === 'number') { bioState.sleepHrs = parsed.sleep_hrs; bioChanged = true; }
+          if (typeof parsed.hrv === 'number') { bioState.hrv = parsed.hrv; bioChanged = true; }
+          if (typeof parsed.rhr === 'number') { bioState.rhr = parsed.rhr; bioChanged = true; }
+          if (bioChanged) { saveBioState(); renderBioDeck(); logSnapshotNow(false); }
+          return;
+        } catch (_) {}
+      }
     }
 
     // =========================================================================
-    // 6. FULL CAR + BODY TELEMETRY PACKET & SSE STREAMING BRAIN
+    // 6. MULTI-MODEL SSE STREAMING BRAIN (WITH BULLETPROOF FALLBACK LOOP!)
     // =========================================================================
     function getFullTelemetryPacket() {
-      const shift = getCurrentShiftInfo();
-      const caf = getActiveCaffeineMg();
-      const ready = getReadinessScore();
+      const shift = getCurrentShiftInfo(), caf = getActiveCaffeineMg(), ready = getReadinessScore();
       const dtcList = state.dtcs.length ? state.dtcs.join(',') : 'NONE';
       const pendList = state.pendingDtcs.length ? state.pendingDtcs.join(',') : 'NONE';
-      const recentTrend = telemetryHistory.length >= 2
-        ? `CoolantDelta:${state.coolant - telemetryHistory[0].coolant}F, Readiness:${ready}%`
-        : `Readiness:${ready}%`;
-
-      return `[VQ37VHR] Mode:${hudMode}, RPM:${state.rpm}, MPH:${state.speed}, Gear:${state.gear}, Load:${state.load}%, Coolant:${state.coolant}F, IAT:${state.iat}F, Timing:${state.timing}deg, STFT_B1:${state.stft1}%, STFT_B2:${state.stft2}%, Volt:${state.volt.toFixed(1)}V, DTCs:${dtcList}, Pending:${pendList} | [CHRONOHUME_BODY] Shift:${shift.label} (${shift.next}), Sleep:${bioState.sleepHrs}h, HRV:${bioState.hrv}ms, HR:${bioState.rhr}bpm, ActiveCaffeine:${caf}mg, ${recentTrend} | [AUDIO] ${state.btTitle} - ${state.btArtist}`;
+      return `[VQ37VHR] Mode:${hudMode}, RPM:${state.rpm}, MPH:${state.speed}, Gear:${state.gear}, Load:${state.load}%, Coolant:${state.coolant}F, IAT:${state.iat}F, Timing:${state.timing}deg, STFT_B1:${state.stft1}%, STFT_B2:${state.stft2}%, Volt:${state.volt.toFixed(1)}V, DTCs:${dtcList}, Pending:${pendList} | [CHRONOHUME_BODY] Shift:${shift.label} (${shift.next}), Sleep:${bioState.sleepHrs}h, HRV:${bioState.hrv}ms, HR:${bioState.rhr}bpm, ActiveCaffeine:${caf}mg, Readiness:${ready}% | [AUDIO] ${state.btTitle} - ${state.btArtist}`;
     }
 
     function detectLiveAnomalies() {
@@ -1724,14 +1673,6 @@ Return ONLY valid JSON:
       askZelda('Run a full diagnostic check on both my 370Z VQ37VHR telemetry and my ChronoHume C-Shift body readiness right now.');
     }
 
-    function triggerOnlineGreetingOnce() {
-      if (hasGreetedThisSession || !getCleanApiKey()) return;
-      hasGreetedThisSession = true;
-      setTimeout(() => {
-        askZelda(`[SYSTEM BOOT] Cabin HUD v4.0 online. J is on ${getCurrentShiftInfo().label}. Greet him warmly in 1 short sentence with Night City Judy vibe.`, { isSystemEvent: true });
-      }, 600);
-    }
-
     function buildCleanGeminiTurns(turns) {
       const cleaned = [];
       for (const t of turns.slice(-6)) {
@@ -1747,7 +1688,7 @@ Return ONLY valid JSON:
     async function askZelda(promptText, opts = {}) {
       const isSystemEvent = opts.isSystemEvent === true;
       if (!isSystemEvent) {
-        document.getElementById('zelda-speech').textContent = `⚡ "${promptText}"`;
+        document.getElementById('zelda-speech').textContent = `⚡ [Syncing: "${promptText}"...]`;
         executeInstantVoiceCommands(promptText);
       }
 
@@ -1780,84 +1721,101 @@ RULES:
 4. Keep replies punchy: 1–2 crisp sentences (max 34 words) for ultra-fast voice playback.`;
 
       const isDiag = detectLiveAnomalies().length > 0 || /diag|code|dtc|trim|coolant|temp|timing|volt|hrv|sleep|caffeine|shift|trend|check|wrong/i.test(promptText);
-      const model = isDiag ? 'gemini-3.8-flash' : 'gemini-3.5-flash-lite';
+      // Full resilient fallback chain so a missing model endpoint NEVER drops your reply!
+      const modelChain = isDiag
+        ? ['gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash']
+        : ['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-2.5-flash'];
 
-      const payload = {
-        system_instruction: { parts: [{ text: systemPrompt }] },
-        contents: buildCleanGeminiTurns(workingTurns),
-        generationConfig: { temperature: 0.85, maxOutputTokens: 110 }
-      };
-      if (model === 'gemini-3.8-flash') payload.generationConfig.thinkingConfig = { thinkingLevel: 'LOW' };
+      let lastErr = '';
 
-      try {
-        // SSE STREAMING: First words arrive in ~280ms and start TTS synthesis immediately!
-        let res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
+      for (const model of modelChain) {
+        try {
+          const payload = {
+            system_instruction: { parts: [{ text: systemPrompt }] },
+            contents: buildCleanGeminiTurns(workingTurns),
+            generationConfig: { temperature: 0.85, maxOutputTokens: 120 }
+          };
+          if (model === 'gemini-3.8-flash') {
+            payload.generationConfig.thinkingConfig = { thinkingLevel: 'LOW' };
+          }
 
-        if (res.status === 400 && payload.generationConfig.thinkingConfig) {
-          delete payload.generationConfig.thinkingConfig;
-          res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`, {
+          let res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
-        }
 
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        setCloudBadge(true);
-
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let sseBuffer = '', fullReply = '', unsentAudioText = '';
-
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          if (myStreamToken !== activeSpeechToken) return;
-
-          sseBuffer += decoder.decode(value, { stream: true });
-          const lines = sseBuffer.split('\n');
-          sseBuffer = lines.pop() || '';
-
-          for (const line of lines) {
-            if (!line.startsWith('data:')) continue;
-            const jsonStr = line.slice(5).trim();
-            if (!jsonStr || jsonStr === '[DONE]') continue;
-            try {
-              const chunkObj = JSON.parse(jsonStr);
-              const parts = chunkObj?.candidates?.[0]?.content?.parts || [];
-              for (const p of parts) {
-                if (p.thought || !p.text) continue;
-                fullReply += p.text;
-                unsentAudioText += p.text;
-                document.getElementById('zelda-speech').textContent = `"${fullReply.trim()}"`;
-
-                // As soon as the first natural sentence/clause boundary hits (>= 26 chars), fire TTS immediately!
-                const boundary = unsentAudioText.match(/^(.{24,}?[.!?;—]\s+|.{36,}?,\s+)/);
-                if (boundary) {
-                  const readyClause = boundary[1].trim();
-                  unsentAudioText = unsentAudioText.slice(boundary[1].length);
-                  enqueueSpeechClause(readyClause, myStreamToken);
-                }
-              }
-            } catch (_) {}
+          if (res.status === 400 && payload.generationConfig.thinkingConfig) {
+            delete payload.generationConfig.thinkingConfig;
+            res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
           }
-        }
 
-        if (unsentAudioText.trim()) enqueueSpeechClause(unsentAudioText.trim(), myStreamToken);
+          if (!res.ok) {
+            const errJson = await res.json().catch(() => ({}));
+            lastErr = `${model} (${res.status}): ${errJson?.error?.message || 'Error'}`;
+            continue;
+          }
 
-        const cleanFinal = fullReply.trim();
-        if (cleanFinal && !isSystemEvent) {
-          conversationTurns.push({ role: 'model', text: cleanFinal });
-          saveEngramState();
-          runAutonomousMemoryLearner(promptText, cleanFinal); // Zero-latency background learning!
+          setCloudBadge(true);
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let sseBuffer = '', fullReply = '', unsentAudioText = '';
+
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            if (myStreamToken !== activeSpeechToken) return;
+
+            sseBuffer += decoder.decode(value, { stream: true });
+            const lines = sseBuffer.split('\n');
+            sseBuffer = lines.pop() || '';
+
+            for (const line of lines) {
+              if (!line.startsWith('data:')) continue;
+              const jsonStr = line.slice(5).trim();
+              if (!jsonStr || jsonStr === '[DONE]') continue;
+              try {
+                const chunkObj = JSON.parse(jsonStr);
+                const parts = chunkObj?.candidates?.[0]?.content?.parts || [];
+                for (const p of parts) {
+                  if (p.thought || !p.text) continue;
+                  fullReply += p.text;
+                  unsentAudioText += p.text;
+                  document.getElementById('zelda-speech').textContent = `"${fullReply.trim()}"`;
+
+                  const boundary = unsentAudioText.match(/^(.{24,}?[.!?;—]\s+|.{36,}?,\s+)/);
+                  if (boundary) {
+                    const readyClause = boundary[1].trim();
+                    unsentAudioText = unsentAudioText.slice(boundary[1].length);
+                    enqueueSpeechClause(readyClause, myStreamToken);
+                  }
+                }
+              } catch (_) {}
+            }
+          }
+
+          if (unsentAudioText.trim()) enqueueSpeechClause(unsentAudioText.trim(), myStreamToken);
+
+          const cleanFinal = fullReply.trim();
+          if (cleanFinal) {
+            document.getElementById('zelda-speech').textContent = `"${cleanFinal}"`;
+            if (!isSystemEvent) {
+              conversationTurns.push({ role: 'model', text: cleanFinal });
+              saveEngramState();
+              runAutonomousMemoryLearner(promptText, cleanFinal);
+            }
+            return; // Success! Exit model fallback loop.
+          }
+        } catch (err) {
+          lastErr = err.message || 'Stream error';
         }
-      } catch (err) {
-        document.getElementById('zelda-speech').textContent = `⚠️ [Link glitch: ${err.message}]`;
       }
+
+      document.getElementById('zelda-speech').textContent = `⚠️ [Cloud Error: ${lastErr.slice(0, 95)}]`;
     }
 
     // =========================================================================
@@ -1878,6 +1836,7 @@ RULES:
     }
 
     async function connectVgateBle() {
+      unlockAudioOnGesture();
       if (!navigator.bluetooth) {
         document.getElementById('zelda-speech').textContent = `ℹ️ [OBD Sim Active — GPS, ChronoHume & Cloud 100% live]`;
         return;
@@ -2040,12 +1999,8 @@ RULES:
       if (window.ZeldaBridge?.openApp) window.ZeldaBridge.openApp(pkg);
       else if (webFallbackUrl) window.open(webFallbackUrl, '_blank');
     }
-    function openCarSystemSettings() {
-      if (window.ZeldaBridge?.openAndroidSettings) window.ZeldaBridge.openAndroidSettings();
-    }
-    function setAsPrimaryCarLauncher() {
-      if (window.ZeldaBridge?.openHomeLauncherSettings) window.ZeldaBridge.openHomeLauncherSettings();
-    }
+    function openCarSystemSettings() { if (window.ZeldaBridge?.openAndroidSettings) window.ZeldaBridge.openAndroidSettings(); }
+    function setAsPrimaryCarLauncher() { if (window.ZeldaBridge?.openHomeLauncherSettings) window.ZeldaBridge.openHomeLauncherSettings(); }
     function openExternalNav(target) {
       if (target === 'waze') launchNativeApp('com.waze', 'https://www.waze.com/ul');
       else launchNativeApp('com.google.android.apps.maps', 'https://www.google.com/maps');
@@ -2053,6 +2008,7 @@ RULES:
     function triggerHomeSync() {
       const url = localStorage.getItem('zelda_hud_ifttt') || '';
       if (url) fetch(url, { mode: 'no-cors' });
+      unlockAudioOnGesture();
       askZelda('I just fired my Peacock Pointe home webhook sync.');
     }
 
@@ -2064,10 +2020,10 @@ RULES:
     }
 
     function saveHudConfig() {
+      unlockAudioOnGesture();
       localStorage.setItem('zelda_hud_gemini_key', document.getElementById('cfg-gemini-key').value.trim());
       localStorage.setItem('zelda_hud_ifttt', document.getElementById('cfg-ifttt-url').value.trim());
       toggleConfigModal();
-      hasGreetedThisSession = false;
       probeCloudConnectivity();
     }
 
