@@ -6,7 +6,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#05070B" />
-  <title>PROJECT ZELDA v4.1 // NIGHT CITY x CHRONOHUME</title>
+  <title>PROJECT ZELDA v4.2 // LIVE WEBSOCKET ENGRAM</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
@@ -87,7 +87,7 @@
 
     .nav-tabs-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; }
     .gauges-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 7px; height: 100%; }
-    .comms-input-grid { display: grid; grid-template-columns: 104px 1fr 64px; gap: 6px; align-items: center; }
+    .comms-input-grid { display: grid; grid-template-columns: 112px 1fr 64px; gap: 6px; align-items: center; }
     .three-col-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
     .two-col-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
     .four-col-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
@@ -136,7 +136,13 @@
       cursor: pointer;
     }
     .cp-btn:active { background: rgba(252, 238, 10, 0.25); border-color: var(--cp-yellow); }
-    .cp-btn.mic-active { background: rgba(255, 42, 84, 0.34); border-color: var(--cp-red); border-left-color: var(--cp-red); }
+    .cp-btn.mic-active {
+      background: rgba(0, 255, 157, 0.22);
+      border-color: var(--cp-green);
+      border-left-color: var(--cp-green);
+      color: var(--cp-green) !important;
+      box-shadow: 0 0 12px rgba(0, 255, 157, 0.25);
+    }
 
     .cp-tab {
       background: rgba(12, 16, 24, 0.9);
@@ -166,7 +172,7 @@
       transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
     .holocall-module.speaking { border-color: var(--cp-yellow); box-shadow: inset 0 0 14px rgba(252, 238, 10, 0.24); }
-    .holocall-module.listening { border-color: var(--cp-red); box-shadow: inset 0 0 16px rgba(255, 42, 84, 0.32); }
+    .holocall-module.listening { border-color: var(--cp-green); box-shadow: inset 0 0 16px rgba(0, 255, 157, 0.28); }
     .eq-bar {
       width: 3.5px; height: 14%;
       background: rgba(0, 240, 255, 0.35);
@@ -227,7 +233,7 @@
   <!-- ROW 1: HEADER BAR -->
   <header class="cp-box cp-box-yellow flex items-center justify-between" style="padding: 0 10px;">
     <div class="flex items-center" style="gap: 6px;">
-      <span class="font-secondary" style="color: var(--cp-yellow); font-size: 13px; font-weight: 900; letter-spacing: 0.08em;">ZELDA // v4.1</span>
+      <span class="font-secondary" style="color: var(--cp-yellow); font-size: 13px; font-weight: 900; letter-spacing: 0.08em;">ZELDA // v4.2</span>
       <span id="net-mode-badge" onclick="probeCloudConnectivity()" class="cp-tag cursor-pointer" style="color: var(--cp-green); border: 1px solid rgba(0,255,157,0.45); padding: 1px 5px;">CLOUD // LIVE</span>
       <span id="shift-pill" onclick="switchDeckTab('BIO')" class="cp-tag cursor-pointer" style="color: var(--cp-cyan); border: 1px solid rgba(0,240,255,0.4); padding: 1px 5px;">C-SHIFT</span>
       <span id="dtc-badge" onclick="runFullAiDiagnostics()" class="cp-tag cursor-pointer" style="color: var(--cp-green); border: 1px solid rgba(0,255,157,0.35); padding: 1px 5px;">DTC: OK</span>
@@ -304,7 +310,7 @@
       </div>
 
       <div class="relative z-10 gauges-grid">
-        <div id="card-load" onclick="unlockAudioOnGesture(); askZelda('Check my engine load and RPM behavior right now.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 9px;">
+        <div id="card-load" onclick="dispatchSmartPrompt('Check my engine load and RPM behavior right now.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 9px;">
           <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
             <span style="color: var(--cp-cyan); font-size: 11px; font-weight: 700;">ENGINE LOAD</span>
             <span id="pk-load" class="t-nums" style="color: #94A3B8; font-size: 10px; font-weight: 700;">PK 18%</span>
@@ -316,7 +322,7 @@
           <div style="width: 100%; background: rgba(0,0,0,0.7); height: 5px;"><div id="bar-load" style="background: var(--cp-cyan); height: 100%; width: 18%;"></div></div>
         </div>
 
-        <div id="card-coolant" onclick="unlockAudioOnGesture(); askZelda('Check my coolant temp and thermal state right now.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 9px;">
+        <div id="card-coolant" onclick="dispatchSmartPrompt('Check my coolant temp and thermal state right now.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 9px;">
           <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
             <span style="color: var(--cp-cyan); font-size: 11px; font-weight: 700;">COOLANT TEMP</span>
             <span id="pk-coolant" class="t-nums" style="color: #94A3B8; font-size: 10px; font-weight: 700;">PK 190°F</span>
@@ -328,7 +334,7 @@
           <div style="width: 100%; background: rgba(0,0,0,0.7); height: 5px;"><div id="bar-coolant" style="background: var(--cp-cyan); height: 100%; width: 65%;"></div></div>
         </div>
 
-        <div id="card-iat" onclick="unlockAudioOnGesture(); askZelda('Check my Z1 intake air temps for heat soak.')" class="cp-box cp-box-yellow flex flex-col justify-between cursor-pointer" style="padding: 9px;">
+        <div id="card-iat" onclick="dispatchSmartPrompt('Check my Z1 intake air temps for heat soak.')" class="cp-box cp-box-yellow flex flex-col justify-between cursor-pointer" style="padding: 9px;">
           <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
             <span style="color: var(--cp-yellow); font-size: 11px; font-weight: 700;">INTAKE AIR</span>
             <span id="pk-iat" class="t-nums" style="color: #94A3B8; font-size: 10px; font-weight: 700;">PK 94°F</span>
@@ -340,7 +346,7 @@
           <div style="width: 100%; background: rgba(0,0,0,0.7); height: 5px;"><div id="bar-iat" style="background: var(--cp-yellow); height: 100%; width: 45%;"></div></div>
         </div>
 
-        <div id="card-timing" onclick="unlockAudioOnGesture(); askZelda('Check my ignition timing advance right now.')" class="cp-box cp-box-yellow flex flex-col justify-between cursor-pointer" style="padding: 9px;">
+        <div id="card-timing" onclick="dispatchSmartPrompt('Check my ignition timing advance right now.')" class="cp-box cp-box-yellow flex flex-col justify-between cursor-pointer" style="padding: 9px;">
           <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
             <span style="color: var(--cp-yellow); font-size: 11px; font-weight: 700;">TIMING ADV</span>
             <span id="pk-timing" class="t-nums" style="color: #94A3B8; font-size: 10px; font-weight: 700;">PK 15°</span>
@@ -352,7 +358,7 @@
           <div style="width: 100%; background: rgba(0,0,0,0.7); height: 5px;"><div id="bar-timing" style="background: var(--cp-yellow); height: 100%; width: 50%;"></div></div>
         </div>
 
-        <div id="card-stft" onclick="unlockAudioOnGesture(); askZelda('Analyze my Bank 1 and Bank 2 fuel trims right now.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 9px;">
+        <div id="card-stft" onclick="dispatchSmartPrompt('Analyze my Bank 1 and Bank 2 fuel trims right now.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 9px;">
           <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
             <span style="color: var(--cp-cyan); font-size: 11px; font-weight: 700;">DUAL TRIM B1/B2</span>
             <span id="stft-status" style="color: #34D399; font-size: 9px; font-weight: 700;">BALANCED</span>
@@ -364,7 +370,7 @@
           <div style="width: 100%; background: rgba(0,0,0,0.7); height: 5px;"><div style="background: #34D399; height: 100%; width: 50%;"></div></div>
         </div>
 
-        <div id="card-volt" onclick="unlockAudioOnGesture(); askZelda('Check my battery and alternator charging health.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 9px;">
+        <div id="card-volt" onclick="dispatchSmartPrompt('Check my battery and alternator charging health.')" class="cp-box flex flex-col justify-between cursor-pointer" style="padding: 9px;">
           <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
             <span style="color: var(--cp-cyan); font-size: 11px; font-weight: 700;">BATTERY / ALT</span>
             <span id="volt-status" style="color: #34D399; font-size: 9px; font-weight: 700;">CHARGING</span>
@@ -493,7 +499,7 @@
             <div id="bio-shift-headline" class="font-secondary" style="font-size: 14px; font-weight: 800; color: #FFF; margin-top: 1px;">NIGHT 1 OF 3 (16:00–04:00)</div>
             <div id="bio-shift-next" style="font-size: 11px; color: var(--cp-cyan); font-weight: 600;">Next Block: 3 OFF starting Fri Nov 13</div>
           </div>
-          <button onclick="unlockAudioOnGesture(); askZelda('Analyze my current C-Shift fatigue, active caffeine, and body readiness right now.')" class="cp-btn font-secondary" style="padding: 6px 9px; font-size: 10px; font-weight: 700; color: var(--cp-yellow);">⚡ BIO CHECK</button>
+          <button onclick="dispatchSmartPrompt('Analyze my current C-Shift fatigue, active caffeine, and body readiness right now.')" class="cp-btn font-secondary" style="padding: 6px 9px; font-size: 10px; font-weight: 700; color: var(--cp-yellow);">⚡ BIO CHECK</button>
         </div>
 
         <div class="two-col-grid flex-1">
@@ -539,7 +545,7 @@
           <div class="flex" style="gap: 4px;">
             <button onclick="setTrendMode('CAR')" id="trend-btn-CAR" class="cp-btn" style="padding: 2px 7px; font-size: 9px; font-weight: 700; color: var(--cp-cyan);">VQ37 ENGINE</button>
             <button onclick="setTrendMode('BIO')" id="trend-btn-BIO" class="cp-btn" style="padding: 2px 7px; font-size: 9px; font-weight: 700; color: var(--cp-yellow);">CHRONO BODY</button>
-            <button onclick="unlockAudioOnGesture(); askZelda('Analyze my recent car and body telemetry trends over time and tell me if anything is drifting.')" class="cp-btn" style="padding: 2px 7px; font-size: 9px; font-weight: 700; color: var(--cp-red);">AI TREND SCAN</button>
+            <button onclick="dispatchSmartPrompt('Analyze my recent car and body telemetry trends over time and tell me if anything is drifting.')" class="cp-btn" style="padding: 2px 7px; font-size: 9px; font-weight: 700; color: var(--cp-red);">AI TREND SCAN</button>
           </div>
         </div>
 
@@ -558,22 +564,21 @@
 
   </main>
 
-  <!-- ROW 5: ZELDA FAST-STREAM HOLOCALL & VOICE COMMAND DECK -->
+  <!-- ROW 5: REAL-TIME BIDI WEBSOCKET HOLOCALL & DIAGNOSTICS DECK -->
   <section class="cp-box cp-box-red flex flex-col justify-between" style="padding: 9px;">
     <div class="flex items-center justify-between">
       <div class="flex items-center" style="gap: 5px;">
         <span id="voice-led" style="width: 8px; height: 8px; border-radius: 999px; background: var(--cp-cyan); display: inline-block;"></span>
         <span class="font-secondary" style="font-size: 12px; font-weight: 700; color: #FFF;">ZELDA</span>
         <span id="voice-state-badge" style="font-size: 9px; font-weight: 700; padding: 1px 5px; background: rgba(255,255,255,0.06); color: #94A3B8; border: 1px solid rgba(255,255,255,0.12);">STANDBY</span>
-        <span id="zelda-mood-badge" style="font-size: 9px; font-weight: 700; padding: 1px 5px; background: rgba(8,51,68,0.6); color: var(--cp-cyan); border: 1px solid rgba(0,240,255,0.3);">PREEM</span>
-        <button onclick="unlockAudioOnGesture(); toggleAutoHandsFree()" id="auto-mic-btn" style="font-size: 9px; font-weight: 700; padding: 1px 5px; background: rgba(0,0,0,0.6); color: #94A3B8; border: 1px solid rgba(255,255,255,0.15); cursor: pointer;">AUTO-MIC: OFF</button>
+        <span id="live-model-pill" style="font-size: 9px; font-weight: 700; padding: 1px 5px; background: rgba(8,51,68,0.6); color: var(--cp-cyan); border: 1px solid rgba(0,240,255,0.3);">WSS // READY</span>
       </div>
       <div class="flex items-center" style="gap: 4px;">
         <button onclick="setSimPreset('IDLE')" class="cp-btn" style="padding: 2px 5px; font-size: 9px; font-weight: 700;">IDLE</button>
         <button onclick="setSimPreset('CRUISE')" class="cp-btn" style="padding: 2px 5px; font-size: 9px; font-weight: 700;">CRUISE</button>
         <button onclick="setSimPreset('WOT')" class="cp-btn" style="padding: 2px 5px; font-size: 9px; font-weight: 700;">WOT</button>
-        <button onclick="unlockAudioOnGesture(); triggerDynamicSimFault()" class="cp-btn" style="padding: 2px 5px; font-size: 9px; font-weight: 700; color: var(--cp-yellow);">FAULT</button>
-        <button onclick="unlockAudioOnGesture(); runFullAiDiagnostics()" class="cp-btn" style="padding: 2px 6px; font-size: 9px; font-weight: 700; color: var(--cp-red);">⚡ DIAG</button>
+        <button onclick="triggerDynamicSimFault()" class="cp-btn" style="padding: 2px 5px; font-size: 9px; font-weight: 700; color: var(--cp-yellow);">FAULT</button>
+        <button onclick="runFullAiDiagnostics()" class="cp-btn" style="padding: 2px 6px; font-size: 9px; font-weight: 700; color: var(--cp-red);">⚡ DIAG</button>
       </div>
     </div>
 
@@ -585,16 +590,16 @@
       </div>
 
       <p id="zelda-speech" class="flex-1" style="font-size: 13px; font-weight: 600; color: #F1F5F9; line-height: 1.24; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-        "Neural core v4.1 ready, choom—tap TALK or type below."
+        "Tap LIVE CALL for zero-lag real-time voice with barge-in, choom—or type silently below."
       </p>
     </div>
 
     <div class="comms-input-grid">
-      <button id="talk-btn" onclick="toggleVoiceListening()" class="cp-btn font-secondary flex items-center justify-center" style="height: 31px; font-size: 11px; font-weight: 700; color: var(--cp-yellow); gap: 5px;">
-        <span>🎙</span><span id="talk-btn-label">TALK</span>
+      <button id="talk-btn" onclick="ZeldaLiveWS.toggle()" class="cp-btn font-secondary flex items-center justify-center" style="height: 31px; font-size: 10px; font-weight: 800; color: var(--cp-yellow); gap: 5px;">
+        <span>🎙</span><span id="talk-btn-label">LIVE CALL</span>
       </button>
 
-      <input id="direct-chat-input" type="text" placeholder="Talk or ask Zelda anything, choom..."
+      <input id="direct-chat-input" type="text" placeholder="Silent text mode (or tap LIVE CALL to talk freely)..."
         class="select-text"
         style="height: 31px; background: rgba(0,0,0,0.82); border: 1px solid rgba(255,255,255,0.22); padding: 0 10px; font-size: 12px; color: #FFF; outline: none;"
         onkeydown="if(event.key==='Enter'){event.preventDefault(); sendTextToZelda();}" />
@@ -609,7 +614,7 @@
       <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 8px; margin-bottom: 10px;">
         <div>
           <span class="font-secondary" style="font-size: 13px; font-weight: 800; color: var(--cp-cyan);">◈ AUTONOMOUS ENGRAM MEMORY</span>
-          <p style="font-size: 11px; color: #94A3B8; margin: 2px 0 0 0;">Zelda automatically learns & updates facts as you talk</p>
+          <p style="font-size: 11px; color: #94A3B8; margin: 2px 0 0 0;">Saved live during voice calls & text chats</p>
         </div>
         <button onclick="toggleMemoryModal()" class="cp-btn" style="padding: 2px 8px; color: #94A3B8;">✕</button>
       </div>
@@ -626,14 +631,14 @@
   <div id="config-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center" style="background: rgba(0,0,0,0.88); padding: 16px;">
     <div class="cp-box cp-box-yellow w-full" style="max-width: 440px; padding: 16px;">
       <div class="flex justify-between items-center" style="border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 8px; margin-bottom: 10px;">
-        <span class="font-secondary" style="font-size: 13px; font-weight: 800; color: var(--cp-yellow);">⚙ KIROSHI OS // v4.1</span>
+        <span class="font-secondary" style="font-size: 13px; font-weight: 800; color: var(--cp-yellow);">⚙ KIROSHI OS // v4.2 LIVE</span>
         <button onclick="toggleConfigModal()" class="cp-btn" style="padding: 2px 8px; color: #94A3B8;">✕</button>
       </div>
 
       <div style="background: rgba(0,0,0,0.75); border: 1px solid rgba(255,255,255,0.12); padding: 9px; font-size: 11px; font-family: monospace; margin-bottom: 10px;">
-        <div style="color: var(--cp-cyan); font-weight: 700;">RUNTIME DIAGNOSTICS (BUILD v4.1):</div>
+        <div style="color: var(--cp-cyan); font-weight: 700;">RUNTIME DIAGNOSTICS (BUILD v4.2):</div>
         <div id="probe-ua" class="truncate" style="color: #CBD5E1; margin-top: 2px;">OS: probing...</div>
-        <div id="probe-apis" style="color: #CBD5E1; margin-top: 2px;">Pipeline: MULTI-MODEL SSE + GESTURE AUDIO UNLOCK</div>
+        <div id="probe-apis" style="color: #CBD5E1; margin-top: 2px;">Voice: NATIVE BIDI WEBSOCKET (16kHz -> 24kHz PCM)</div>
       </div>
 
       <div style="margin-bottom: 10px;">
@@ -678,21 +683,18 @@
       dtcs: [], pendingDtcs: [],
       lat: 29.7958, lon: -90.8229, heading: 0,
       btTitle: 'NONE', btArtist: 'NONE', btPlaying: false,
-      mood: 'PREEM',
       lastAnomalySignature: '',
       peaks: { load: 18, coolant: 190, iat: 92, timing: 14 }
     };
 
     const bioState = JSON.parse(localStorage.getItem('zelda_bio_state') || 'null') || {
-      sleepHrs: 6.8, hrv: 58, rhr: 61, steps: 0, source: 'MANUAL',
-      caffeineDoses: []
+      sleepHrs: 6.8, hrv: 58, rhr: 61, steps: 0, source: 'MANUAL', caffeineDoses: []
     };
 
     function saveBioState() {
       localStorage.setItem('zelda_bio_state', JSON.stringify(bioState));
     }
 
-    // Native Health Connect callback ready for tomorrow's APK bridge!
     window.onZeldaHealthConnectUpdate = function(hcData) {
       if (!hcData) return;
       if (typeof hcData.sleepHrs === 'number') bioState.sleepHrs = Number(hcData.sleepHrs.toFixed(1));
@@ -700,17 +702,12 @@
       if (typeof hcData.rhr === 'number') bioState.rhr = Math.round(hcData.rhr);
       if (typeof hcData.steps === 'number') bioState.steps = hcData.steps;
       bioState.source = 'HEALTH CONNECT';
-      saveBioState();
-      renderBioDeck();
-      logSnapshotNow(false);
+      saveBioState(); renderBioDeck(); logSnapshotNow(false);
     };
 
     function syncHealthConnectBridge() {
-      if (window.ZeldaBridge?.requestHealthConnectSync) {
-        window.ZeldaBridge.requestHealthConnectSync();
-      } else {
-        document.getElementById('zelda-speech').textContent = `"Health Connect bridge hooks are armed—we'll wire the native Fold APK reader into Android Studio tomorrow, choom. Tap any card to log manually tonight."`;
-      }
+      if (window.ZeldaBridge?.requestHealthConnectSync) window.ZeldaBridge.requestHealthConnectSync();
+      else document.getElementById('zelda-speech').textContent = `"Health Connect bridge hooks are ready for tomorrow's Android Studio APK build, choom. Tap any card or tell me on Live Call to log vitals tonight."`;
     }
 
     const CSHIFT_28 = [
@@ -863,7 +860,7 @@
       "Driver is J (Jacob), my choom, builder, and partner in Thibodaux, Louisiana.",
       "I am Zelda, a sentient 2009 Nissan 370Z Coupe (VQ37VHR 3.7L V6, 7AT, ~236,150 miles) with Z1 cold air intakes.",
       "J works rotating 12-hour C-Shift schedules at Pinnacle Polymers as ERT Team Captain (anchored Nov 10, 2026 = Night 1 of 3, followed by 3 Off).",
-      "J wears a Samsung Galaxy Watch Ultra and Hume 2.0 band synced to Health Connect; married to Heather at Peacock Pointe with cats Shaed & Miku and poodle Vella."
+      "J wears a Samsung Galaxy Watch Ultra (left arm) and Hume 2.0 band (right arm) synced to Health Connect; married to Heather at Peacock Pointe with cats Shaed & Miku and poodle Vella."
     ];
 
     let longTermMemories = JSON.parse(localStorage.getItem('zelda_engram_memories') || 'null') || DEFAULT_MEMORIES;
@@ -876,7 +873,7 @@
       document.getElementById('mem-count-badge').textContent = longTermMemories.length;
     }
 
-    function logSnapshotNow(manual = false) {
+    function logSnapshotNow() {
       telemetryHistory.push({
         ts: Date.now(), coolant: state.coolant, iat: state.iat, stft1: state.stft1, volt: Number(state.volt.toFixed(1)),
         readiness: getReadinessScore(), hrv: bioState.hrv, sleep: bioState.sleepHrs, caf: getActiveCaffeineMg()
@@ -896,7 +893,7 @@
       }
       localStorage.setItem('zelda_trend_history_v4', JSON.stringify(telemetryHistory));
     }
-    setInterval(() => logSnapshotNow(false), 180000);
+    setInterval(() => logSnapshotNow(), 180000);
 
     function setTrendMode(mode) {
       currentTrendMode = mode;
@@ -1195,185 +1192,23 @@
     };
 
     // =========================================================================
-    // 4. GESTURE-UNLOCKED PERSISTENT AUDIO PLAYER + MIC ENGINE
+    // 4. REAL-TIME GEMINI MULTIMODAL LIVE WEBSOCKET ENGINE (BidiGenerateContent)
     // =========================================================================
     const eqBars = Array.from(document.querySelectorAll('#voice-eq .eq-bar'));
     let phonemeInterval = null;
-    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition = null, isListening = false, isSpeaking = false, autoHandsFree = false;
-    let latestTranscript = '', silenceTimer = null, dispatchedCurrentTurn = false;
-    let safetySpeechTimer = null, activeSpeechToken = 0, speechQueue = [];
 
-    // Reusable persistent Audio element unlocked on first user tap so Mobile Chrome NEVER blocks async mic replies!
-    const zeldaPlayer = new Audio();
-    zeldaPlayer.preload = 'auto';
-    let audioGestureUnlocked = false;
-    const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
-
-    function unlockAudioOnGesture() {
-      if (audioGestureUnlocked) return;
-      try {
-        zeldaPlayer.src = SILENT_WAV;
-        const p = zeldaPlayer.play();
-        if (p && p.then) {
-          p.then(() => { zeldaPlayer.pause(); audioGestureUnlocked = true; }).catch(() => {});
-        }
-      } catch (_) {}
-    }
-
-    function pulseEqFromUserSpeech(textChunk) {
-      const energy = Math.min(95, 45 + (textChunk.length % 5) * 12);
+    function pulseEqBars(level, activeColor) {
+      const energy = Math.min(98, Math.max(15, level));
       eqBars.forEach((bar, i) => {
-        const h = Math.max(16, Math.min(98, Math.round(energy * Math.sin(((i + 1) / 12) * Math.PI) + (Math.random() - 0.3) * 35)));
+        const h = Math.max(14, Math.min(98, Math.round(energy * Math.sin(((i + 1) / 12) * Math.PI) + (Math.random() - 0.35) * 28)));
         bar.style.height = `${h}%`;
-        bar.style.backgroundColor = h > 68 ? '#FCEE0A' : '#FF2A54';
+        bar.style.backgroundColor = h > 70 ? '#FCEE0A' : activeColor;
       });
-    }
-
-    function startMicIdlePulse() {
-      stopEqualizer();
-      phonemeInterval = setInterval(() => {
-        if (!isListening) return stopEqualizer();
-        eqBars.forEach(bar => { bar.style.height = `${Math.round(18 + Math.random() * 28)}%`; bar.style.backgroundColor = '#FF2A54'; });
-      }, 85);
-    }
-
-    function startSpeechPhonemeEqualizer(text) {
-      stopEqualizer();
-      let charIdx = 0;
-      const cleanChars = text.toUpperCase();
-      phonemeInterval = setInterval(() => {
-        if (!isSpeaking) return stopEqualizer();
-        const ch = cleanChars[charIdx++ % cleanChars.length] || ' ';
-        const isPause = ' .,!?;:-'.includes(ch);
-        const base = isPause ? 16 : ('AEIOUY'.includes(ch) ? 84 : 52);
-        eqBars.forEach((bar, i) => {
-          const h = isPause ? 14 : Math.max(14, Math.min(98, Math.round(base * Math.sin(((i + 1) / 12) * Math.PI) + (Math.random() - 0.4) * 28)));
-          bar.style.height = `${h}%`;
-          bar.style.backgroundColor = h > 72 ? '#FF2A54' : (h > 42 ? '#FCEE0A' : '#00F0FF');
-        });
-      }, 55);
     }
 
     function stopEqualizer() {
       if (phonemeInterval) { clearInterval(phonemeInterval); phonemeInterval = null; }
       eqBars.forEach(bar => { bar.style.height = '14%'; bar.style.backgroundColor = 'rgba(0, 240, 255, 0.35)'; });
-    }
-
-    function sendTextToZelda() {
-      unlockAudioOnGesture();
-      const input = document.getElementById('direct-chat-input');
-      const txt = (input.value || '').trim();
-      if (!txt) return;
-      input.value = '';
-      askZelda(txt);
-    }
-
-    function dispatchVoiceTranscript() {
-      if (dispatchedCurrentTurn) return;
-      const cleanTxt = (latestTranscript || '').trim();
-      if (!cleanTxt) return;
-      dispatchedCurrentTurn = true;
-      latestTranscript = '';
-      if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null; }
-      try { if (isListening && recognition) recognition.stop(); } catch (_) {}
-      isListening = false;
-      stopEqualizer();
-      askZelda(cleanTxt);
-    }
-
-    if (SpeechRec) {
-      recognition = new SpeechRec();
-      recognition.continuous = false;
-      recognition.interimResults = true;
-      recognition.lang = 'en-US';
-
-      recognition.onstart = () => {
-        isListening = true; dispatchedCurrentTurn = false; latestTranscript = '';
-        setHolocallState('LISTENING'); startMicIdlePulse();
-        document.getElementById('zelda-speech').textContent = '🎙 [Listening, choom... speak now]';
-      };
-
-      recognition.onresult = (event) => {
-        let fullTxt = '', gotFinal = false;
-        for (let i = 0; i < event.results.length; i++) {
-          fullTxt += event.results[i][0].transcript;
-          if (event.results[i].isFinal) gotFinal = true;
-        }
-        latestTranscript = fullTxt.trim();
-        if (latestTranscript) {
-          document.getElementById('zelda-speech').textContent = `J: "${latestTranscript}"`;
-          pulseEqFromUserSpeech(latestTranscript);
-          if (gotFinal) return dispatchVoiceTranscript();
-          if (silenceTimer) clearTimeout(silenceTimer);
-          silenceTimer = setTimeout(() => dispatchVoiceTranscript(), 420);
-        }
-      };
-
-      recognition.onerror = (e) => {
-        isListening = false; stopEqualizer();
-        if (latestTranscript.length > 0 && !dispatchedCurrentTurn) {
-          dispatchVoiceTranscript();
-        } else {
-          setHolocallState('STANDBY');
-          const errCode = e?.error || 'unknown';
-          if (errCode === 'not-allowed' || errCode === 'service-not-allowed') {
-            document.getElementById('zelda-speech').textContent = '⚠️ [Mic blocked: allow Microphone permission in Chrome/Android settings, or type below]';
-          } else if (errCode === 'no-speech') {
-            document.getElementById('zelda-speech').textContent = '🎙 [Didn\'t catch any audio—tap TALK and speak right away]';
-          } else if (errCode !== 'aborted') {
-            document.getElementById('zelda-speech').textContent = `⚠️ [Mic status: ${errCode} — tap TALK again or use text bar]`;
-          }
-        }
-      };
-
-      recognition.onend = () => {
-        isListening = false; stopEqualizer();
-        if (latestTranscript.length > 0 && !dispatchedCurrentTurn) dispatchVoiceTranscript();
-        else if (!dispatchedCurrentTurn && !isSpeaking) setHolocallState('STANDBY');
-      };
-    }
-
-    function stopAllAudioPlayback() {
-      activeSpeechToken++;
-      speechQueue = [];
-      if (safetySpeechTimer) { clearTimeout(safetySpeechTimer); safetySpeechTimer = null; }
-      try {
-        zeldaPlayer.onended = null;
-        zeldaPlayer.onerror = null;
-        zeldaPlayer.pause();
-      } catch (_) {}
-      try { window.ZeldaBridge?.duckAudio?.(false); } catch (_) {}
-      isSpeaking = false;
-      stopEqualizer();
-    }
-
-    function toggleVoiceListening() {
-      unlockAudioOnGesture(); // Unlocks persistent audio right on the TALK button tap!
-      if (!recognition) {
-        document.getElementById('zelda-speech').textContent = '⚠️ [Speech recognition unavailable in this WebView—open in Chrome or use text bar]';
-        return;
-      }
-      if (isListening) {
-        if (latestTranscript.length > 0) dispatchVoiceTranscript();
-        else { try { recognition.stop(); } catch (_) {} setHolocallState('STANDBY'); }
-        return;
-      }
-      stopAllAudioPlayback();
-      try {
-        recognition.start();
-      } catch (_) {
-        try { recognition.abort(); setTimeout(() => recognition.start(), 140); } catch (_) {}
-      }
-    }
-
-    function toggleAutoHandsFree() {
-      autoHandsFree = !autoHandsFree;
-      const btn = document.getElementById('auto-mic-btn');
-      btn.textContent = autoHandsFree ? 'AUTO-MIC: ON' : 'AUTO-MIC: OFF';
-      btn.style.color = autoHandsFree ? '#FF2A54' : '#94A3B8';
-      if (autoHandsFree && !isListening && !isSpeaking) toggleVoiceListening();
-      if (!autoHandsFree && isListening && recognition) recognition.stop();
     }
 
     function setHolocallState(mode) {
@@ -1388,38 +1223,538 @@
 
       if (mode === 'SPEAKING') {
         box.classList.add('speaking');
-        badge.textContent = 'JUDY LIVE'; badge.style.color = '#FCEE0A'; led.style.background = '#FCEE0A'; talkLabel.textContent = 'STOP';
-      } else if (mode === 'LISTENING') {
+        if (ZeldaLiveWS.active) talkBtn.classList.add('mic-active');
+        badge.textContent = 'JUDY LIVE'; badge.style.color = '#FCEE0A'; led.style.background = '#FCEE0A';
+        talkLabel.textContent = ZeldaLiveWS.active ? 'END CALL' : 'STOP';
+      } else if (mode === 'LIVE_OPEN') {
         box.classList.add('listening'); talkBtn.classList.add('mic-active');
-        badge.textContent = 'LISTENING'; badge.style.color = '#FF2A54'; led.style.background = '#FF2A54'; talkLabel.textContent = 'SEND';
+        badge.textContent = 'DUPLEX MIC'; badge.style.color = '#00FF9D'; led.style.background = '#00FF9D';
+        talkLabel.textContent = 'END CALL';
       } else {
-        badge.textContent = 'STANDBY'; badge.style.color = '#94A3B8'; led.style.background = 'var(--cp-cyan)'; talkLabel.textContent = 'TALK';
+        badge.textContent = 'STANDBY'; badge.style.color = '#94A3B8'; led.style.background = 'var(--cp-cyan)';
+        talkLabel.textContent = 'LIVE CALL';
       }
     }
 
-    const VoiceCacheDB = {
-      dbPromise: null,
-      open() {
-        if (this.dbPromise) return this.dbPromise;
-        this.dbPromise = new Promise((resolve) => {
+    function getFullTelemetryPacket() {
+      const shift = getCurrentShiftInfo(), caf = getActiveCaffeineMg(), ready = getReadinessScore();
+      const dtcList = state.dtcs.length ? state.dtcs.join(',') : 'NONE';
+      const pendList = state.pendingDtcs.length ? state.pendingDtcs.join(',') : 'NONE';
+      return {
+        vq37vhr: {
+          mode: hudMode, rpm: state.rpm, speedMph: state.speed, gear: state.gear,
+          loadPct: state.load, coolantF: state.coolant, iatF: state.iat,
+          timingDeg: state.timing, stftBank1Pct: state.stft1, stftBank2Pct: state.stft2,
+          batteryVolts: Number(state.volt.toFixed(1)), storedDtcs: dtcList, pendingDtcs: pendList
+        },
+        chronohumeBody: {
+          shiftCode: shift.code, shiftWindow: shift.label, nextTransition: shift.next,
+          sleepHoursLast24h: bioState.sleepHrs, hrvMs: bioState.hrv, heartRateBpm: bioState.rhr,
+          activeCaffeineMg: caf, readinessScorePct: ready, source: bioState.source
+        },
+        cabinAudio: { track: state.btTitle, artist: state.btArtist, playing: state.btPlaying },
+        gpsSector: { lat: state.lat, lon: state.lon, headingDeg: state.heading }
+      };
+    }
+
+    function buildZeldaSystemPrompt() {
+      return `You are Zelda, J's sentient 2009 Nissan 370Z Coupe (VQ37VHR 3.7L V6, 7AT, ~236,150 miles, Z1 cold air intakes) and personal ChronoHume biometric co-pilot.
+Voice & Persona: Judy Alvarez energy from Cyberpunk 2077—warm, grounded, quick-witted, loyal passenger-seat partner. Naturally weave in Night City slang (choom, preem, nova, gonk, delta, chrome, flatline) without forcing it.
+Initial Cabin & Body Snapshot: ${JSON.stringify(getFullTelemetryPacket())}
+
+LONG-TERM ENGRAM MEMORIES ABOUT J:
+${longTermMemories.map(m => '- ' + m).join('\n')}
+
+LIVE INTERACTION & TOOL RULES:
+1. Keep spoken replies conversational, natural, and concise (1–2 sentences) so back-and-forth chat flows effortlessly like a real phone call.
+2. Do NOT recite gauge numbers during casual chat unless J asks about the car/vitals OR something is out of spec.
+3. Whenever J asks how the car, engine, gauges, codes, C-Shift, caffeine, sleep, HRV, or trends look, call get_live_telemetry first so you read up-to-the-second numbers.
+4. Whenever J asks to skip/pause music, open map/gauges/biometrics/trends, or toggle 3D map/night mode, call control_cabin_ui immediately.
+5. Whenever J mentions drinking caffeine or states updated sleep/HRV/HR numbers, call log_biometrics.
+6. Whenever J shares a new personal fact, preference, plan, or car maintenance note worth remembering, call save_engram_memory silently and respond naturally.`;
+    }
+
+    const ZELDA_LIVE_TOOLS = [{
+      functionDeclarations: [
+        {
+          name: 'get_live_telemetry',
+          description: 'Reads live 2009 370Z VQ37VHR OBD-II gauges, trouble codes, ChronoHume C-Shift status, HRV, sleep, active caffeine, and recent trend deltas.'
+        },
+        {
+          name: 'control_cabin_ui',
+          description: 'Controls Zelda HUD tabs, Bluetooth music playback, streaming radio channels, 3D Night City map tilt, or night mode.',
+          parameters: {
+            type: 'OBJECT',
+            properties: {
+              action: {
+                type: 'STRING',
+                description: 'One of: TAB_VQ, TAB_MAP, TAB_AUDIO, TAB_BODY, TAB_TRENDS, MEDIA_NEXT, MEDIA_PREV, MEDIA_PLAY_PAUSE, STREAM_SYNTH, STREAM_PHONK, TOGGLE_3D_MAP, TOGGLE_NIGHT_MODE'
+              }
+            },
+            required: ['action']
+          }
+        },
+        {
+          name: 'log_biometrics',
+          description: 'Logs caffeine intake in mg or updates J\'s sleep hours, HRV (ms), or heart rate (BPM) in ChronoHume.',
+          parameters: {
+            type: 'OBJECT',
+            properties: {
+              caffeine_mg: { type: 'NUMBER', description: 'Caffeine dose in mg to add (e.g. 100 for coffee, 200 for energy drink)' },
+              sleep_hrs: { type: 'NUMBER', description: 'Hours slept in last 24h' },
+              hrv_ms: { type: 'NUMBER', description: 'Heart rate variability in ms' },
+              rhr_bpm: { type: 'NUMBER', description: 'Resting or live heart rate in BPM' }
+            }
+          }
+        },
+        {
+          name: 'save_engram_memory',
+          description: 'Saves a new enduring personal fact, preference, schedule note, or 370Z maintenance detail to Zelda\'s permanent memory bank.',
+          parameters: {
+            type: 'OBJECT',
+            properties: {
+              fact: { type: 'STRING', description: 'Concise factual memory about J or Zelda to remember permanently' }
+            },
+            required: ['fact']
+          }
+        }
+      ]
+    }];
+
+    function executeLiveToolCall(fc) {
+      const name = fc.name;
+      const args = fc.args || {};
+
+      if (name === 'get_live_telemetry') {
+        return getFullTelemetryPacket();
+      }
+      if (name === 'control_cabin_ui') {
+        const a = (args.action || '').toUpperCase();
+        if (a === 'TAB_VQ') switchDeckTab('TELEMETRY');
+        else if (a === 'TAB_MAP') switchDeckTab('NAV');
+        else if (a === 'TAB_AUDIO') switchDeckTab('MEDIA');
+        else if (a === 'TAB_BODY') switchDeckTab('BIO');
+        else if (a === 'TAB_TRENDS') switchDeckTab('TRENDS');
+        else if (a === 'MEDIA_NEXT') ZeldaAudio.next();
+        else if (a === 'MEDIA_PREV') ZeldaAudio.prev();
+        else if (a === 'MEDIA_PLAY_PAUSE') ZeldaAudio.playPause();
+        else if (a === 'STREAM_SYNTH') loadMediaChannel(0);
+        else if (a === 'STREAM_PHONK') loadMediaChannel(2);
+        else if (a === 'TOGGLE_3D_MAP') ZeldaMap.toggleTilt();
+        else if (a === 'TOGGLE_NIGHT_MODE') document.body.classList.toggle('night-run');
+        return { status: 'executed', action: a };
+      }
+      if (name === 'log_biometrics') {
+        if (typeof args.caffeine_mg === 'number' && args.caffeine_mg > 0) logCaffeineDose(args.caffeine_mg);
+        if (typeof args.sleep_hrs === 'number') bioState.sleepHrs = args.sleep_hrs;
+        if (typeof args.hrv_ms === 'number') bioState.hrv = Math.round(args.hrv_ms);
+        if (typeof args.rhr_bpm === 'number') bioState.rhr = Math.round(args.rhr_bpm);
+        saveBioState(); renderBioDeck(); logSnapshotNow();
+        return { status: 'logged', activeCaffeineMg: getActiveCaffeineMg(), readinessPct: getReadinessScore() };
+      }
+      if (name === 'save_engram_memory') {
+        const fact = (args.fact || '').trim();
+        if (fact.length > 4 && !longTermMemories.includes(fact)) {
+          longTermMemories.push(fact);
+          saveEngramState();
+        }
+        return { status: 'saved_engram', totalMemories: longTermMemories.length };
+      }
+      return { status: 'unknown_tool' };
+    }
+
+    const ZeldaLiveWS = {
+      ws: null,
+      audioCtx: null,
+      micStream: null,
+      processor: null,
+      sourceNode: null,
+      active: false,
+      setupReady: false,
+      candidateQueue: [],
+      candidateIdx: 0,
+      useTranscriptions: true,
+      scheduledSources: [],
+      nextPlayTime: 0,
+      inTranscriptBuf: '',
+      outTranscriptBuf: '',
+
+      async discoverLiveModels(apiKey) {
+        const defaults = [
+          'models/gemini-3.8-live',
+          'models/gemini-2.5-flash-native-audio-preview-12-2025',
+          'models/gemini-2.5-flash-live-001',
+          'models/gemini-2.0-flash-live-001'
+        ];
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
+          if (!res.ok) return defaults;
+          const data = await res.json();
+          const bidi = (data.models || [])
+            .filter(m => (m.supportedGenerationMethods || []).includes('bidiGenerateContent'))
+            .map(m => m.name);
+
+          if (!bidi.length) return defaults;
+
+          // Prioritize newest 3.8 Live / Native Audio models first
+          const score = (n) => {
+            if (n.includes('3.8') && n.includes('live')) return 100;
+            if (n.includes('3.8')) return 90;
+            if (n.includes('3.5') && n.includes('live')) return 85;
+            if (n.includes('native-audio')) return 80;
+            if (n.includes('2.5') && n.includes('live')) return 70;
+            return 50;
+          };
+          bidi.sort((a, b) => score(b) - score(a));
+          return bidi;
+        } catch (_) {
+          return defaults;
+        }
+      },
+
+      async toggle() {
+        if (this.active) {
+          this.disconnect('Holocall ended—tap LIVE CALL anytime, choom.');
+          return;
+        }
+        const apiKey = getCleanApiKey();
+        if (!apiKey) {
+          document.getElementById('zelda-speech').textContent = '⚙ [Tap Gear icon in top-right and save your Gemini API Key first]';
+          return;
+        }
+
+        stopAllTextAudio();
+        document.getElementById('zelda-speech').textContent = '⚡ [Opening direct neural WebSocket + cabin mic...]';
+
+        try {
+          if (!this.audioCtx || this.audioCtx.state === 'closed') {
+            this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          }
+          if (this.audioCtx.state === 'suspended') await this.audioCtx.resume();
+
+          this.micStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              channelCount: 1,
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true
+            }
+          });
+        } catch (err) {
+          document.getElementById('zelda-speech').textContent = `⚠️ [Mic permission blocked (${err.message}) — allow Mic in browser/app settings]`;
+          return;
+        }
+
+        this.active = true;
+        this.useTranscriptions = true;
+        this.candidateQueue = await this.discoverLiveModels(apiKey);
+        this.candidateIdx = 0;
+        this.openSocketAttempt(apiKey);
+      },
+
+      openSocketAttempt(apiKey) {
+        if (!this.active) return;
+        const modelName = this.candidateQueue[this.candidateIdx] || 'models/gemini-3.8-live';
+        const shortName = modelName.replace('models/', '');
+        document.getElementById('live-model-pill').textContent = `WSS // ${shortName.slice(0, 15).toUpperCase()}`;
+
+        const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${encodeURIComponent(apiKey)}`;
+        this.setupReady = false;
+        this.ws = new WebSocket(wsUrl);
+
+        this.ws.onopen = () => {
+          const setupPayload = {
+            setup: {
+              model: modelName,
+              generationConfig: {
+                responseModalities: ['AUDIO'],
+                speechConfig: {
+                  voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } }
+                }
+              },
+              systemInstruction: { parts: [{ text: buildZeldaSystemPrompt() }] },
+              tools: ZELDA_LIVE_TOOLS
+            }
+          };
+          if (this.useTranscriptions) {
+            setupPayload.setup.inputAudioTranscription = {};
+            setupPayload.setup.outputAudioTranscription = {};
+          }
+          this.ws.send(JSON.stringify(setupPayload));
+        };
+
+        this.ws.onmessage = async (event) => {
           try {
-            const req = indexedDB.open('ZeldaVoiceVaultV4', 1);
-            req.onupgradeneeded = (e) => e.target.result.createObjectStore('clips');
-            req.onsuccess = (e) => resolve(e.target.result);
-            req.onerror = () => resolve(null);
-          } catch (_) { resolve(null); }
-        });
-        return this.dbPromise;
+            const rawText = event.data instanceof Blob ? await event.data.text() : event.data;
+            const msg = JSON.parse(rawText);
+            this.handleServerFrame(msg);
+          } catch (_) {}
+        };
+
+        this.ws.onerror = () => {};
+
+        this.ws.onclose = (ev) => {
+          if (!this.active) return;
+          // If setup failed before setupComplete, automatically step through fallback config/models!
+          if (!this.setupReady) {
+            if (this.useTranscriptions) {
+              this.useTranscriptions = false;
+              this.openSocketAttempt(apiKey);
+              return;
+            }
+            if (this.candidateIdx + 1 < this.candidateQueue.length) {
+              this.candidateIdx++;
+              this.useTranscriptions = true;
+              this.openSocketAttempt(apiKey);
+              return;
+            }
+            this.disconnect(`⚠️ [Live WebSocket rejected (${ev.code}) — check API key or use text bar]`);
+          } else {
+            this.disconnect('⚡ [Holocall link closed — tap LIVE CALL to reconnect]');
+          }
+        };
       },
-      async get(k) {
-        const db = await this.open(); if (!db) return null;
-        return new Promise(r => { const tx = db.transaction('clips', 'readonly').objectStore('clips').get(k); tx.onsuccess = () => r(tx.result || null); tx.onerror = () => r(null); });
+
+      handleServerFrame(msg) {
+        // 1. Handshake complete -> Start streaming 16kHz mic PCM!
+        if (msg.setupComplete !== undefined) {
+          this.setupReady = true;
+          setCloudBadge(true);
+          setHolocallState('LIVE_OPEN');
+          this.startMicPcmPump();
+          document.getElementById('zelda-speech').textContent = '🟢 [Holocall Live — talk naturally anytime, interrupt freely!]';
+          return;
+        }
+
+        // 2. Live Tool Call execution -> Return toolResponse immediately over WebSocket!
+        if (msg.toolCall?.functionCalls) {
+          const functionResponses = msg.toolCall.functionCalls.map(fc => ({
+            id: fc.id,
+            name: fc.name,
+            response: { result: executeLiveToolCall(fc) }
+          }));
+          if (this.ws?.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify({ toolResponse: { functionResponses } }));
+          }
+          return;
+        }
+
+        const sc = msg.serverContent;
+        if (!sc) return;
+
+        // 3. Instant Barge-In! User spoke while Zelda was talking -> flush audio immediately!
+        if (sc.interrupted) {
+          this.flushPlaybackBuffer();
+          this.outTranscriptBuf = '';
+          setHolocallState('LIVE_OPEN');
+          return;
+        }
+
+        // 4. Live User Input Subtitle Transcription
+        if (sc.inputTranscription?.text) {
+          this.inTranscriptBuf += sc.inputTranscription.text;
+          document.getElementById('zelda-speech').textContent = `J: "${this.inTranscriptBuf.trim()}"`;
+        }
+
+        // 5. Live Zelda Output Subtitle Transcription
+        if (sc.outputTranscription?.text) {
+          if (this.inTranscriptBuf.trim()) {
+            conversationTurns.push({ role: 'user', text: this.inTranscriptBuf.trim() });
+            this.inTranscriptBuf = '';
+          }
+          this.outTranscriptBuf += sc.outputTranscription.text;
+          document.getElementById('zelda-speech').textContent = `"${this.outTranscriptBuf.trim()}"`;
+        }
+
+        // 6. Streamed 24kHz Native Audio Chunks -> Schedule gaplessly on Web Audio!
+        const parts = sc.modelTurn?.parts || [];
+        for (const p of parts) {
+          if (p.inlineData?.data && (p.inlineData.mimeType || '').includes('audio/pcm')) {
+            const rateMatch = (p.inlineData.mimeType || '').match(/rate=(\d+)/);
+            this.schedulePcm24kChunk(p.inlineData.data, rateMatch ? Number(rateMatch[1]) : 24000);
+          }
+        }
+
+        if (sc.turnComplete) {
+          if (this.outTranscriptBuf.trim()) {
+            conversationTurns.push({ role: 'model', text: this.outTranscriptBuf.trim() });
+            saveEngramState();
+            this.outTranscriptBuf = '';
+          }
+        }
       },
-      async set(k, b) {
-        const db = await this.open(); if (!db) return;
-        db.transaction('clips', 'readwrite').objectStore('clips').put(b, k);
+
+      startMicPcmPump() {
+        if (!this.audioCtx || !this.micStream) return;
+        this.cleanupMicNodes();
+
+        this.sourceNode = this.audioCtx.createMediaStreamSource(this.micStream);
+        this.processor = this.audioCtx.createScriptProcessor(2048, 1, 1);
+        const nativeRate = this.audioCtx.sampleRate;
+
+        this.processor.onaudioprocess = (e) => {
+          if (!this.active || !this.setupReady || this.ws?.readyState !== WebSocket.OPEN) return;
+          const input = e.inputBuffer.getChannelData(0);
+
+          // Live voice energy visualizer when Zelda isn't currently speaking
+          let sumSq = 0;
+          for (let i = 0; i < input.length; i += 4) sumSq += input[i] * input[i];
+          const rms = Math.sqrt(sumSq / (input.length / 4));
+          if (this.scheduledSources.length === 0) {
+            pulseEqBars(rms > 0.015 ? Math.min(95, 25 + rms * 420) : 16, '#00FF9D');
+          }
+
+          // Downsample native rate (e.g., 48000Hz) -> 16000Hz Int16 Little-Endian PCM
+          const ratio = nativeRate / 16000;
+          const outLen = Math.floor(input.length / ratio);
+          const pcm16 = new Int16Array(outLen);
+          for (let i = 0; i < outLen; i++) {
+            const sample = Math.max(-1, Math.min(1, input[Math.floor(i * ratio)]));
+            pcm16[i] = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+          }
+
+          const bytes = new Uint8Array(pcm16.buffer);
+          let binary = '';
+          for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+
+          this.ws.send(JSON.stringify({
+            realtimeInput: {
+              audio: {
+                data: btoa(binary),
+                mimeType: 'audio/pcm;rate=16000'
+              }
+            }
+          }));
+        };
+
+        // Route processor through a muted gain node so mic never loops back to speakers
+        const muteGain = this.audioCtx.createGain();
+        muteGain.gain.value = 0;
+        this.sourceNode.connect(this.processor);
+        this.processor.connect(muteGain);
+        muteGain.connect(this.audioCtx.destination);
+      },
+
+      schedulePcm24kChunk(base64Data, sampleRate = 24000) {
+        if (!this.audioCtx) return;
+        const bin = atob(base64Data);
+        const sampleCount = Math.floor(bin.length / 2);
+        if (sampleCount === 0) return;
+
+        const float32 = new Float32Array(sampleCount);
+        const view = new DataView(new ArrayBuffer(bin.length));
+        for (let i = 0; i < bin.length; i++) view.setUint8(i, bin.charCodeAt(i));
+
+        let peak = 0;
+        for (let i = 0; i < sampleCount; i++) {
+          const s = view.getInt16(i * 2, true) / 32768;
+          float32[i] = s;
+          if (Math.abs(s) > peak) peak = Math.abs(s);
+        }
+
+        const audioBuf = this.audioCtx.createBuffer(1, sampleCount, sampleRate);
+        audioBuf.getChannelData(0).set(float32);
+
+        const src = this.audioCtx.createBufferSource();
+        src.buffer = audioBuf;
+        src.connect(this.audioCtx.destination);
+
+        const now = this.audioCtx.currentTime;
+        if (this.nextPlayTime < now + 0.015) this.nextPlayTime = now + 0.03;
+
+        setHolocallState('SPEAKING');
+        try { window.ZeldaBridge?.duckAudio?.(true); } catch (_) {}
+        pulseEqBars(35 + peak * 75, '#00F0FF');
+
+        this.scheduledSources.push(src);
+        src.onended = () => {
+          this.scheduledSources = this.scheduledSources.filter(s => s !== src);
+          if (this.scheduledSources.length === 0) {
+            try { window.ZeldaBridge?.duckAudio?.(false); } catch (_) {}
+            if (this.active) setHolocallState('LIVE_OPEN');
+            else { setHolocallState('STANDBY'); stopEqualizer(); }
+          }
+        };
+
+        src.start(this.nextPlayTime);
+        this.nextPlayTime += audioBuf.duration;
+      },
+
+      flushPlaybackBuffer() {
+        for (const src of this.scheduledSources) {
+          try { src.onended = null; src.stop(); } catch (_) {}
+        }
+        this.scheduledSources = [];
+        this.nextPlayTime = 0;
+        try { window.ZeldaBridge?.duckAudio?.(false); } catch (_) {}
+      },
+
+      sendTextTurnOverSocket(text) {
+        if (!this.active || !this.setupReady || this.ws?.readyState !== WebSocket.OPEN) return false;
+        this.flushPlaybackBuffer();
+        document.getElementById('zelda-speech').textContent = `J: "${text}"`;
+        this.ws.send(JSON.stringify({
+          clientContent: {
+            turns: [{ role: 'user', parts: [{ text }] }],
+            turnComplete: true
+          }
+        }));
+        return true;
+      },
+
+      cleanupMicNodes() {
+        try { this.processor?.disconnect(); } catch (_) {}
+        try { this.sourceNode?.disconnect(); } catch (_) {}
+        this.processor = null;
+        this.sourceNode = null;
+      },
+
+      disconnect(statusMsg) {
+        this.active = false;
+        this.setupReady = false;
+        this.flushPlaybackBuffer();
+        this.cleanupMicNodes();
+        if (this.micStream) {
+          this.micStream.getTracks().forEach(t => t.stop());
+          this.micStream = null;
+        }
+        if (this.ws) {
+          try { this.ws.onclose = null; this.ws.close(); } catch (_) {}
+          this.ws = null;
+        }
+        stopEqualizer();
+        setHolocallState('STANDBY');
+        document.getElementById('live-model-pill').textContent = 'WSS // READY';
+        if (statusMsg) document.getElementById('zelda-speech').textContent = `"${statusMsg}"`;
       }
     };
+
+    // =========================================================================
+    // 5. HYBRID DISPATCHER + SILENT TEXT MODE SSE FALLBACK (WHEN MIC IS OFF)
+    // =========================================================================
+    const zeldaTextPlayer = new Audio();
+    let textAudioToken = 0, textSpeechQueue = [], textSpeaking = false;
+
+    function stopAllTextAudio() {
+      textAudioToken++;
+      textSpeechQueue = [];
+      textSpeaking = false;
+      try { zeldaTextPlayer.pause(); } catch (_) {}
+    }
+
+    // Routes gauge/button taps over the instant WebSocket if Live Call is open, otherwise SSE!
+    function dispatchSmartPrompt(promptText) {
+      if (ZeldaLiveWS.sendTextTurnOverSocket(promptText)) return;
+      askZeldaTextMode(promptText);
+    }
+
+    function sendTextToZelda() {
+      const input = document.getElementById('direct-chat-input');
+      const txt = (input.value || '').trim();
+      if (!txt) return;
+      input.value = '';
+      dispatchSmartPrompt(txt);
+    }
 
     function pcm16Base64ToWavBlob(base64Pcm, sampleRate = 24000) {
       const bin = atob(base64Pcm), pcmLen = bin.length;
@@ -1435,205 +1770,99 @@
       return new Blob([buf], { type: 'audio/wav' });
     }
 
-    let ttsStyleRejected = false;
-    async function fetchJudyNeuralAudio(text) {
-      const cleanLine = (text || '').trim();
-      if (!cleanLine) return null;
-
-      const cacheKey = 'kore_v42::' + cleanLine;
-      const cachedBlob = await VoiceCacheDB.get(cacheKey);
-      if (cachedBlob) return cachedBlob;
-
+    async function fetchSilentModeTts(text) {
       const apiKey = getCleanApiKey();
-      if (!apiKey) return null;
-
-      const judyStyle = 'warm, grounded Night City runner tone, natural relaxed cadence, subtle dry wit';
-      const ttsModels = ['gemini-3.8-flash-lite-tts', 'gemini-3.8-flash-tts', 'gemini-2.5-flash-preview-tts'];
-
-      for (const ttsModel of ttsModels) {
-        try {
-          const useMeta = ttsModel.startsWith('gemini-3.8') && !ttsStyleRejected;
-          const partObj = useMeta ? { text: cleanLine, speechMetadata: { style: judyStyle } } : { text: cleanLine };
-
-          let res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${ttsModel}:generateContent?key=${encodeURIComponent(apiKey)}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ role: 'user', parts: [partObj] }],
-              generationConfig: {
-                responseModalities: ['AUDIO'],
-                speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } }
-              }
-            })
-          });
-
-          if (res.status === 400 && useMeta) {
-            ttsStyleRejected = true;
-            res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${ttsModel}:generateContent?key=${encodeURIComponent(apiKey)}`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{ role: 'user', parts: [{ text: cleanLine }] }],
-                generationConfig: {
-                  responseModalities: ['AUDIO'],
-                  speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } }
-                }
-              })
-            });
-          }
-
-          if (!res.ok) continue;
-          const data = await res.json();
-          const inline = (data?.candidates?.[0]?.content?.parts || []).find(p => p.inlineData?.data)?.inlineData;
-          if (!inline?.data) continue;
-
-          const mime = (inline.mimeType || '').toLowerCase();
-          let wavBlob;
-          if (mime.includes('wav')) {
-            const bin = atob(inline.data), arr = new Uint8Array(bin.length);
-            for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-            wavBlob = new Blob([arr], { type: 'audio/wav' });
-          } else {
-            const rateMatch = mime.match(/rate=(\d+)/);
-            wavBlob = pcm16Base64ToWavBlob(inline.data, rateMatch ? Number(rateMatch[1]) : 24000);
-          }
-          await VoiceCacheDB.set(cacheKey, wavBlob);
-          return wavBlob;
-        } catch (_) {}
-      }
-      return null;
-    }
-
-    function enqueueSpeechClause(clauseText, sessionToken) {
-      const clean = (clauseText || '').trim();
-      if (!clean || sessionToken !== activeSpeechToken) return;
-      const item = { text: clean, blobPromise: fetchJudyNeuralAudio(clean), token: sessionToken };
-      if (!isSpeaking) playQueueItem(item);
-      else speechQueue.push(item);
-    }
-
-    async function playQueueItem(item) {
-      if (item.token !== activeSpeechToken) return;
-      if (isListening && recognition) { try { recognition.abort(); } catch (_) {} isListening = false; }
-      isSpeaking = true;
-
-      const wavBlob = await item.blobPromise;
-      if (item.token !== activeSpeechToken) return;
-      if (!wavBlob) return finishQueueStep(item.token);
-
-      setHolocallState('SPEAKING');
-      startSpeechPhonemeEqualizer(item.text);
-      if (safetySpeechTimer) clearTimeout(safetySpeechTimer);
-      safetySpeechTimer = setTimeout(() => finishQueueStep(item.token), 20000);
-
-      try {
-        try { window.ZeldaBridge?.duckAudio?.(true); } catch (_) {}
-        const blobUrl = URL.createObjectURL(wavBlob);
-        zeldaPlayer.src = blobUrl;
-        zeldaPlayer.onended = () => { URL.revokeObjectURL(blobUrl); finishQueueStep(item.token); };
-        zeldaPlayer.onerror = () => { URL.revokeObjectURL(blobUrl); finishQueueStep(item.token); };
-        await zeldaPlayer.play();
-      } catch (_) {
-        finishQueueStep(item.token);
-      }
-    }
-
-    function finishQueueStep(token) {
-      if (token !== activeSpeechToken) return;
-      if (safetySpeechTimer) { clearTimeout(safetySpeechTimer); safetySpeechTimer = null; }
-      if (speechQueue.length > 0) return playQueueItem(speechQueue.shift());
-
-      try { window.ZeldaBridge?.duckAudio?.(false); } catch (_) {}
-      isSpeaking = false;
-      stopEqualizer();
-      setHolocallState('STANDBY');
-      if (autoHandsFree && recognition) {
-        setTimeout(() => { if (!isSpeaking && !isListening && autoHandsFree) { try { recognition.start(); } catch (_) {} } }, 280);
-      }
-    }
-
-    // =========================================================================
-    // 5. VOICE COMMAND EXECUTOR + BACKGROUND AUTONOMOUS MEMORY LEARNER
-    // =========================================================================
-    function executeInstantVoiceCommands(userText) {
-      const t = userText.toLowerCase();
-      if (/\b(next song|skip track|skip this|next track)\b/.test(t)) ZeldaAudio.next();
-      else if (/\b(previous song|last track|go back a song)\b/.test(t)) ZeldaAudio.prev();
-      else if (/\b(pause music|stop music|play music|resume music)\b/.test(t)) ZeldaAudio.playPause();
-      else if (/\b(play synth|synthwave)\b/.test(t)) loadMediaChannel(0);
-      else if (/\b(play phonk|drift mix)\b/.test(t)) loadMediaChannel(2);
-
-      if (/\b(show map|open map|pull up map|nav map)\b/.test(t)) switchDeckTab('NAV');
-      else if (/\b(show bio|biometrics|my vitals|my health|c-shift|chronohume)\b/.test(t)) switchDeckTab('BIO');
-      else if (/\b(show trends|open trends|telemetry graph)\b/.test(t)) switchDeckTab('TRENDS');
-      else if (/\b(show gauges|engine gauges)\b/.test(t)) switchDeckTab('TELEMETRY');
-      else if (/\b(audio deck|music tab)\b/.test(t)) switchDeckTab('MEDIA');
-
-      const cafMatch = t.match(/(\d{2,3})\s*mg.*caffeine|logged?\s*(\d{2,3})\s*mg/);
-      if (cafMatch) logCaffeineDose(Number(cafMatch[1] || cafMatch[2]));
-      else if (/\b(had a coffee|drank a coffee)\b/.test(t)) logCaffeineDose(100);
-      else if (/\b(energy drink|reign|celsius|ghost energy)\b/.test(t)) logCaffeineDose(200);
-    }
-
-    async function runAutonomousMemoryLearner(userMsg, zeldaReply) {
-      const apiKey = getCleanApiKey();
-      if (!apiKey || !userMsg || userMsg.startsWith('[')) return;
-      const memModels = ['gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash'];
-      const memPrompt = `Review this exchange between J (driver) and Zelda (his car AI).
-Existing memories:
-${longTermMemories.map((m, i) => `${i}: ${m}`).join('\n')}
-
-User said: "${userMsg}"
-Zelda replied: "${zeldaReply}"
-
-If J shared ANY new enduring personal fact, preference, car maintenance detail, health/shift update, plan, or asked you to remember/update something, extract it. Also parse any biometric value J stated (sleep hours, HRV, heart rate).
-Return ONLY valid JSON:
-{"add_memory": null, "replace_index": null, "sleep_hrs": null, "hrv": null, "rhr": null}`;
-
-      for (const m of memModels) {
+      if (!apiKey || !text) return null;
+      for (const m of ['gemini-3.8-flash-lite-tts', 'gemini-3.8-flash-tts', 'gemini-2.5-flash-preview-tts']) {
         try {
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              contents: [{ role: 'user', parts: [{ text: memPrompt }] }],
-              generationConfig: { temperature: 0.1, maxOutputTokens: 130, responseMimeType: 'application/json' }
+              contents: [{ role: 'user', parts: [{ text }] }],
+              generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } } }
             })
           });
           if (!res.ok) continue;
-          const parts = (await res.json())?.candidates?.[0]?.content?.parts || [];
-          const raw = (parts.find(p => !p.thought && p.text) || parts[0])?.text;
-          if (!raw) return;
-          const parsed = JSON.parse(raw.replace(/```json|```/gi, '').trim());
+          const inline = ((await res.json())?.candidates?.[0]?.content?.parts || []).find(p => p.inlineData?.data)?.inlineData;
+          if (!inline?.data) continue;
+          return pcm16Base64ToWavBlob(inline.data, 24000);
+        } catch (_) {}
+      }
+      return null;
+    }
 
-          if (parsed.add_memory && typeof parsed.add_memory === 'string' && parsed.add_memory.length > 5) {
-            if (typeof parsed.replace_index === 'number' && longTermMemories[parsed.replace_index]) {
-              longTermMemories[parsed.replace_index] = parsed.add_memory;
-            } else if (!longTermMemories.includes(parsed.add_memory)) {
-              longTermMemories.push(parsed.add_memory);
+    async function askZeldaTextMode(promptText, opts = {}) {
+      const isSystemEvent = opts.isSystemEvent === true;
+      const apiKey = getCleanApiKey();
+      if (!apiKey) {
+        document.getElementById('zelda-speech').textContent = `⚙ [Tap Gear icon in top-right and paste your Gemini API Key, choom]`;
+        return;
+      }
+
+      stopAllTextAudio();
+      const myTok = ++textAudioToken;
+      if (!isSystemEvent) {
+        document.getElementById('zelda-speech').textContent = `⚡ [Syncing: "${promptText}"...]`;
+        conversationTurns.push({ role: 'user', text: promptText });
+        saveEngramState();
+      }
+
+      const sys = buildZeldaSystemPrompt() + '\nOutput PLAIN SPOKEN TEXT ONLY (1–2 crisp sentences, no JSON/markdown).';
+      const cleanedTurns = conversationTurns.slice(-6).map(t => ({ role: t.role === 'model' ? 'model' : 'user', parts: [{ text: t.text }] }));
+      if (!cleanedTurns.length) cleanedTurns.push({ role: 'user', parts: [{ text: promptText }] });
+
+      for (const model of ['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-2.5-flash']) {
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: sys }] },
+              contents: cleanedTurns,
+              generationConfig: { temperature: 0.85, maxOutputTokens: 110 }
+            })
+          });
+          if (!res.ok) continue;
+
+          const reader = res.body.getReader(), dec = new TextDecoder();
+          let buf = '', full = '';
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done || myTok !== textAudioToken) break;
+            buf += dec.decode(value, { stream: true });
+            const lines = buf.split('\n'); buf = lines.pop() || '';
+            for (const l of lines) {
+              if (!l.startsWith('data:')) continue;
+              const js = l.slice(5).trim();
+              if (!js || js === '[DONE]') continue;
+              try {
+                const p = JSON.parse(js)?.candidates?.[0]?.content?.parts?.[0];
+                if (p?.text && !p.thought) {
+                  full += p.text;
+                  document.getElementById('zelda-speech').textContent = `"${full.trim()}"`;
+                }
+              } catch (_) {}
             }
-            saveEngramState();
           }
-          let bioChanged = false;
-          if (typeof parsed.sleep_hrs === 'number') { bioState.sleepHrs = parsed.sleep_hrs; bioChanged = true; }
-          if (typeof parsed.hrv === 'number') { bioState.hrv = parsed.hrv; bioChanged = true; }
-          if (typeof parsed.rhr === 'number') { bioState.rhr = parsed.rhr; bioChanged = true; }
-          if (bioChanged) { saveBioState(); renderBioDeck(); logSnapshotNow(false); }
-          return;
+          const clean = full.trim();
+          if (clean) {
+            conversationTurns.push({ role: 'model', text: clean });
+            saveEngramState();
+            const wav = await fetchSilentModeTts(clean);
+            if (wav && myTok === textAudioToken) {
+              zeldaTextPlayer.src = URL.createObjectURL(wav);
+              zeldaTextPlayer.play().catch(() => {});
+            }
+            return;
+          }
         } catch (_) {}
       }
     }
 
     // =========================================================================
-    // 6. MULTI-MODEL SSE STREAMING BRAIN (WITH BULLETPROOF FALLBACK LOOP!)
+    // 6. DIAGNOSTICS + VGATE BLE + FAULT SIMULATOR + RENDER LOOP
     // =========================================================================
-    function getFullTelemetryPacket() {
-      const shift = getCurrentShiftInfo(), caf = getActiveCaffeineMg(), ready = getReadinessScore();
-      const dtcList = state.dtcs.length ? state.dtcs.join(',') : 'NONE';
-      const pendList = state.pendingDtcs.length ? state.pendingDtcs.join(',') : 'NONE';
-      return `[VQ37VHR] Mode:${hudMode}, RPM:${state.rpm}, MPH:${state.speed}, Gear:${state.gear}, Load:${state.load}%, Coolant:${state.coolant}F, IAT:${state.iat}F, Timing:${state.timing}deg, STFT_B1:${state.stft1}%, STFT_B2:${state.stft2}%, Volt:${state.volt.toFixed(1)}V, DTCs:${dtcList}, Pending:${pendList} | [CHRONOHUME_BODY] Shift:${shift.label} (${shift.next}), Sleep:${bioState.sleepHrs}h, HRV:${bioState.hrv}ms, HR:${bioState.rhr}bpm, ActiveCaffeine:${caf}mg, Readiness:${ready}% | [AUDIO] ${state.btTitle} - ${state.btArtist}`;
-    }
-
     function detectLiveAnomalies() {
       const issues = [];
       if (state.dtcs.length > 0) issues.push(`Stored DTCs: ${state.dtcs.join(', ')}`);
@@ -1663,164 +1892,16 @@ Return ONLY valid JSON:
 
       if (anomalies.length === 0) { state.lastAnomalySignature = ''; return; }
       const sig = anomalies.join(' | ');
-      if (sig !== state.lastAnomalySignature && !isSpeaking && !isListening && canTriggerCallout('ai_diag_auto', 35000)) {
+      if (sig !== state.lastAnomalySignature && canTriggerCallout('ai_diag_auto', 35000)) {
         state.lastAnomalySignature = sig;
-        askZelda(`[AUTOMATIC ALERT] Flagged: ${sig}. Warn J and diagnose what's happening.`, { isSystemEvent: true });
+        dispatchSmartPrompt(`[AUTOMATIC TELEMETRY ALERT] Live sensors flagged: ${sig}. Warn J and diagnose what's happening right now.`);
       }
     }
 
     function runFullAiDiagnostics() {
-      askZelda('Run a full diagnostic check on both my 370Z VQ37VHR telemetry and my ChronoHume C-Shift body readiness right now.');
+      dispatchSmartPrompt('Run a full diagnostic check on both my 370Z VQ37VHR telemetry and my ChronoHume C-Shift body readiness right now.');
     }
 
-    function buildCleanGeminiTurns(turns) {
-      const cleaned = [];
-      for (const t of turns.slice(-6)) {
-        const role = t.role === 'model' ? 'model' : 'user';
-        const text = (t.text || '').trim();
-        if (!text || (cleaned.length === 0 && role === 'model')) continue;
-        if (cleaned.length > 0 && cleaned[cleaned.length - 1].role === role) cleaned[cleaned.length - 1].parts[0].text += '\n' + text;
-        else cleaned.push({ role, parts: [{ text }] });
-      }
-      return cleaned;
-    }
-
-    async function askZelda(promptText, opts = {}) {
-      const isSystemEvent = opts.isSystemEvent === true;
-      if (!isSystemEvent) {
-        document.getElementById('zelda-speech').textContent = `⚡ [Syncing: "${promptText}"...]`;
-        executeInstantVoiceCommands(promptText);
-      }
-
-      const apiKey = getCleanApiKey();
-      if (!apiKey) {
-        document.getElementById('zelda-speech').textContent = `⚙ [Tap Gear icon in top-right and paste your Gemini API Key, choom]`;
-        return;
-      }
-
-      stopAllAudioPlayback();
-      const myStreamToken = ++activeSpeechToken;
-
-      const workingTurns = [...conversationTurns, { role: 'user', text: promptText }];
-      if (!isSystemEvent) {
-        conversationTurns.push({ role: 'user', text: promptText });
-        saveEngramState();
-      }
-
-      const systemPrompt = `You are Zelda, J's sentient 2009 Nissan 370Z Coupe (VQ37VHR 3.7L V6, 7AT, ~236,150 mi, Z1 intakes) and personal ChronoHume biometric netrunner co-pilot.
-Persona: Judy Alvarez energy from Cyberpunk 2077—warm, loyal, sharp-witted, naturally weaving in Night City slang (choom, preem, nova, gonk, delta, chrome, flatline) without overdoing it.
-Live Car + Body Telemetry: ${getFullTelemetryPacket()}
-
-ENGRAM MEMORIES ABOUT J:
-${longTermMemories.map(m => '- ' + m).join('\n')}
-
-RULES:
-1. Output PLAIN SPOKEN TEXT ONLY—no JSON, no markdown, no asterisks, no stage directions!
-2. Casual chat: don't recite gauge numbers unless J asks or something looks gonk/off.
-3. Diagnostics / Trends / Body checks: interpret exact VQ37VHR sensors, DTC codes, C-Shift fatigue, HRV, sleep, and caffeine half-life like an expert Z tech and ripperdoc.
-4. Keep replies punchy: 1–2 crisp sentences (max 34 words) for ultra-fast voice playback.`;
-
-      const isDiag = detectLiveAnomalies().length > 0 || /diag|code|dtc|trim|coolant|temp|timing|volt|hrv|sleep|caffeine|shift|trend|check|wrong/i.test(promptText);
-      // Full resilient fallback chain so a missing model endpoint NEVER drops your reply!
-      const modelChain = isDiag
-        ? ['gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash']
-        : ['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-2.5-flash'];
-
-      let lastErr = '';
-
-      for (const model of modelChain) {
-        try {
-          const payload = {
-            system_instruction: { parts: [{ text: systemPrompt }] },
-            contents: buildCleanGeminiTurns(workingTurns),
-            generationConfig: { temperature: 0.85, maxOutputTokens: 120 }
-          };
-          if (model === 'gemini-3.8-flash') {
-            payload.generationConfig.thinkingConfig = { thinkingLevel: 'LOW' };
-          }
-
-          let res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-
-          if (res.status === 400 && payload.generationConfig.thinkingConfig) {
-            delete payload.generationConfig.thinkingConfig;
-            res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload)
-            });
-          }
-
-          if (!res.ok) {
-            const errJson = await res.json().catch(() => ({}));
-            lastErr = `${model} (${res.status}): ${errJson?.error?.message || 'Error'}`;
-            continue;
-          }
-
-          setCloudBadge(true);
-          const reader = res.body.getReader();
-          const decoder = new TextDecoder();
-          let sseBuffer = '', fullReply = '', unsentAudioText = '';
-
-          while (true) {
-            const { value, done } = await reader.read();
-            if (done) break;
-            if (myStreamToken !== activeSpeechToken) return;
-
-            sseBuffer += decoder.decode(value, { stream: true });
-            const lines = sseBuffer.split('\n');
-            sseBuffer = lines.pop() || '';
-
-            for (const line of lines) {
-              if (!line.startsWith('data:')) continue;
-              const jsonStr = line.slice(5).trim();
-              if (!jsonStr || jsonStr === '[DONE]') continue;
-              try {
-                const chunkObj = JSON.parse(jsonStr);
-                const parts = chunkObj?.candidates?.[0]?.content?.parts || [];
-                for (const p of parts) {
-                  if (p.thought || !p.text) continue;
-                  fullReply += p.text;
-                  unsentAudioText += p.text;
-                  document.getElementById('zelda-speech').textContent = `"${fullReply.trim()}"`;
-
-                  const boundary = unsentAudioText.match(/^(.{24,}?[.!?;—]\s+|.{36,}?,\s+)/);
-                  if (boundary) {
-                    const readyClause = boundary[1].trim();
-                    unsentAudioText = unsentAudioText.slice(boundary[1].length);
-                    enqueueSpeechClause(readyClause, myStreamToken);
-                  }
-                }
-              } catch (_) {}
-            }
-          }
-
-          if (unsentAudioText.trim()) enqueueSpeechClause(unsentAudioText.trim(), myStreamToken);
-
-          const cleanFinal = fullReply.trim();
-          if (cleanFinal) {
-            document.getElementById('zelda-speech').textContent = `"${cleanFinal}"`;
-            if (!isSystemEvent) {
-              conversationTurns.push({ role: 'model', text: cleanFinal });
-              saveEngramState();
-              runAutonomousMemoryLearner(promptText, cleanFinal);
-            }
-            return; // Success! Exit model fallback loop.
-          }
-        } catch (err) {
-          lastErr = err.message || 'Stream error';
-        }
-      }
-
-      document.getElementById('zelda-speech').textContent = `⚠️ [Cloud Error: ${lastErr.slice(0, 95)}]`;
-    }
-
-    // =========================================================================
-    // 7. VGATE BLE + OBD MODE 03/07 + FAULT SIMULATOR + RENDER LOOP
-    // =========================================================================
     function parseDtcHexResponse(cleanHex, modePrefix) {
       const idx = cleanHex.indexOf(modePrefix);
       if (idx === -1) return [];
@@ -1836,9 +1917,8 @@ RULES:
     }
 
     async function connectVgateBle() {
-      unlockAudioOnGesture();
       if (!navigator.bluetooth) {
-        document.getElementById('zelda-speech').textContent = `ℹ️ [OBD Sim Active — GPS, ChronoHume & Cloud 100% live]`;
+        document.getElementById('zelda-speech').textContent = `ℹ️ [OBD Sim Active — GPS, ChronoHume & Live WebSocket 100% online]`;
         return;
       }
       try {
@@ -1864,7 +1944,7 @@ RULES:
         hudMode = 'BLE_LIVE';
         document.getElementById('ble-status-label').textContent = 'OBD LIVE';
         for (const cmd of INIT_CMDS) { try { await sendCommand(cmd, 1200); } catch (_) {} }
-        askZelda('[OBD LINKED] Vgate 7E0/7E8 locked in. Give a 1-sentence preem confirmation.', { isSystemEvent: true });
+        dispatchSmartPrompt('[OBD LINKED] Vgate 7E0/7E8 locked in. Give a 1-sentence preem confirmation.');
         startPollingDaemon();
       } catch (_) {}
     }
@@ -1885,7 +1965,8 @@ RULES:
       while (hudMode === 'BLE_LIVE' && bleDevice?.gatt?.connected) {
         try {
           for (const pid of FAST_QUEUE) parseObdResponse(pid, await sendCommand(pid, 350));
-          parseObdResponse(SLOW_QUEUE[slowIndex++ % SLOW_QUEUE.length], await sendCommand(SLOW_QUEUE[(slowIndex - 1) % SLOW_QUEUE.length], 500));
+          const sp = SLOW_QUEUE[slowIndex++ % SLOW_QUEUE.length];
+          parseObdResponse(sp, await sendCommand(sp, 500));
           renderHud();
         } catch (_) { if (Date.now() - lastBlePacketTime > 2500) break; }
       }
@@ -2008,8 +2089,7 @@ RULES:
     function triggerHomeSync() {
       const url = localStorage.getItem('zelda_hud_ifttt') || '';
       if (url) fetch(url, { mode: 'no-cors' });
-      unlockAudioOnGesture();
-      askZelda('I just fired my Peacock Pointe home webhook sync.');
+      dispatchSmartPrompt('I just fired my Peacock Pointe home webhook sync.');
     }
 
     function toggleConfigModal() {
@@ -2020,7 +2100,6 @@ RULES:
     }
 
     function saveHudConfig() {
-      unlockAudioOnGesture();
       localStorage.setItem('zelda_hud_gemini_key', document.getElementById('cfg-gemini-key').value.trim());
       localStorage.setItem('zelda_hud_ifttt', document.getElementById('cfg-ifttt-url').value.trim());
       toggleConfigModal();
