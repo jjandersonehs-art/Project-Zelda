@@ -1777,32 +1777,72 @@
       }
     },
 
-    mountOrLoadVideo(videoId) {
-      state.ytVideoId = videoId;
-      if (!window.YT || !window.YT.Player) {
-        document.getElementById('yt-api-mount').innerHTML =
-          `<iframe style="width:100%;height:100%;border:0;" src="https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1&controls=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
-        return;
-      }
-      if (this.player && typeof this.player.loadVideoById === 'function') {
-        this.player.loadVideoById({ videoId, suggestedQuality: 'medium' });
-        return;
-      }
-      this.player = new YT.Player('yt-api-mount', {
-        width: '100%',
-        height: '100%',
-        videoId: videoId,
-        playerVars: { autoplay: 1, playsinline: 1, controls: 1, rel: 0, modestbranding: 1 },
-        events: {
-          onReady: (e) => { try { e.target.playVideo(); } catch (_) {} },
-          onError: (e) => {
-            if ([100, 101, 150].includes(e.data) && this.queueIdx + 1 < this.queue.length) {
-              this.nextSearchResult(true);
+          mountOrLoadVideo(videoId) {
+        state.ytVideoId = videoId;
+        const trustedOrigin = window.location.origin.startsWith('http')
+          ? window.location.origin
+          : 'https://jjandersonehs-art.github.io';
+
+        // Keep internal player >= 200px tall for YouTube IFrame API compliance while fitting 132px deck
+        const mountEl = document.getElementById('yt-api-mount');
+        if (mountEl && mountEl.parentElement) {
+          mountEl.parentElement.style.overflow = 'hidden';
+          mountEl.style.width = '151.5%';
+          mountEl.style.height = '200px';
+          mountEl.style.transform = 'scale(0.66)';
+          mountEl.style.transformOrigin = 'top left';
+        }
+
+        if (!window.YT || !window.YT.Player) {
+          if (mountEl) {
+            mountEl.innerHTML =
+              `<iframe style="width:100%;height:100%;border:0;" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1&controls=1&rel=0&origin=${encodeURIComponent(trustedOrigin)}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+          }
+          return;
+        }
+
+        if (this.player && this.playerReady && typeof this.player.loadVideoById === 'function') {
+          this.player.loadVideoById(videoId);
+          return;
+        }
+
+        if (this.player && !this.playerReady) {
+          this.pendingVideoId = videoId;
+          return;
+        }
+
+        this.playerReady = false;
+        this.player = new YT.Player('yt-api-mount', {
+          width: '100%',
+          height: '200',
+          videoId: videoId,
+          playerVars: {
+            autoplay: 1,
+            playsinline: 1,
+            controls: 1,
+            rel: 0,
+            modestbranding: 1,
+            origin: trustedOrigin
+          },
+          events: {
+            onReady: (e) => {
+              this.playerReady = true;
+              const targetVid = this.pendingVideoId || videoId;
+              this.pendingVideoId = null;
+              try {
+                if (targetVid !== videoId) e.target.loadVideoById(targetVid);
+                else e.target.playVideo();
+              } catch (_) {}
+            },
+            onError: (e) => {
+              if ([100, 101, 150, 153].includes(e.data) && this.queueIdx + 1 < this.queue.length) {
+                this.nextSearchResult(true);
+              }
             }
           }
-        }
-      });
-    },
+        });
+      },
+
 
     stopEmbed() {
       try { if (this.player?.stopVideo) this.player.stopVideo(); } catch (_) {}
@@ -3057,22 +3097,220 @@ LIVE INTERACTION & TOOL RULES:
               if (!l.startsWith('data:')) continue;
               const js = l.slice(5).trim();
               if (!js || js === '[DONE]') continue;
-              try {
-                const parts = JSON.parse(js)?.candidates?.[0]?.content?.parts || [];
-                for (const p of parts) {
-                  if (p?.text && !p.thought) {
-                    full += p.text;
-                    document.getElementById('zelda-speech').textContent = `"${full.trim()}"`;
-                  }
-                }
-              } catch (_) {}
-            }
+    // =========================================================================
+    // 6. HYBRID DISPATCHER + REAL GEMINI TOOL CALLING FOR TYPED CHAT
+    // =========================================================================
+    const zeldaTextPlayer = new Audio();
+    let textAudioToken = 0;
+
+    function stopAllTextAudio() {
+      textAudioToken++;
+      try { zeldaTextPlayer.pause(); } catch (_) {}
+    }
+
+    async function checkSilentTextCommands(promptText) {
+      if (/\b(scan optics|what do you see|look through optics|check camera)\b/i.test(promptText)) {
+        return await ZeldaOptics.snapAndAnalyze(promptText);
+      }
+
+      // Expanded fast-path: catches "pull X from YouTube", "pull up X", "play X on YouTube", "watch X"
+      const ytMatch = promptText.match(/(?:pull\s+up|pull|search\s+youtube\s+for|play|watch|put\s+on|queue\s+up)\s+(.+?)(?:\s+(?:on|in|from|off)\s+youtube(\s+music)?)?$/i);
+      if (ytMatch && (/\byoutube\b/i.test(promptText) || /^(?:pull\s+up|watch|put\s+on|queue\s+up)\b/i.test(promptText.trim()))) {
+        const cleanQuery = ytMatch[1]
+          .replace(/\s+(?:on|in|from|off)\s+youtube(?:\s+music)?$/i, '')
+          .replace(/[?.!]+$/, '')
+          .trim();
+        const appMode = /\byoutube\s+music\b/i.test(promptText) ? 'ytmusic' : (/\bopen\s+youtube\b/i.test(promptText) ? 'youtube' : null);
+        if (cleanQuery && !/^(something|a\s+video|a\s+song|music)$/i.test(cleanQuery)) {
+          return await ZeldaYouTube.searchAndPlay(cleanQuery, appMode);
+        }
+      }
+
+      const routeMatch = promptText.match(/(?:set a route to|set a navigation route to|plot a route to|route me to|directions to|navigate to|take me to|head to)\s+(.+)/i);
+      if (routeMatch) {
+        let dest = routeMatch[1].replace(/[?.!]+$/, '').trim();
+        let ext = null;
+        if (/\b(in|on|with)\s+waze\b/i.test(dest)) {
+          ext = 'waze';
+          dest = dest.replace(/\b(in|on|with)\s+waze\b/ig, '').trim();
+        } else if (/\b(in|on|with)\s+(google\s+maps|g-maps|maps)\b/i.test(dest)) {
+          ext = 'maps';
+          dest = dest.replace(/\b(in|on|with)\s+(google\s+maps|g-maps|maps)\b/ig, '').trim();
+        }
+        return await ZeldaMap.plotRouteToQuery(dest, ext);
+      }
+
+      if (/\b(clear route|cancel route|stop navigation)\b/i.test(promptText)) {
+        return ZeldaMap.clearRoute();
+      }
+      return null;
+    }
+
+    async function dispatchSmartPrompt(promptText) {
+      if (ZeldaLiveWS.sendTextTurnOverSocket(promptText)) return;
+      const fastToolResult = await checkSilentTextCommands(promptText);
+      if (fastToolResult?.analysis) return; // Already spoken by Kiroshi Optics
+      const enriched = fastToolResult ? `${promptText} [Executed Action Result: ${JSON.stringify(fastToolResult)}]` : promptText;
+      askZeldaTextMode(enriched, { displayUserText: promptText, toolsAlreadyRan: !!fastToolResult });
+    }
+
+    function sendTextToZelda() {
+      const input = document.getElementById('direct-chat-input');
+      const txt = (input.value || '').trim();
+      if (!txt) return;
+      input.value = '';
+      dispatchSmartPrompt(txt);
+    }
+
+    function pcm16Base64ToWavBlob(base64Pcm, sampleRate = 24000) {
+      const bin = atob(base64Pcm);
+      const pcmLen = bin.length - (bin.length % 2);
+      const buf = new ArrayBuffer(44 + pcmLen), view = new DataView(buf);
+      const writeStr = (off, s) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
+      writeStr(0, 'RIFF'); view.setUint32(4, 36 + pcmLen, true); writeStr(8, 'WAVE'); writeStr(12, 'fmt ');
+      view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+      view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * 2, true);
+      view.setUint16(32, 2, true); view.setUint16(34, 16, true);
+      writeStr(36, 'data'); view.setUint32(40, pcmLen, true);
+      const bytes = new Uint8Array(buf, 44);
+      for (let i = 0; i < pcmLen; i++) bytes[i] = bin.charCodeAt(i);
+
+      // 20ms smooth tail fade-out kills end-of-speech vocoder static pop
+      const totalSamples = pcmLen / 2;
+      const fadeSamples = Math.min(480, Math.floor(totalSamples / 6));
+      for (let i = 0; i < fadeSamples; i++) {
+        const byteIdx = 44 + (totalSamples - 1 - i) * 2;
+        const s = view.getInt16(byteIdx, true);
+        view.setInt16(byteIdx, Math.round(s * (i / fadeSamples)), true);
+      }
+      return new Blob([buf], { type: 'audio/wav' });
+    }
+
+    async function fetchSilentModeTts(text) {
+      const apiKey = getCleanApiKey();
+      if (!apiKey || !text) return null;
+      for (const m of ['gemini-3.8-flash-lite-tts', 'gemini-3.8-flash-tts', 'gemini-2.5-flash-preview-tts']) {
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts: [{ text }] }],
+              generationConfig: {
+                responseModalities: ['AUDIO'],
+                speechConfig: { languageCode: 'en-US', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } }
+              }
+            })
+          });
+          if (!res.ok) continue;
+          const inline = ((await res.json())?.candidates?.[0]?.content?.parts || []).find(p => p.inlineData?.data)?.inlineData;
+          if (!inline?.data) continue;
+          return pcm16Base64ToWavBlob(inline.data, 24000);
+        } catch (_) {}
+      }
+      return null;
+    }
+
+    async function askZeldaTextMode(promptText, opts = {}) {
+      const isSystemEvent = opts.isSystemEvent === true;
+      const toolsAlreadyRan = opts.toolsAlreadyRan === true;
+      const shownText = opts.displayUserText || promptText;
+      const apiKey = getCleanApiKey();
+      if (!apiKey) {
+        document.getElementById('zelda-speech').textContent = `⚙ [Tap Gear icon in top-right and save your Gemini API Key to the Vault, choom]`;
+        return;
+      }
+
+      stopAllTextAudio();
+      const myTok = ++textAudioToken;
+      if (!isSystemEvent) {
+        document.getElementById('zelda-speech').textContent = `⚡ [Syncing: "${shownText}"...]`;
+        conversationTurns.push({ role: 'user', text: shownText });
+        saveEngramState();
+      }
+
+      const sys = buildZeldaSystemPrompt() + '\nOutput PLAIN SPOKEN ENGLISH TEXT ONLY (1–2 crisp sentences, zero JSON or markdown).';
+      const cleanedTurns = [];
+      for (const t of [...conversationTurns.slice(-5), { role: 'user', text: promptText }]) {
+        const role = t.role === 'model' ? 'model' : 'user';
+        const txt = (t.text || '').trim();
+        if (!txt || (cleanedTurns.length === 0 && role === 'model')) continue;
+        if (cleanedTurns.length > 0 && cleanedTurns[cleanedTurns.length - 1].role === role) {
+          cleanedTurns[cleanedTurns.length - 1].parts[0].text += '\n' + txt;
+        } else {
+          cleanedTurns.push({ role, parts: [{ text: txt }] });
+        }
+      }
+
+      for (const model of ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-3.5-flash-lite']) {
+        try {
+          const reqPayload = {
+            system_instruction: { parts: [{ text: sys }] },
+            contents: cleanedTurns,
+            generationConfig: { temperature: 0.75, maxOutputTokens: 150 }
+          };
+          if (!toolsAlreadyRan) {
+            reqPayload.tools = ZELDA_LIVE_TOOLS;
           }
-          const clean = full.trim();
-          if (clean) {
-            conversationTurns.push({ role: 'model', text: clean });
+
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(reqPayload)
+          });
+          if (!res.ok) continue;
+
+          const data = await res.json();
+          if (myTok !== textAudioToken) return;
+
+          const modelContent = data?.candidates?.[0]?.content;
+          const parts = modelContent?.parts || [];
+          const fcParts = parts.filter(p => p.functionCall);
+          let finalSpoken = parts.filter(p => p.text && !p.thought).map(p => p.text).join('').trim();
+
+          // If Gemini invoked any cabin tool (YouTube, Route, Tab, Biometrics), execute it live!
+          if (fcParts.length > 0) {
+            const fnRespParts = [];
+            let fallbackSummary = '';
+            for (const p of fcParts) {
+              const fc = p.functionCall;
+              const resObj = await executeLiveToolCallAsync(fc);
+              if (resObj?.playingTitle) fallbackSummary = `Spinning up ${resObj.playingTitle} on the deck right now, choom.`;
+              else if (resObj?.destination) fallbackSummary = `Route locked to ${resObj.destination}, choom.`;
+              const fnResp = { name: fc.name, response: { result: resObj } };
+              if (fc.id) fnResp.id = fc.id;
+              fnRespParts.push({ functionResponse: fnResp });
+            }
+
+            try {
+              const followRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  system_instruction: { parts: [{ text: sys }] },
+                  contents: [...cleanedTurns, modelContent, { role: 'user', parts: fnRespParts }],
+                  generationConfig: { temperature: 0.75, maxOutputTokens: 120 }
+                })
+              });
+              if (followRes.ok) {
+                const followData = await followRes.json();
+                const followTxt = (followData?.candidates?.[0]?.content?.parts || [])
+                  .filter(p => p.text && !p.thought)
+                  .map(p => p.text)
+                  .join('')
+                  .trim();
+                if (followTxt) finalSpoken = followTxt;
+              }
+            } catch (_) {}
+
+            if (!finalSpoken) finalSpoken = fallbackSummary || 'Locked in on the cyberdeck, choom.';
+          }
+
+          if (finalSpoken) {
+            document.getElementById('zelda-speech').textContent = `"${finalSpoken}"`;
+            conversationTurns.push({ role: 'model', text: finalSpoken });
             saveEngramState();
-            const wav = await fetchSilentModeTts(clean);
+            const wav = await fetchSilentModeTts(finalSpoken);
             if (wav && myTok === textAudioToken) {
               zeldaTextPlayer.src = URL.createObjectURL(wav);
               zeldaTextPlayer.play().catch(() => {});
@@ -3082,6 +3320,7 @@ LIVE INTERACTION & TOOL RULES:
         } catch (_) {}
       }
     }
+
 
     // =========================================================================
     // 7. DIAGNOSTICS + VGATE BLE + VAULT CONFIG + RENDER LOOP
