@@ -1,0 +1,135 @@
+/* ==========================================================================
+   PROJECT ZELDA v4.5.3 — PORTRAIT AUDIO STAGE & NATIVE VOICE PATCH
+   Drop into your repo and link after your main stylesheet (or import inside index.html)
+   ========================================================================== */
+
+/* 1. Force 03 // AUDIO tab container to use full vertical portrait height */
+#tab-audio,
+[data-tab-panel="audio"],
+.audio-tab-panel,
+.zelda-audio-deck {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* 2. Expand YouTube stage wrapper to claim all vertical dead space */
+#yt-stage-wrapper,
+.yt-stage-wrapper,
+.yt-player-container,
+.youtube-embed-box,
+.video-stage {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 360px !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  padding-bottom: 0 !important; /* Kills legacy 56.25% 16:9 padding hack */
+  position: relative !important;
+  background: #050508 !important;
+  border: 1px solid rgba(252, 238, 10, 0.28);
+  overflow: hidden !important;
+}
+
+/* 3. Lock the YouTube IFrame / API mount edge-to-edge inside the expanded stage */
+#yt-stage-wrapper iframe,
+.yt-stage-wrapper iframe,
+.yt-player-container iframe,
+.youtube-embed-box iframe,
+.video-stage iframe,
+#zelda-yt-api-mount {
+  position: absolute !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  border: 0 !important;
+  transition: transform 0.22s ease;
+  transform-origin: center center;
+}
+
+/* Optional edge-to-edge crop/zoom mode for portrait screens (toggled via [FILL] button) */
+.zelda-yt-zoom-fill iframe {
+  transform: scale(1.38) !important;
+}
+
+/* 4. Cyberpunk Transport Bar: [PREV] [PLAY/PAUSE] [NEXT] [LOOP] [FILL] */
+.zelda-yt-transport-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  background: rgba(8, 10, 16, 0.94);
+  border-top: 1px solid rgba(0, 240, 255, 0.25);
+  border-bottom: 1px solid rgba(252, 238, 10, 0.25);
+  font-family: 'Orbitron', 'Rajdhani', monospace, sans-serif;
+  flex-shrink: 0;
+  z-index: 20;
+}
+
+.zelda-yt-transport-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zelda-yt-btn {
+  background: rgba(252, 238, 10, 0.08);
+  color: #fcee0a;
+  border: 1px solid rgba(252, 238, 10, 0.45);
+  padding: 6px 12px;
+  font-family: 'Orbitron', 'Rajdhani', monospace, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.zelda-yt-btn:active,
+.zelda-yt-btn.is-active {
+  background: #fcee0a;
+  color: #050508;
+  box-shadow: 0 0 10px rgba(252, 238, 10, 0.55);
+}
+
+.zelda-yt-btn--cyan {
+  background: rgba(0, 240, 255, 0.08);
+  color: #00f0ff;
+  border-color: rgba(0, 240, 255, 0.45);
+}
+
+.zelda-yt-btn--cyan:active,
+.zelda-yt-btn--cyan.is-active {
+  background: #00f0ff;
+  color: #050508;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.55);
+}
+
+.zelda-yt-queue-status {
+  color: rgba(0, 240, 255, 0.88);
+  font-family: 'Rajdhani', monospace, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 42%;
+}
+
+/* 5. Native Voice Active Indicator on LIVE CALL / HOLD PTT */
+.zelda-mic-listening {
+  background: rgba(255, 42, 109, 0.22) !important;
+  border-color: #ff2a6d !important;
+  color: #ff2a6d !important;
+  box-shadow: 0 0 14px rgba(255, 42, 109, 0.6) !important;
+}
