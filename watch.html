@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#05060a" />
+  <title>ZELDA // RIPPERDOC LINK</title>
+  <link rel="manifest" href="watch-manifest.json" />
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, #0c121e 0%, #05060a 78%);
+      color: #fcee0a;
+      font-family: 'Orbitron', 'Rajdhani', system-ui, -apple-system, monospace, sans-serif;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Circular 480x480 Galaxy Watch Ultra Safe Frame */
+    .watch-shell {
+      width: 100vw;
+      height: 100vh;
+      max-width: 460px;
+      max-height: 460px;
+      border-radius: 50%;
+      border: 2px solid rgba(0, 240, 255, 0.35);
+      box-shadow: inset 0 0 26px rgba(0, 240, 255, 0.14);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px 22px;
+      text-align: center;
+      position: relative;
+    }
+
+    .top-telemetry {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      color: #00f0ff;
+      text-transform: uppercase;
+      cursor: pointer;
+      padding: 4px 10px;
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      background: rgba(0, 240, 255, 0.08);
+      border-radius: 999px;
+    }
+
+    .mic-core-btn {
+      width: 122px;
+      height: 122px;
+      border-radius: 50%;
+      border: 3px solid #fcee0a;
+      background: rgba(252, 238, 10, 0.09);
+      color: #fcee0a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(252, 238, 10, 0.25);
+      transition: all 0.16s ease;
+    }
+
+    .mic-core-btn.is-listening {
+      border-color: #ff2a6d;
+      background: rgba(255, 42, 109, 0.22);
+      color: #ff2a6d;
+      box-shadow: 0 0 28px rgba(255, 42, 109, 0.75);
+      animation: pulseRing 1.15s infinite ease-in-out;
+    }
+
+    @keyframes pulseRing {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+
+    .mic-icon {
+      font-size: 30px;
+      line-height: 1;
+    }
+
+    .mic-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+    }
+
+    .transcript-readout {
+      font-size: 12px;
+      line-height: 1.28;
+      color: #e4f7ff;
+      min-height: 32px;
+      max-height: 48px;
+      width: 90%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0 4px;
+    }
+
+    .bottom-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .cyber-chip {
+      background: rgba(0, 240, 255, 0.1);
+      color: #00f0ff;
+      border: 1px solid rgba(0, 240, 255, 0.45);
+      padding: 6px 10px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      border-radius: 999px;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+
+    .cyber-chip:active, .cyber-chip.gps-on {
+      background: #00f0ff;
+      color: #05060a;
+    }
+  </style>
+</head>
+<body>
+  <div class="watch-shell">
+    <button type="button" class="top-telemetry" id="pair-btn">LINK // SET CODE</button>
+
+    <button type="button" class="mic-core-btn" id="mic-btn">
+      <span class="mic-icon">&#127897;</span>
+      <span class="mic-label" id="mic-label">TAP SPEAK</span>
+    </button>
+
+    <div class="transcript-readout" id="readout">RIPPERDOC // READY</div>
+
+    <div class="bottom-actions">
+      <button type="button" class="cyber-chip" id="zlock-btn">Z-LOCK GPS</button>
+      <button type="button" class="cyber-chip" id="kbd-btn">VOICE / TXT</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = 'zelda_watch_channel_v1';
+      const params = new URLSearchParams(window.location.search);
+      const urlCode = params.get('code');
+      if (urlCode) {
+        const clean = urlCode.trim().toUpperCase();
+        localStorage.setItem(STORAGE_KEY, clean.startsWith('ZELDA-') ? clean.toLowerCase() : 'zelda-370z-' + clean);
+      }
+
+      let channel = localStorage.getItem(STORAGE_KEY) || '';
+      let listening = false;
+      let latestGps = null;
+      let gpsWatchId = null;
+      let recognition = null;
+      let sse = null;
+
+      const pairBtn = document.getElementById('pair-btn');
+      const micBtn = document.getElementById('mic-btn');
+      const micLabel = document.getElementById('mic-label');
+      const readout = document.getElementById('readout');
+      const zlockBtn = document.getElementById('zlock-btn');
+      const kbdBtn = document.getElementById('kbd-btn');
+
+      function updateHeader() {
+        if (!channel) {
+          pairBtn.textContent = 'TAP TO PAIR 370Z';
+        } else {
+          pairBtn.textContent = 'LINK // ' + channel.replace(/^zelda-370z-/i, '').toUpperCase();
+        }
+      }
+
+      function promptPairingCode() {
+        const current = channel ? channel.replace(/^zelda-370z-/i, '').toUpperCase() : '';
+        const entered = window.prompt('ENTER 4-CHAR CODE SHOWN TOP-RIGHT ON 370Z SCREEN:', current);
+        if (entered && entered.trim()) {
+          const clean = entered.trim().toUpperCase().replace(/[^A-Z0-9\-_]/g, '');
+          channel = clean.startsWith('ZELDA-') ? clean.toLowerCase() : 'zelda-370z-' + clean;
+          localStorage.setItem(STORAGE_KEY, channel);
+          updateHeader();
+          subscribeCarReplies();
+          readout.textContent = 'PAIRED // ' + clean;
+        }
+      }
+
+      pairBtn.addEventListener('click', promptPairingCode);
+
+      function startWatchGpsBeacon() {
+        if (!navigator.geolocation || gpsWatchId !== null) return;
+        gpsWatchId = navigator.geolocation.watchPosition(
+          function (pos) {
+            latestGps = {
+              lat: pos.coords.latitude,
+              lng: pos.coords.longitude,
+              accuracy: pos.coords.accuracy,
+              speed: pos.coords.speed,
+              heading: pos.coords.heading
+            };
+            zlockBtn.classList.add('gps-on');
+          },
+          function () {},
+          { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+        );
+      }
+
+      async function transmitToCar(packet) {
+        if (!channel) {
+          promptPairingCode();
+          if (!channel) return;
+        }
+        const payload = Object.assign(
+          {
+            source: 'zelda-watch',
+            gps: latestGps,
+            ts: Date.now()
+          },
+          packet
+        );
+
+        readout.textContent = packet.transcript
+          ? 'TX >> "' + packet.transcript + '"'
+          : 'TX >> Z-LOCK GPS PING';
+
+        try {
+          await fetch('https://ntfy.sh/' + encodeURIComponent(channel), {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+        } catch (err) {
+          readout.textContent = 'OFFLINE // CHECK HOTSPOT';
+        }
+      }
+
+      function subscribeCarReplies() {
+        if (!channel) return;
+        if (sse) {
+          try { sse.close(); } catch (_) {}
+        }
+        try {
+          sse = new EventSource('https://ntfy.sh/' + encodeURIComponent(channel) + '/sse');
+          sse.onmessage = function (ev) {
+            try {
+              const env = JSON.parse(ev.data);
+              if (env.event !== 'message') return;
+              const msg = JSON.parse(env.message);
+              if (msg && msg.source === 'zelda-car' && msg.text) {
+                readout.textContent = msg.text;
+              }
+            } catch (_) {}
+          };
+        } catch (_) {}
+      }
+
+      // Speech capture: Web Speech API + Samsung Wear OS Voice Keyboard fallback!
+      function toggleVoiceCapture() {
+        startWatchGpsBeacon();
+
+        // If native Android/Wear OS bridge exists (inside optional Wear APK wrapper)
+        if (window.ZeldaWatchBridge && typeof window.ZeldaWatchBridge.startVoice === 'function') {
+          window.ZeldaWatchBridge.startVoice();
+          return;
+        }
+
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRec) {
+          // On Samsung Internet Wear OS, prompt() opens Wear OS's native microphone voice dictation!
+          openWearVoiceDictationPrompt();
+          return;
+        }
+
+        if (listening && recognition) {
+          recognition.stop();
+          return;
+        }
+
+        try {
+          recognition = new SpeechRec();
+          recognition.lang = 'en-US';
+          recognition.interimResults = true;
+          recognition.continuous = false;
+
+          recognition.onstart = function () {
+            listening = true;
+            micBtn.classList.add('is-listening');
+            micLabel.textContent = 'LISTENING';
+            readout.textContent = 'SPEAK TO ZELDA...';
+          };
+
+          let finalSent = false;
+          let latestText = '';
+
+          recognition.onresult = function (ev) {
+            let text = '';
+            let isFinal = false;
+            for (let i = 0; i < ev.results.length; i++) {
+              text += ev.results[i][0].transcript;
+              if (ev.results[i].isFinal) isFinal = true;
+            }
+            latestText = text.trim();
+            readout.textContent = latestText;
+            if (isFinal && latestText && !finalSent) {
+              finalSent = true;
+              transmitToCar({ type: 'voice', transcript: latestText });
+            }
+          };
+
+          recognition.onerror = function () {
+            listening = false;
+            micBtn.classList.remove('is-listening');
+            micLabel.textContent = 'TAP SPEAK';
+            openWearVoiceDictationPrompt();
+          };
+
+          recognition.onend = function () {
+            listening = false;
+            micBtn.classList.remove('is-listening');
+            micLabel.textContent = 'TAP SPEAK';
+            if (!finalSent && latestText) {
+              finalSent = true;
+              transmitToCar({ type: 'voice', transcript: latestText });
+            }
+          };
+
+          recognition.start();
+        } catch (_) {
+          openWearVoiceDictationPrompt();
+        }
+      }
+
+      // Universal Wear OS Voice Input fallback (uses Samsung Watch built-in Mic icon on prompt)
+      function openWearVoiceDictationPrompt() {
+        const spoken = window.prompt('TAP MIC ICON & SPEAK TO ZELDA:');
+        if (spoken && spoken.trim()) {
+          transmitToCar({ type: 'voice', transcript: spoken.trim() });
+        }
+      }
+
+      window.onZeldaWatchVoice = function (text) {
+        if (text && String(text).trim()) {
+          transmitToCar({ type: 'voice', transcript: String(text).trim() });
+        }
+      };
+
+      micBtn.addEventListener('click', toggleVoiceCapture);
+      kbdBtn.addEventListener('click', openWearVoiceDictationPrompt);
+
+      zlockBtn.addEventListener('click', function () {
+        startWatchGpsBeacon();
+        if (latestGps) {
+          transmitToCar({ type: 'zlock' });
+        } else if (navigator.geolocation) {
+          readout.textContent = 'LOCKING SATELLITES...';
+          navigator.geolocation.getCurrentPosition(
+            function (pos) {
+              latestGps = {
+                lat: pos.coords.latitude,
+                lng: pos.coords.longitude,
+                accuracy: pos.coords.accuracy,
+                speed: pos.coords.speed,
+                heading: pos.coords.heading
+              };
+              zlockBtn.classList.add('gps-on');
+              transmitToCar({ type: 'zlock' });
+            },
+            function () {
+              readout.textContent = 'ALLOW WATCH GPS';
+            },
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+          );
+        }
+      });
+
+      updateHeader();
+      startWatchGpsBeacon();
+      subscribeCarReplies();
+
+      // Auto-trigger mic when launched from Ripperdoc Complication or Quick Button (?automic=1)
+      if (params.get('automic') === '1') {
+        setTimeout(toggleVoiceCapture, 250);
+      }
+    })();
+  </script>
+</body>
+</html>
