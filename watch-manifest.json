@@ -1,0 +1,8 @@
+{
+  "name": "Zelda Ripperdoc Comm-Link",
+  "short_name": "Zelda Link",
+  "start_url": "./watch.html?automic=1",
+  "display": "standalone",
+  "background_color": "#05060a",
+  "theme_color": "#00f0ff"
+}
