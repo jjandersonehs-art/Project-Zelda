@@ -1,34 +1,25 @@
 /**
  * ==========================================================================
- * PROJECT ZELDA v4.7.0 — VAULT + Z-LOCK GPS + KITT WATCH VOICE COMLINK
+ * PROJECT ZELDA v4.7.6 — VAULT + Z-LOCK GPS + KITT WATCH VOICE COMLINK
  * Repo Filename: zelda-vault-gps-watch-sync.js
  * ==========================================================================
- * Upgrades in v4.7.0:
- *  1. HUD PTT Removal & Car Mic Kill-Switch:
- *     - Hides Push-to-Talk (PTT), Open Speak, and Mic clutter on the 370Z HUD.
- *     - Stops background car-mic polling so XYAuto audio focus stays clean.
- *  2. Sub-Second Turbo Brain for Fluent Watch Conversation:
- *     - Instant (<50ms) local command router for YouTube transport & Z-LOCK.
- *     - Direct low-latency Gemini 2.5 Flash fast-path (thinkingBudget: 0,
- *       rolling 10-turn memory, live Watch GPS context) for ~500ms responses.
- *     - Full fallback interceptor for HUD fetch / speechSynthesis / NativeVoice.
- *  3. Wrist-First KITT Audio Routing:
- *     - Streams spoken replies (`type: "speak"`) directly to Galaxy Watch Ultra's
- *       speaker + 3-bar KITT Voice Modulator while keeping 370Z music uninterrupted.
  */
 
 (function () {
   'use strict';
 
-  const ZELDA_SYNC_VERSION = '4.7.0';
+  const ZELDA_SYNC_VERSION = '4.7.6';
   const VAULT_SNAPSHOT_KEY = '__zelda_master_vault_snapshot_v1';
+  const MASTER_GEMINI_SLOT = 'zelda_master_gemini_key_v1';
   const LINK_CHANNEL_KEY = 'zelda_watch_channel_v1';
   const WRIST_ONLY_AUDIO_KEY = 'zelda_wrist_only_audio_v1';
   const IDB_NAME = 'ZeldaImmortalVaultDB';
   const IDB_STORE = 'kv';
+  const KEY_REGEX = /AIza[0-9A-Za-z\-_]{25,}/;
 
   const relayState = {
     channel: '',
+    cachedApiKey: '',
     sse: null,
     ws: null,
     connected: false,
@@ -75,15 +66,10 @@
 
   function sweepAndDisableHudPttElements() {
     injectHudPttRemovalCss();
-
     try {
       if (window.ZeldaNativeVoice) {
-        if (typeof window.ZeldaNativeVoice.stopListening === 'function') {
-          window.ZeldaNativeVoice.stopListening();
-        }
-        if (typeof window.ZeldaNativeVoice.setContinuous === 'function') {
-          window.ZeldaNativeVoice.setContinuous(false);
-        }
+        window.ZeldaNativeVoice.stopListening?.();
+        window.ZeldaNativeVoice.setContinuous?.(false);
       }
     } catch (_) {}
 
@@ -110,7 +96,7 @@
   }
 
   /* ========================================================================
-   * PART 2: IMMORTAL API KEY VAULT (SURVIVES CAR IGNITION OFF & ORIGIN SPLIT)
+   * PART 2: IMMORTAL API KEY VAULT + DEEP ZELDAVAULT / FETCH SNIFFER
    * ======================================================================== */
   function hasNativeVault() {
     return typeof window.ZeldaNativeVault !== 'undefined' && window.ZeldaNativeVault !== null;
@@ -216,10 +202,6 @@
   const origSetItem = Storage.prototype.setItem;
   const origRemoveItem = Storage.prototype.removeItem;
 
-  function isImportantVaultKey(k) {
-    return k && /api|key|gemini|openai|eleven|token|secret|zelda|voice|map|mapbox|google|cfg|config|setting|vault|channel/i.test(k);
-  }
-
   function buildCurrentSnapshot() {
     const snap = {};
     try {
@@ -233,21 +215,61 @@
     return snap;
   }
 
+  function lockGeminiKeyEverywhere(rawKey) {
+    const m = String(rawKey || '').match(KEY_REGEX);
+    if (!m) return '';
+    const cleanKey = m[0];
+    relayState.cachedApiKey = cleanKey;
+
+    const slots = [
+      MASTER_GEMINI_SLOT,
+      'gemini_api_key',
+      'GEMINI_API_KEY',
+      'zelda_api_key',
+      'zelda_gemini_key',
+      'apiKey',
+      'api_key'
+    ];
+    slots.forEach((slot) => {
+      try { origSetItem.call(localStorage, slot, cleanKey); } catch (_) {}
+      nativeVaultSet(slot, cleanKey);
+    });
+    writeCookieBackup(MASTER_GEMINI_SLOT, cleanKey);
+
+    const snap = buildCurrentSnapshot();
+    snap[MASTER_GEMINI_SLOT] = cleanKey;
+    nativeVaultSet(VAULT_SNAPSHOT_KEY, JSON.stringify(snap));
+    idbSetSnapshot(snap);
+    updateWatchBadgeUi();
+    return cleanKey;
+  }
+
   function persistEverywhere(key, val) {
     if (!key || key === VAULT_SNAPSHOT_KEY) return;
     const strVal = String(val ?? '');
     if (!strVal) return;
+
+    const keyMatch = strVal.match(KEY_REGEX);
+    if (keyMatch) {
+      relayState.cachedApiKey = keyMatch[0];
+      writeCookieBackup(MASTER_GEMINI_SLOT, keyMatch[0]);
+      nativeVaultSet(MASTER_GEMINI_SLOT, keyMatch[0]);
+    }
+
     nativeVaultSet(key, strVal);
-    if (isImportantVaultKey(key) && strVal.length < 512) writeCookieBackup(key, strVal);
+    if (strVal.length < 512) writeCookieBackup(key, strVal);
     const snap = buildCurrentSnapshot();
     snap[key] = strVal;
     nativeVaultSet(VAULT_SNAPSHOT_KEY, JSON.stringify(snap));
     idbSetSnapshot(snap);
+    updateWatchBadgeUi();
   }
 
   Storage.prototype.setItem = function (key, value) {
     origSetItem.call(this, key, value);
-    if (this === window.localStorage) persistEverywhere(String(key), value);
+    if (this === window.localStorage || this === window.sessionStorage) {
+      persistEverywhere(String(key), value);
+    }
   };
 
   Storage.prototype.removeItem = function (key) {
@@ -256,6 +278,29 @@
       try { window.ZeldaNativeVault.removeItem?.(String(key)); } catch (_) {}
     }
   };
+
+  function installFetchKeySniffer() {
+    if (!window.fetch || window.fetch._zeldaKeySniffed) return;
+    const origFetch = window.fetch.bind(window);
+    window.fetch = function (input, init) {
+      try {
+        const urlStr = typeof input === 'string' ? input : (input && input.url) || '';
+        const urlMatch = urlStr.match(KEY_REGEX);
+        if (urlMatch && urlMatch[0] !== relayState.cachedApiKey) {
+          lockGeminiKeyEverywhere(urlMatch[0]);
+        }
+        if (init && init.headers) {
+          const hStr = JSON.stringify(init.headers);
+          const hMatch = hStr.match(KEY_REGEX);
+          if (hMatch && hMatch[0] !== relayState.cachedApiKey) {
+            lockGeminiKeyEverywhere(hMatch[0]);
+          }
+        }
+      } catch (_) {}
+      return origFetch(input, init);
+    };
+    window.fetch._zeldaKeySniffed = true;
+  }
 
   function hydrateSyncAtBoot() {
     try {
@@ -269,21 +314,59 @@
         }
       }
       const commonKeys = [
-        'gemini_api_key', 'GEMINI_API_KEY', 'zelda_api_key', 'zelda_gemini_key',
-        'apiKey', 'api_key', 'elevenlabs_api_key', 'ELEVENLABS_API_KEY',
-        'zelda_config', 'zelda_settings', 'zelda_vault', LINK_CHANNEL_KEY
+        MASTER_GEMINI_SLOT, 'gemini_api_key', 'GEMINI_API_KEY', 'zelda_api_key',
+        'zelda_gemini_key', 'apiKey', 'api_key', 'zelda_config', 'zelda_settings',
+        'zelda_vault', LINK_CHANNEL_KEY
       ];
       for (const k of commonKeys) {
-        if (!localStorage.getItem(k)) {
-          const nvVal = nativeVaultGet(k);
-          if (nvVal) origSetItem.call(localStorage, k, nvVal);
-        }
+        const nvVal = nativeVaultGet(k);
+        if (nvVal && !localStorage.getItem(k)) origSetItem.call(localStorage, k, nvVal);
       }
       const cookies = readAllCookieBackups();
       Object.entries(cookies).forEach(([k, v]) => {
         if (v && !localStorage.getItem(k)) origSetItem.call(localStorage, k, v);
       });
     } catch (_) {}
+  }
+
+  async function scanAllIndexedDbsForKey() {
+    if (!window.indexedDB || typeof window.indexedDB.databases !== 'function') return '';
+    try {
+      const dbs = await window.indexedDB.databases();
+      for (const info of dbs) {
+        if (!info || !info.name) continue;
+        const found = await new Promise((resolve) => {
+          try {
+            const req = window.indexedDB.open(info.name);
+            req.onsuccess = () => {
+              const db = req.result;
+              const stores = Array.from(db.objectStoreNames || []);
+              if (!stores.length) { db.close(); return resolve(''); }
+              let pending = stores.length;
+              let hit = '';
+              stores.forEach((stName) => {
+                try {
+                  const tx = db.transaction(stName, 'readonly');
+                  const getAll = tx.objectStore(stName).getAll();
+                  getAll.onsuccess = () => {
+                    const dump = JSON.stringify(getAll.result || '');
+                    const m = dump.match(KEY_REGEX);
+                    if (m && !hit) hit = m[0];
+                    if (--pending === 0) { db.close(); resolve(hit); }
+                  };
+                  getAll.onerror = () => { if (--pending === 0) { db.close(); resolve(hit); } };
+                } catch (_) {
+                  if (--pending === 0) { db.close(); resolve(hit); }
+                }
+              });
+            };
+            req.onerror = () => resolve('');
+          } catch (_) { resolve(''); }
+        });
+        if (found) return lockGeminiKeyEverywhere(found);
+      }
+    } catch (_) {}
+    return '';
   }
 
   async function hydrateAsyncAndBindInputs() {
@@ -297,18 +380,32 @@
       });
     }
     bindDomApiKeyInputs();
+    const k = await findGeminiApiKeyAsync();
+    if (k) updateWatchBadgeUi();
   }
 
   function bindDomApiKeyInputs() {
     const inputs = document.querySelectorAll('input, textarea');
     inputs.forEach((inp) => {
+      if (!inp.dataset.zeldaGlobalKeyWatch) {
+        inp.dataset.zeldaGlobalKeyWatch = '1';
+        const anyPasteCheck = () => {
+          const val = (inp.value || '').trim();
+          const m = val.match(KEY_REGEX);
+          if (m) lockGeminiKeyEverywhere(m[0]);
+        };
+        inp.addEventListener('input', anyPasteCheck);
+        inp.addEventListener('change', anyPasteCheck);
+        inp.addEventListener('blur', anyPasteCheck);
+      }
+
       if (inp.dataset.zeldaVaultBound) return;
       const sig = [inp.id || '', inp.name || '', inp.placeholder || '', inp.getAttribute('aria-label') || ''].join(' ');
-      if (!/api|key|gemini|eleven|token|secret|ai\s*studio/i.test(sig)) return;
+      if (!/api|key|gemini|eleven|token|secret|vault|ai\s*studio/i.test(sig)) return;
 
       inp.dataset.zeldaVaultBound = '1';
       const fieldSlotKey = 'zelda_dom_input__' + (inp.id || inp.name || sig.replace(/\W+/g, '_').slice(0, 40));
-      const savedVal = localStorage.getItem(fieldSlotKey) || nativeVaultGet(fieldSlotKey);
+      const savedVal = localStorage.getItem(fieldSlotKey) || nativeVaultGet(fieldSlotKey) || relayState.cachedApiKey;
       if (!inp.value && savedVal) {
         inp.value = savedVal;
         inp.dispatchEvent(new Event('input', { bubbles: true }));
@@ -318,11 +415,7 @@
         const val = (inp.value || '').trim();
         if (val.length >= 12) {
           localStorage.setItem(fieldSlotKey, val);
-          if (/^AIza[0-9A-Za-z\-_]{25,}$/.test(val)) {
-            ['gemini_api_key', 'GEMINI_API_KEY', 'zelda_api_key', 'zelda_gemini_key', 'apiKey'].forEach((k) => {
-              if (!localStorage.getItem(k)) localStorage.setItem(k, val);
-            });
-          }
+          if (KEY_REGEX.test(val)) lockGeminiKeyEverywhere(val);
         }
       };
       inp.addEventListener('input', saveHandler);
@@ -331,28 +424,81 @@
     });
   }
 
-  function findGeminiApiKey() {
+  function findGeminiApiKeySync() {
+    if (relayState.cachedApiKey && KEY_REGEX.test(relayState.cachedApiKey)) {
+      return relayState.cachedApiKey;
+    }
+
     const directSlots = [
-      'gemini_api_key', 'GEMINI_API_KEY', 'zelda_api_key', 'zelda_gemini_key', 'apiKey', 'api_key'
+      MASTER_GEMINI_SLOT, 'gemini_api_key', 'GEMINI_API_KEY',
+      'zelda_api_key', 'zelda_gemini_key', 'apiKey', 'api_key'
     ];
     for (const k of directSlots) {
       const v = (localStorage.getItem(k) || nativeVaultGet(k) || '').trim();
-      if (/^AIza[0-9A-Za-z\-_]{25,}$/.test(v)) return v;
+      const m = v.match(KEY_REGEX);
+      if (m) return (relayState.cachedApiKey = m[0]);
     }
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      const raw = localStorage.getItem(k) || '';
-      const match = raw.match(/AIza[0-9A-Za-z\-_]{25,}/);
-      if (match) return match[0];
+
+    for (const store of [window.localStorage, window.sessionStorage]) {
+      try {
+        for (let i = 0; i < store.length; i++) {
+          const raw = store.getItem(store.key(i)) || '';
+          const m = raw.match(KEY_REGEX);
+          if (m) return lockGeminiKeyEverywhere(m[0]);
+          if (raw.length >= 40 && raw.length < 400 && /^[A-Za-z0-9+/=]+$/.test(raw.trim())) {
+            try {
+              const dec = atob(raw.trim());
+              const dm = dec.match(KEY_REGEX);
+              if (dm) return lockGeminiKeyEverywhere(dm[0]);
+            } catch (_) {}
+          }
+        }
+      } catch (_) {}
     }
+
+    const cm = (document.cookie || '').match(KEY_REGEX);
+    if (cm) return lockGeminiKeyEverywhere(cm[0]);
+
+    const globalCandidates = [
+      window.ZeldaVault, window.ZELDA_VAULT, window.zeldaVault,
+      window.STATE, window.CONFIG, window.ZELDA_CONFIG, window.APP_STATE
+    ];
+    for (const g of globalCandidates) {
+      if (!g) continue;
+      try {
+        const gm = JSON.stringify(g).match(KEY_REGEX);
+        if (gm) return lockGeminiKeyEverywhere(gm[0]);
+      } catch (_) {}
+    }
+
     const inputs = document.querySelectorAll('input, textarea');
     for (const inp of inputs) {
-      const m = (inp.value || '').match(/AIza[0-9A-Za-z\-_]{25,}/);
-      if (m) return m[0];
+      const m = (inp.value || '').match(KEY_REGEX);
+      if (m) return lockGeminiKeyEverywhere(m[0]);
     }
+
     return '';
   }
 
+  async function findGeminiApiKeyAsync() {
+    const syncHit = findGeminiApiKeySync();
+    if (syncHit) return syncHit;
+
+    try {
+      const zv = window.ZeldaVault || window.zeldaVault;
+      if (zv && typeof zv.get === 'function') {
+        for (const k of ['gemini_api_key', 'GEMINI_API_KEY', 'apiKey', 'geminiKey', 'api_key']) {
+          const val = await Promise.resolve(zv.get(k));
+          const m = String(val || '').match(KEY_REGEX);
+          if (m) return lockGeminiKeyEverywhere(m[0]);
+        }
+      }
+    } catch (_) {}
+
+    return await scanAllIndexedDbsForKey();
+  }
+
+  installFetchKeySniffer();
   hydrateSyncAtBoot();
   injectHudPttRemovalCss();
 
@@ -498,7 +644,7 @@
   installGeolocationPrecisionWrapper();
 
   /* ========================================================================
-   * PART 4: TURBO KITT WATCH COMLINK (SUB-SECOND AI + WRIST VOICE STREAMING)
+   * PART 4: TURBO KITT WATCH COMLINK (GEMINI 3.8 FLASH / 3.5 FLASH-LITE)
    * ======================================================================== */
   function cleanSpeechText(raw) {
     return String(raw || '')
@@ -554,43 +700,51 @@
       telemetryCtx
     ].join(' ');
 
-    relayState.convHistory.push({ role: 'user', parts: [{ text: userText }] });
-    if (relayState.convHistory.length > 10) {
-      relayState.convHistory = relayState.convHistory.slice(-10);
-    }
+    const candidateHistory = relayState.convHistory.concat([{ role: 'user', parts: [{ text: userText }] }]).slice(-10);
 
-    const callModel = async (model, includeThinkingZero) => {
-      const genCfg = { temperature: 0.75, maxOutputTokens: 100 };
-      if (includeThinkingZero) genCfg.thinkingConfig = { thinkingBudget: 0 };
+    const modelAttempts = [
+      { model: 'gemini-3.5-flash-lite', genCfg: { temperature: 0.75, maxOutputTokens: 220 } },
+      { model: 'gemini-3.8-flash', genCfg: { temperature: 0.75, maxOutputTokens: 320, thinkingConfig: { thinkingLevel: 'MINIMAL' } } },
+      { model: 'gemini-3.8-flash', genCfg: { temperature: 0.75, maxOutputTokens: 500 } },
+      { model: 'gemini-2.5-flash-lite', genCfg: { temperature: 0.75, maxOutputTokens: 200, thinkingConfig: { thinkingBudget: 0 } } }
+    ];
 
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: systemPrompt }] },
-            contents: relayState.convHistory,
-            generationConfig: genCfg
-          })
+    let lastStatus = 0;
+    for (const attempt of modelAttempts) {
+      try {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${attempt.model}:generateContent?key=${encodeURIComponent(apiKey)}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              systemInstruction: { parts: [{ text: systemPrompt }] },
+              contents: candidateHistory,
+              generationConfig: attempt.genCfg
+            })
+          }
+        );
+        lastStatus = res.status;
+        if (!res.ok) continue;
+
+        const data = await res.json();
+        const parts = data?.candidates?.[0]?.content?.parts || [];
+        const reply = parts
+          .filter((p) => !p.thought)
+          .map((p) => p.text || '')
+          .join(' ')
+          .trim();
+
+        if (reply) {
+          relayState.convHistory = candidateHistory.concat([{ role: 'model', parts: [{ text: reply }] }]);
+          return { reply, status: 200 };
         }
-      );
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-      return data?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join(' ').trim() || '';
-    };
-
-    let reply = '';
-    try {
-      reply = await callModel('gemini-2.5-flash', true);
-    } catch (_) {
-      reply = await callModel('gemini-2.0-flash', false);
+      } catch (e) {
+        console.warn('[ZeldaWatchRelay] Model attempt failed:', attempt.model, e);
+      }
     }
 
-    if (reply) {
-      relayState.convHistory.push({ role: 'model', parts: [{ text: reply }] });
-    }
-    return reply;
+    return { reply: '', status: lastStatus };
   }
 
   function tryFastLocalHudCommand(spoken) {
@@ -648,42 +802,26 @@
       return;
     }
 
-    const apiKey = findGeminiApiKey();
-    if (apiKey) {
-      try {
-        const reply = await askZeldaTurboGemini(spoken, apiKey);
-        if (reply) {
-          sendSpokenReplyToWatch(reply);
-          appendHudChatLog('ZELDA', reply);
-          return;
-        }
-      } catch (err) {
-        console.warn('[ZeldaWatchRelay] Turbo Gemini fallback to HUD:', err);
-      }
+    const apiKey = await findGeminiApiKeyAsync();
+    if (!apiKey) {
+      sendSpokenReplyToWatch('Tap the top right KITT Link badge on the car screen and paste your Gemini key once to lock it in, J.');
+      return;
     }
 
-    const sentBefore = relayState.lastSpokenReplySentAt;
-    if (typeof window.onZeldaVoiceResult === 'function') {
-      window.onZeldaVoiceResult({ transcript: spoken, isFinal: true, source: 'watch' });
+    const result = await askZeldaTurboGemini(spoken, apiKey);
+    if (result.reply) {
+      sendSpokenReplyToWatch(result.reply);
+      appendHudChatLog('ZELDA', result.reply);
+      return;
+    }
+
+    if (result.status === 400 || result.status === 403) {
+      sendSpokenReplyToWatch(`Gemini rejected the API key with status ${result.status}, J. Tap the KITT Link badge to paste a fresh key.`);
+    } else if (result.status === 429) {
+      sendSpokenReplyToWatch('Gemini rate limit hit, J. Give it five seconds and try again.');
     } else {
-      const textInput = document.querySelector(
-        'input[placeholder*="Zelda" i], input[placeholder*="Say" i], input[placeholder*="Ask" i], #zelda-chat-input, textarea'
-      );
-      if (textInput) {
-        textInput.value = spoken;
-        textInput.dispatchEvent(new Event('input', { bubbles: true }));
-      }
-      const sendBtn = Array.from(document.querySelectorAll('button')).find((b) =>
-        /^SEND$/i.test((b.textContent || '').trim())
-      );
-      if (sendBtn) sendBtn.click();
+      sendSpokenReplyToWatch(`Comlink online, J, but Gemini returned status ${result.status || 'offline'}. Check hotspot data.`);
     }
-
-    setTimeout(() => {
-      if (relayState.lastSpokenReplySentAt === sentBefore) {
-        sendSpokenReplyToWatch('Comlink active, J. Check API key in Vault settings.');
-      }
-    }, 5500);
   }
 
   function hookCarVoiceOutputMirror() {
@@ -695,9 +833,7 @@
           if (Date.now() - relayState.lastSpokenReplySentAt > 1200) {
             sendSpokenReplyToWatch(utterance.text);
           }
-          if (Date.now() < relayState.suppressCarTtsUntil) {
-            return;
-          }
+          if (Date.now() < relayState.suppressCarTtsUntil) return;
         }
         return origSpeak(utterance);
       };
@@ -717,7 +853,7 @@
   }
 
   /* ========================================================================
-   * PART 5: NTFY SSE STREAM & HEADER COMLINK BADGE
+   * PART 5: NTFY SSE STREAM & 1-TAP KEY / PAIRING BADGE
    * ======================================================================== */
   function getOrInitWatchChannel() {
     let ch = localStorage.getItem(LINK_CHANNEL_KEY) || nativeVaultGet(LINK_CHANNEL_KEY);
@@ -733,13 +869,14 @@
   function updateWatchBadgeUi() {
     const badge = document.getElementById('zelda-watch-link-badge');
     if (!badge) return;
-    const shortCode = relayState.channel.replace(/^zelda-370z-/i, '').toUpperCase();
-    const audioMode = relayState.wristOnlyAudio ? 'WRIST' : 'WRIST+CAR';
+    const shortCode = (relayState.channel || '').replace(/^zelda-370z-/i, '').toUpperCase();
+    const hasKey = Boolean(findGeminiApiKeySync());
+    const keyTag = hasKey ? 'KEY:OK' : 'PASTE KEY';
     badge.textContent = relayState.connected
-      ? `⌚ KITT LINK // ${shortCode} [${audioMode}]`
-      : `⌚ KITT IDLE // ${shortCode}`;
-    badge.style.borderColor = relayState.connected ? '#ff1744' : 'rgba(252,238,10,0.45)';
-    badge.style.color = relayState.connected ? '#00f0ff' : '#fcee0a';
+      ? `⌚ KITT // ${shortCode} [${keyTag}]`
+      : `⌚ IDLE // ${shortCode} [${keyTag}]`;
+    badge.style.borderColor = !hasKey ? '#fcee0a' : (relayState.connected ? '#ff1744' : 'rgba(252,238,10,0.45)');
+    badge.style.color = !hasKey ? '#fcee0a' : '#00f0ff';
   }
 
   function injectWatchLinkBadge() {
@@ -766,15 +903,26 @@
     `;
     badge.addEventListener('click', function () {
       const currentShort = relayState.channel.replace(/^zelda-370z-/i, '').toUpperCase();
-      const modeLabel = relayState.wristOnlyAudio ? 'WRIST SPEAKER ONLY' : 'WRIST + CAR STEREO';
+      const keyStatus = findGeminiApiKeySync() ? 'LOCKED IN VAULT ✅' : 'MISSING ❌ (Paste AIza... key below!)';
+      const modeLabel = relayState.wristOnlyAudio ? 'WRIST ONLY' : 'WRIST + CAR';
       const entered = window.prompt(
-        `KITT WATCH COMLINK (${modeLabel})\n` +
-        `• Enter 4-char pairing code to change channel\n` +
-        `• Or type AUDIO to toggle Wrist-Only vs Wrist+Car voice:`,
+        `KITT COMLINK // ${currentShort} (${modeLabel})\n` +
+        `Gemini API Key: ${keyStatus}\n\n` +
+        `• Paste your AIza... Gemini API key here to lock it permanently\n` +
+        `• Or enter a 4-char Watch code\n` +
+        `• Or type AUDIO to toggle speaker routing:`,
         currentShort
       );
       if (!entered || !entered.trim()) return;
-      const clean = entered.trim().toUpperCase().replace(/[^A-Z0-9\-_]/g, '');
+      const trimmed = entered.trim();
+
+      if (KEY_REGEX.test(trimmed)) {
+        lockGeminiKeyEverywhere(trimmed);
+        sendSpokenReplyToWatch('Gemini key locked into immortal vault, J. Ready when you are.');
+        return;
+      }
+
+      const clean = trimmed.toUpperCase().replace(/[^A-Z0-9\-_]/g, '');
       if (clean === 'AUDIO') {
         relayState.wristOnlyAudio = !relayState.wristOnlyAudio;
         localStorage.setItem(WRIST_ONLY_AUDIO_KEY, relayState.wristOnlyAudio ? '1' : '0');
@@ -852,8 +1000,8 @@
 
   function bootZeldaSync() {
     sweepAndDisableHudPttElements();
-    hydrateAsyncAndBindInputs();
     injectWatchLinkBadge();
+    hydrateAsyncAndBindInputs();
     bindZLockButton();
     hookCarVoiceOutputMirror();
     connectWatchRelay();
@@ -872,6 +1020,7 @@
   window.ZeldaSync = {
     version: ZELDA_SYNC_VERSION,
     getChannel: () => relayState.channel,
+    setApiKey: lockGeminiKeyEverywhere,
     speakToWatch: sendSpokenReplyToWatch,
     forceZLock: forceLockCarMapToLiveGps
   };
