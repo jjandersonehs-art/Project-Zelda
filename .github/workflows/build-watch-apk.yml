@@ -22,7 +22,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Unpack KITT Wear OS Project & Debug Keystore
+      - name: Create Debug Keystore
         shell: bash
         run: |
           mkdir -p ~/.android
@@ -33,177 +33,658 @@ jobs:
               -keyalg RSA -keysize 2048 -validity 10000 \
               -dname "CN=Android Debug,O=Android,C=US"
           fi
-          printf '%s' "
-            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
-            pMS7pB2oE8M28zqoCGDKHbfyg/mVWlzFVwxj2lDLKo9yTLg3RRTwBPrC76qvqauQRnidFEIhfTAc
-            mCX5g0kwWMbsIrK0QFqaXzgsyy+IuYVSMFlqgV+R2bWYQNRwfrza7x3GeH9VHBbef1rG092jSu8G
-            pCmCgM6PqXyeEXBj/SF0Y6JyMRfKUoO02EbNJxRK+cpSlDhaSKJF4Ee0hFZ+35e+/871MarQ9b2P
-            H8uc3S1uSvxJB88XljVUfixeNK966lzZt6841ZdOUzLF9oXRvlT6suxapbAhfyUmqTfMzCD/6jjx
-            mt/r2F2eaS2vf6xQ88pwZKo9/8q/zJbxBLzlLZBsW/LNH9qdCWWb+PrH/wVQSwECFAAUAAAACAA4
-            PW1dr5/PerAAAAAEwBAAAcAAAAAAAAAAAAAACAAQAAAAB3ZWFyLWFwcC9zZXR0aW5ncy5ncmFkbGUu
-            a3RzUEsBAhQDFAAAAAgAOD1tXbUo4UlnAAAAjgAAABkAAAAAAAAAAAAAAIAB8QAAAHdlYXItYXBw
-            L2J1aWxkLmdyYWRsZS5rdHNQSwECFAMUAAAACAA4PW1dnweX7V4AAABtAAAAGgAAAAAAAAAAAAAA
-            gAGPAQAAd2Vhci1hcHAvZ3JhZGxlLnByb3BlcnRpZXNQSwECFAMUAAAACAA4PW1dwFj81qEBAACQ
-            AwAAHQAAAAAAAAAAAAAAgAElAgAAd2Vhci1hcHAvYXBwL2J1aWxkLmdyYWRsZS5rdHNQSwECFAMU
-            AAAACAA4PW1dOgKeG/cCAABgCgAAKQAAAAAAAAAAAAAAgAEBBAAAd2Vhci1hcHAvYXBwL3NyYy9t
-            YWluL0FuZHJvaWRNYW5pZmVzdC54bWxQSwECFAMUAAAACAA4PW1dsx68ubQbAAA4dAAASwAAAAAA
-            AAAAAAAAgAE/BwAAd2Vhci1hcHAvYXBwL3NyYy9tYWluL2phdmEvY29tL2V4YW1wbGUvemVsZGF3
-            YXRjaC9aZWxkYVdhdGNoQ29tcGxpY2F0aW9uLmt0UEsFBgAAAAAGAAYA9AEAAFwjAAAAAA==
-          " | tr -d ' \n\r\t' | base64 -d > wear-project.zip
-          unzip -oq wear-project.zip
+
+      - name: Generate KITT Wear OS Project Files
+        shell: python
+        run: |
+          import os
+
+          base = "wear-app"
+          pkg = base + "/app/src/main/java/com/example/zeldawatch"
+          os.makedirs(pkg, exist_ok=True)
+
+          def save(path, raw):
+              out = []
+              for line in raw.strip().splitlines():
+                  s = line.lstrip()
+                  out.append(s[1:] if s.startswith("|") else s)
+              with open(path, "w", encoding="utf-8") as f:
+                  f.write("\n".join(out) + "\n")
+
+          save(base + "/settings.gradle.kts", """
+          |pluginManagement {
+          |    repositories { google(); mavenCentral(); gradlePluginPortal() }
+          |}
+          |dependencyResolutionManagement {
+          |    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+          |    repositories { google(); mavenCentral() }
+          |}
+          |rootProject.name = "ZeldaWatchLink"
+          |include(":app")
+          """)
+
+          save(base + "/build.gradle.kts", """
+          |plugins {
+          |    id("com.android.application") version "8.6.1" apply false
+          |    id("org.jetbrains.kotlin.android") version "2.0.21" apply false
+          |}
+          """)
+
+          save(base + "/gradle.properties", """
+          |org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+          |android.useAndroidX=true
+          |android.nonTransitiveRClass=true
+          """)
+
+          save(base + "/app/build.gradle.kts", """
+          |plugins {
+          |    id("com.android.application")
+          |    id("org.jetbrains.kotlin.android")
+          |}
+          |android {
+          |    namespace = "com.example.zeldawatch"
+          |    compileSdk = 34
+          |    defaultConfig {
+          |        applicationId = "com.example.zeldawatch"
+          |        minSdk = 30
+          |        targetSdk = 34
+          |        versionCode = 8
+          |        versionName = "4.7.4"
+          |    }
+          |    buildTypes {
+          |        release {
+          |            isMinifyEnabled = false
+          |            signingConfig = signingConfigs.getByName("debug")
+          |        }
+          |    }
+          |    lint {
+          |        checkReleaseBuilds = false
+          |        abortOnError = false
+          |    }
+          |    compileOptions {
+          |        sourceCompatibility = JavaVersion.VERSION_17
+          |        targetCompatibility = JavaVersion.VERSION_17
+          |    }
+          |    kotlinOptions { jvmTarget = "17" }
+          |}
+          |dependencies {
+          |    implementation("androidx.core:core-ktx:1.13.1")
+          |    implementation("androidx.wear.watchface:watchface-complications-data-source-ktx:1.2.1")
+          |}
+          """)
+
+          save(base + "/app/src/main/AndroidManifest.xml", """
+          |<?xml version="1.0" encoding="utf-8"?>
+          |<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+          |    <uses-feature android:name="android.hardware.type.watch" />
+          |    <uses-permission android:name="android.permission.INTERNET" />
+          |    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+          |    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+          |    <uses-permission android:name="android.permission.VIBRATE" />
+          |    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+          |    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+          |    <queries>
+          |        <intent><action android:name="android.speech.RecognitionService" /></intent>
+          |        <intent><action android:name="android.speech.action.RECOGNIZE_SPEECH" /></intent>
+          |        <intent><action android:name="android.intent.action.TTS_SERVICE" /></intent>
+          |    </queries>
+          |    <application
+          |        android:allowBackup="true"
+          |        android:icon="@android:drawable/ic_btn_speak_now"
+          |        android:label="Zelda KITT"
+          |        android:supportsRtl="true"
+          |        android:theme="@android:style/Theme.DeviceDefault">
+          |        <meta-data android:name="com.google.android.wearable.standalone" android:value="true" />
+          |        <activity
+          |            android:name=".ZeldaQuickVoiceActivity"
+          |            android:exported="true"
+          |            android:label="Zelda KITT"
+          |            android:launchMode="singleTop"
+          |            android:taskAffinity="">
+          |            <intent-filter>
+          |                <action android:name="android.intent.action.MAIN" />
+          |                <category android:name="android.intent.category.LAUNCHER" />
+          |            </intent-filter>
+          |        </activity>
+          |        <service
+          |            android:name=".ZeldaComplicationService"
+          |            android:exported="true"
+          |            android:icon="@android:drawable/ic_btn_speak_now"
+          |            android:label="Zelda Comm-Link"
+          |            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+          |            <intent-filter>
+          |                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+          |            </intent-filter>
+          |            <meta-data
+          |                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+          |                android:value="SHORT_TEXT,MONOCHROMATIC_IMAGE,SMALL_IMAGE" />
+          |            <meta-data
+          |                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+          |                android:value="0" />
+          |        </service>
+          |    </application>
+          |</manifest>
+          """)
+
+          save(pkg + "/ZeldaWatchComplication.kt", """
+          |package com.example.zeldawatch
+          |
+          |import android.Manifest
+          |import android.app.Activity
+          |import android.app.PendingIntent
+          |import android.content.ComponentName
+          |import android.content.Context
+          |import android.content.Intent
+          |import android.content.pm.PackageManager
+          |import android.graphics.Canvas
+          |import android.graphics.Color
+          |import android.graphics.Paint
+          |import android.graphics.RectF
+          |import android.graphics.Typeface
+          |import android.graphics.drawable.GradientDrawable
+          |import android.graphics.drawable.Icon
+          |import android.location.LocationManager
+          |import android.media.AudioAttributes
+          |import android.os.Bundle
+          |import android.os.Handler
+          |import android.os.Looper
+          |import android.speech.RecognitionListener
+          |import android.speech.RecognizerIntent
+          |import android.speech.SpeechRecognizer
+          |import android.speech.tts.TextToSpeech
+          |import android.speech.tts.UtteranceProgressListener
+          |import android.util.AttributeSet
+          |import android.view.Gravity
+          |import android.view.View
+          |import android.view.WindowManager
+          |import android.widget.Button
+          |import android.widget.EditText
+          |import android.widget.LinearLayout
+          |import android.widget.ScrollView
+          |import android.widget.TextView
+          |import androidx.wear.watchface.complications.data.ComplicationData
+          |import androidx.wear.watchface.complications.data.ComplicationType
+          |import androidx.wear.watchface.complications.data.MonochromaticImage
+          |import androidx.wear.watchface.complications.data.MonochromaticImageComplicationData
+          |import androidx.wear.watchface.complications.data.PlainComplicationText
+          |import androidx.wear.watchface.complications.data.ShortTextComplicationData
+          |import androidx.wear.watchface.complications.data.SmallImage
+          |import androidx.wear.watchface.complications.data.SmallImageComplicationData
+          |import androidx.wear.watchface.complications.data.SmallImageType
+          |import androidx.wear.watchface.complications.datasource.ComplicationDataSourceUpdateRequester
+          |import androidx.wear.watchface.complications.datasource.ComplicationRequest
+          |import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
+          |import org.json.JSONObject
+          |import java.io.BufferedReader
+          |import java.io.InputStreamReader
+          |import java.net.HttpURLConnection
+          |import java.net.URL
+          |import java.util.Locale
+          |import kotlin.concurrent.thread
+          |import kotlin.math.abs
+          |import kotlin.math.max
+          |import kotlin.math.min
+          |import kotlin.math.sin
+          |
+          |private const val PREFS_NAME = "zelda_watch_prefs"
+          |private const val KEY_CHANNEL = "channel_code"
+          |
+          |class ZeldaComplicationService : SuspendingComplicationDataSourceService() {
+          |    override fun getPreviewData(type: ComplicationType): ComplicationData? = buildComp(type, "ZELDA")
+          |
+          |    override suspend fun onComplicationRequest(request: ComplicationRequest): ComplicationData? {
+          |        val code = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(KEY_CHANNEL, "") ?: ""
+          |        return buildComp(request.complicationType, if (code.isNotEmpty()) "ZELDA" else "PAIR")
+          |    }
+          |
+          |    private fun buildComp(type: ComplicationType, text: String): ComplicationData? {
+          |        val intent = Intent(this, ZeldaQuickVoiceActivity::class.java).apply {
+          |            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+          |            putExtra("FROM_COMPLICATION", true)
+          |        }
+          |        val pi = PendingIntent.getActivity(this, 1001, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+          |        val rawIcon = Icon.createWithResource(this, android.R.drawable.ic_btn_speak_now)
+          |        val mono = MonochromaticImage.Builder(rawIcon).build()
+          |        val small = SmallImage.Builder(rawIcon, SmallImageType.ICON).build()
+          |        val desc = PlainComplicationText.Builder("Zelda KITT Comlink").build()
+          |        return when (type) {
+          |            ComplicationType.SHORT_TEXT -> ShortTextComplicationData.Builder(PlainComplicationText.Builder(text).build(), desc).setMonochromaticImage(mono).setTapAction(pi).build()
+          |            ComplicationType.MONOCHROMATIC_IMAGE -> MonochromaticImageComplicationData.Builder(mono, desc).setTapAction(pi).build()
+          |            ComplicationType.SMALL_IMAGE -> SmallImageComplicationData.Builder(small, desc).setTapAction(pi).build()
+          |            else -> null
+          |        }
+          |    }
+          |}
+          |
+          |class KittModulatorView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
+          |    companion object {
+          |        const val MODE_IDLE = 0
+          |        const val MODE_LISTENING = 1
+          |        const val MODE_THINKING = 2
+          |        const val MODE_SPEAKING = 3
+          |    }
+          |
+          |    var mode: Int = MODE_IDLE
+          |        set(value) { field = value; postInvalidateOnAnimation() }
+          |    var micLevel: Float = 0.25f
+          |    var wordPulseBoost: Float = 0f
+          |
+          |    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+          |    private val segRect = RectF()
+          |    private val frameRect = RectF()
+          |
+          |    fun triggerWordPulse() { wordPulseBoost = 1.0f; postInvalidateOnAnimation() }
+          |
+          |    override fun onDraw(canvas: Canvas) {
+          |        super.onDraw(canvas)
+          |        val w = width.toFloat()
+          |        val h = height.toFloat()
+          |        val now = System.currentTimeMillis()
+          |
+          |        frameRect.set(6f, 6f, w - 6f, h - 6f)
+          |        paint.style = Paint.Style.FILL
+          |        paint.color = Color.parseColor("#07090F")
+          |        canvas.drawRoundRect(frameRect, 26f, 26f, paint)
+          |
+          |        paint.style = Paint.Style.STROKE
+          |        paint.strokeWidth = 2.5f
+          |        paint.color = when (mode) {
+          |            MODE_SPEAKING, MODE_THINKING -> Color.parseColor("#FF1744")
+          |            MODE_LISTENING -> Color.parseColor("#00F0FF")
+          |            else -> Color.parseColor("#334455")
+          |        }
+          |        canvas.drawRoundRect(frameRect, 26f, 26f, paint)
+          |        paint.style = Paint.Style.FILL
+          |
+          |        if (mode == MODE_THINKING) {
+          |            val cols = 8
+          |            val padX = 22f
+          |            val gap = 6f
+          |            val boxW = (w - padX * 2f - gap * (cols - 1)) / cols
+          |            val boxH = h * 0.28f
+          |            val topY = (h - boxH) / 2f
+          |            val cycle = (now % 1100L).toFloat() / 1100f
+          |            val tri = if (cycle < 0.5f) cycle * 2f else (1f - cycle) * 2f
+          |            val pos = tri * (cols - 1)
+          |            for (i in 0 until cols) {
+          |                val alpha = max(0.12f, 1f - abs(i - pos) * 0.42f)
+          |                paint.color = Color.argb((alpha * 255).toInt(), 255, 23, 68)
+          |                val left = padX + i * (boxW + gap)
+          |                segRect.set(left, topY, left + boxW, topY + boxH)
+          |                canvas.drawRoundRect(segRect, 5f, 5f, paint)
+          |            }
+          |            postInvalidateOnAnimation()
+          |            return
+          |        }
+          |
+          |        val halfPairs = 6
+          |        val colMultipliers = floatArrayOf(0.68f, 1.0f, 0.68f)
+          |        val t = now / 95.0
+          |        if (wordPulseBoost > 0.02f) wordPulseBoost *= 0.86f else wordPulseBoost = 0f
+          |        val baseEnergy = when (mode) {
+          |            MODE_SPEAKING -> min(1f, 0.48f + 0.32f * abs(sin(t)).toFloat() + 0.20f * abs(sin(t * 2.3)).toFloat() + wordPulseBoost * 0.38f)
+          |            MODE_LISTENING -> max(0.18f, min(1f, micLevel))
+          |            else -> 0.12f
+          |        }
+          |
+          |        val colW = w * 0.19f
+          |        val colGap = w * 0.07f
+          |        val startX = (w - (colW * 3f + colGap * 2f)) / 2f
+          |        val padY = 16f
+          |        val segGap = 4f
+          |        val totalSegs = halfPairs * 2
+          |        val segH = (h - padY * 2f - segGap * (totalSegs - 1)) / totalSegs
+          |        val centerY = h / 2f
+          |
+          |        for (c in 0..2) {
+          |            val colPhase = if (c == 1) 1f else (0.85f + 0.15f * sin(t * 1.7 + c).toFloat())
+          |            val activePairs = max(1, (baseEnergy * colMultipliers[c] * colPhase * halfPairs + 0.6f).toInt())
+          |            val left = startX + c * (colW + colGap)
+          |            for (p in 0 until halfPairs) {
+          |                val lit = p < activePairs
+          |                paint.color = when {
+          |                    !lit -> Color.parseColor("#181D26")
+          |                    mode == MODE_LISTENING -> if (p >= halfPairs - 1) Color.parseColor("#FCEE0A") else Color.parseColor("#00F0FF")
+          |                    mode == MODE_SPEAKING -> if (p >= halfPairs - 1) Color.parseColor("#FCEE0A") else Color.parseColor("#FF1744")
+          |                    else -> Color.parseColor("#661022")
+          |                }
+          |                val upBottom = centerY - segGap / 2f - p * (segH + segGap)
+          |                segRect.set(left, upBottom - segH, left + colW, upBottom)
+          |                canvas.drawRoundRect(segRect, 3f, 3f, paint)
+          |                val dnTop = centerY + segGap / 2f + p * (segH + segGap)
+          |                segRect.set(left, dnTop, left + colW, dnTop + segH)
+          |                canvas.drawRoundRect(segRect, 3f, 3f, paint)
+          |            }
+          |        }
+          |        if (mode != MODE_IDLE) postInvalidateOnAnimation()
+          |    }
+          |}
+          |
+          |class ZeldaQuickVoiceActivity : Activity() {
+          |    private val REQ_SPEECH_FALLBACK = 101
+          |    private val REQ_PERMS = 202
+          |    private val mainHandler = Handler(Looper.getMainLooper())
+          |
+          |    private lateinit var kittView: KittModulatorView
+          |    private lateinit var statusView: TextView
+          |    private lateinit var subtitleView: TextView
+          |    private lateinit var codeInput: EditText
+          |    private lateinit var pairContainer: LinearLayout
+          |
+          |    private var speechRecognizer: SpeechRecognizer? = null
+          |    private var tts: TextToSpeech? = null
+          |    private var ttsReady = false
+          |    private var pendingSpeakText: String? = null
+          |
+          |    @Volatile private var activityAlive = true
+          |    @Volatile private var sseConn: HttpURLConnection? = null
+          |    private var activeStreamTopic = ""
+          |    private var lastRxId = ""
+          |    private var replyTimeoutRunnable: Runnable? = null
+          |
+          |    override fun onCreate(savedInstanceState: Bundle?) {
+          |        super.onCreate(savedInstanceState)
+          |        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+          |        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+          |        val savedCode = prefs.getString(KEY_CHANNEL, "") ?: ""
+          |        initWatchTts()
+          |
+          |        val scroll = ScrollView(this).apply { setBackgroundColor(Color.parseColor("#040508")); isFillViewport = true }
+          |        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER; setPadding(26, 26, 26, 30) }
+          |
+          |        statusView = TextView(this).apply {
+          |            text = if (savedCode.isEmpty()) "PAIR 370Z CODE" else "KITT // $savedCode"
+          |            setTextColor(Color.parseColor("#00F0FF")); textSize = 11f; typeface = Typeface.MONOSPACE; gravity = Gravity.CENTER
+          |        }
+          |        kittView = KittModulatorView(this).apply {
+          |            layoutParams = LinearLayout.LayoutParams(230, 126).apply { topMargin = 8 }
+          |            setOnClickListener {
+          |                tts?.stop()
+          |                val c = currentCode()
+          |                if (c.isNotEmpty()) beginVoiceTurn() else pairContainer.visibility = View.VISIBLE
+          |            }
+          |        }
+          |        subtitleView = TextView(this).apply {
+          |            text = "TAP VOICE BOX TO SPEAK"
+          |            setTextColor(Color.parseColor("#E6F7FF")); textSize = 11f; gravity = Gravity.CENTER; maxLines = 3; setPadding(8, 8, 8, 4)
+          |        }
+          |
+          |        val actionRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER }
+          |        val zLockChip = Button(this).apply {
+          |            text = "Z-LOCK"; setTextColor(Color.parseColor("#00F0FF")); textSize = 10f
+          |            background = GradientDrawable().apply { setColor(Color.parseColor("#0D1E2A")); setStroke(2, Color.parseColor("#00F0FF")); cornerRadius = 40f }
+          |            setPadding(18, 8, 18, 8)
+          |            setOnClickListener { val c = currentCode(); if (c.isNotEmpty()) beamToCar(c, "zlock", null) else pairContainer.visibility = View.VISIBLE }
+          |        }
+          |        val cfgChip = Button(this).apply {
+          |            text = "CODE"; setTextColor(Color.parseColor("#FCEE0A")); textSize = 10f
+          |            background = GradientDrawable().apply { setColor(Color.parseColor("#1B1908")); setStroke(2, Color.parseColor("#FCEE0A")); cornerRadius = 40f }
+          |            setPadding(18, 8, 18, 8)
+          |            setOnClickListener { pairContainer.visibility = if (pairContainer.visibility == View.VISIBLE) View.GONE else View.VISIBLE }
+          |        }
+          |        val chipLp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { setMargins(6, 6, 6, 0) }
+          |        actionRow.addView(zLockChip, chipLp); actionRow.addView(cfgChip, chipLp)
+          |
+          |        pairContainer = LinearLayout(this).apply {
+          |            orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER
+          |            visibility = if (savedCode.isEmpty()) View.VISIBLE else View.GONE
+          |        }
+          |        codeInput = EditText(this).apply {
+          |            hint = "4-char 370Z code"; setText(savedCode); setTextColor(Color.parseColor("#FCEE0A"))
+          |            setHintTextColor(Color.parseColor("#667788")); textSize = 12f; gravity = Gravity.CENTER; setSingleLine(true)
+          |        }
+          |        val saveCodeBtn = Button(this).apply {
+          |            text = "SAVE & LINK"; textSize = 11f
+          |            setOnClickListener {
+          |                val c = saveCode(prefs)
+          |                if (c.isNotEmpty()) { pairContainer.visibility = View.GONE; ensureCarReplyStream(c); beginVoiceTurn() }
+          |            }
+          |        }
+          |        pairContainer.addView(codeInput); pairContainer.addView(saveCodeBtn)
+          |        root.addView(statusView); root.addView(kittView); root.addView(subtitleView); root.addView(actionRow); root.addView(pairContainer)
+          |        scroll.addView(root); setContentView(scroll)
+          |
+          |        val hasPerms = checkAndRequestPerms()
+          |        if (savedCode.isNotEmpty()) {
+          |            ensureCarReplyStream(savedCode)
+          |            if (hasPerms) mainHandler.postDelayed({ beginVoiceTurn() }, 180)
+          |        }
+          |    }
+          |
+          |    private fun currentCode(): String = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(KEY_CHANNEL, "") ?: ""
+          |
+          |    private fun checkAndRequestPerms(): Boolean {
+          |        val needed = mutableListOf<String>()
+          |        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) needed.add(Manifest.permission.RECORD_AUDIO)
+          |        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+          |            needed.add(Manifest.permission.ACCESS_FINE_LOCATION); needed.add(Manifest.permission.ACCESS_COARSE_LOCATION)
+          |        }
+          |        if (needed.isNotEmpty()) { requestPermissions(needed.toTypedArray(), REQ_PERMS); return false }
+          |        return true
+          |    }
+          |
+          |    private fun initWatchTts() {
+          |        tts = TextToSpeech(this) { status ->
+          |            if (status == TextToSpeech.SUCCESS) {
+          |                tts?.setLanguage(Locale.US)
+          |                tts?.setSpeechRate(1.10f)
+          |                tts?.setPitch(1.0f)
+          |                tts?.setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ASSISTANT).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build())
+          |                tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+          |                    override fun onStart(utteranceId: String?) {
+          |                        mainHandler.post { kittView.mode = KittModulatorView.MODE_SPEAKING; statusView.text = "ZELDA // SPEAKING" }
+          |                    }
+          |                    override fun onRangeStart(utteranceId: String?, start: Int, end: Int, frame: Int) {
+          |                        mainHandler.post { kittView.triggerWordPulse() }
+          |                    }
+          |                    override fun onDone(utteranceId: String?) {
+          |                        mainHandler.post {
+          |                            if (utteranceId == "SIGN_OFF") finish()
+          |                            else if (activityAlive) mainHandler.postDelayed({ if (activityAlive) beginVoiceTurn() }, 350)
+          |                        }
+          |                    }
+          |                    @Deprecated("Deprecated in Java")
+          |                    override fun onError(utteranceId: String?) {
+          |                        mainHandler.post { kittView.mode = KittModulatorView.MODE_IDLE }
+          |                    }
+          |                })
+          |                ttsReady = true
+          |                pendingSpeakText?.let { pendingSpeakText = null; speakWithKittModulator(it, false) }
+          |            }
+          |        }
+          |    }
+          |
+          |    private fun speakWithKittModulator(text: String, signOffAfter: Boolean) {
+          |        replyTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+          |        mainHandler.post { subtitleView.text = text; kittView.mode = KittModulatorView.MODE_SPEAKING; statusView.text = "ZELDA // SPEAKING" }
+          |        if (!ttsReady || tts == null) { pendingSpeakText = text; return }
+          |        val uttId = if (signOffAfter) "SIGN_OFF" else "KITT_${System.currentTimeMillis()}"
+          |        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, uttId)
+          |    }
+          |
+          |    private fun saveCode(prefs: android.content.SharedPreferences): String {
+          |        val raw = codeInput.text.toString().trim().uppercase(Locale.US)
+          |        val sb = StringBuilder()
+          |        for (ch in raw) {
+          |            if (ch.isLetterOrDigit() || ch == '-' || ch == '_') sb.append(ch)
+          |        }
+          |        val clean = sb.toString()
+          |        if (clean.isEmpty()) { statusView.text = "ENTER 4-CHAR CODE"; return "" }
+          |        prefs.edit().putString(KEY_CHANNEL, clean).commit()
+          |        statusView.text = "KITT // $clean"
+          |        try { ComplicationDataSourceUpdateRequester.create(this, ComponentName(this, ZeldaComplicationService::class.java)).requestUpdateAll() } catch (_: Exception) {}
+          |        return clean
+          |    }
+          |
+          |    private fun beginVoiceTurn() {
+          |        if (!activityAlive) return
+          |        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) { checkAndRequestPerms(); return }
+          |        tts?.stop()
+          |        if (!SpeechRecognizer.isRecognitionAvailable(this)) { launchFallbackSpeechPrompt(); return }
+          |        try {
+          |            speechRecognizer?.destroy()
+          |            val sr = SpeechRecognizer.createSpeechRecognizer(this)
+          |            speechRecognizer = sr
+          |            sr.setRecognitionListener(object : RecognitionListener {
+          |                override fun onReadyForSpeech(params: Bundle?) {
+          |                    kittView.mode = KittModulatorView.MODE_LISTENING; statusView.text = "LISTENING..."; subtitleView.text = "SPEAK TO ZELDA..."
+          |                }
+          |                override fun onBeginningOfSpeech() {}
+          |                override fun onRmsChanged(rmsdB: Float) { kittView.micLevel = ((rmsdB + 2f) / 10f).coerceIn(0.18f, 1.0f) }
+          |                override fun onBufferReceived(buffer: ByteArray?) {}
+          |                override fun onEndOfSpeech() { kittView.mode = KittModulatorView.MODE_THINKING; statusView.text = "SCANNING..." }
+          |                override fun onPartialResults(partialResults: Bundle?) {
+          |                    val part = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
+          |                    if (!part.isNullOrBlank()) subtitleView.text = part
+          |                }
+          |                override fun onResults(results: Bundle?) {
+          |                    handleUserTranscript(results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull())
+          |                }
+          |                override fun onError(error: Int) {
+          |                    if (error == SpeechRecognizer.ERROR_CLIENT || error == SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS) {
+          |                        launchFallbackSpeechPrompt(); return
+          |                    }
+          |                    if (error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT || error == SpeechRecognizer.ERROR_NO_MATCH) {
+          |                        kittView.mode = KittModulatorView.MODE_IDLE; statusView.text = "STANDING BY"
+          |                        mainHandler.postDelayed({ if (activityAlive && kittView.mode == KittModulatorView.MODE_IDLE) finish() }, 900)
+          |                    } else {
+          |                        kittView.mode = KittModulatorView.MODE_IDLE; statusView.text = "TAP VOICE BOX"
+          |                    }
+          |                }
+          |                override fun onEvent(eventType: Int, params: Bundle?) {}
+          |            })
+          |            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+          |                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+          |                putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+          |                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 800L)
+          |                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 650L)
+          |            }
+          |            sr.startListening(intent)
+          |        } catch (_: Exception) { launchFallbackSpeechPrompt() }
+          |    }
+          |
+          |    private fun launchFallbackSpeechPrompt() {
+          |        try {
+          |            val i = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+          |                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+          |                putExtra(RecognizerIntent.EXTRA_PROMPT, "ZELDA // KITT LINK")
+          |            }
+          |            startActivityForResult(i, REQ_SPEECH_FALLBACK)
+          |        } catch (_: Exception) { statusView.text = "MIC ERR" }
+          |    }
+          |
+          |    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+          |        super.onActivityResult(requestCode, resultCode, data)
+          |        if (requestCode == REQ_SPEECH_FALLBACK) {
+          |            if (resultCode == RESULT_OK) handleUserTranscript(data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull())
+          |            else finish()
+          |        }
+          |    }
+          |
+          |    private fun handleUserTranscript(rawSpoken: String?) {
+          |        val spoken = rawSpoken?.trim() ?: ""
+          |        if (spoken.isEmpty()) { kittView.mode = KittModulatorView.MODE_IDLE; return }
+          |        val low = spoken.lowercase(Locale.US)
+          |        if (low == "over and out" || low == "goodbye" || low == "goodbye zelda" || low == "stop listening" || low == "exit" || low == "close" || low == "thats all" || low == "that's all" || low == "that is all") {
+          |            speakWithKittModulator("Standing by, J.", signOffAfter = true)
+          |            return
+          |        }
+          |        val code = currentCode()
+          |        if (code.isNotEmpty()) { subtitleView.text = spoken; beamToCar(code, "voice", spoken) }
+          |    }
+          |
+          |    private fun ensureCarReplyStream(shortCode: String) {
+          |        val topic = if (shortCode.startsWith("ZELDA-", true)) shortCode.lowercase(Locale.US) else "zelda-370z-$shortCode"
+          |        if (topic == activeStreamTopic && sseConn != null) return
+          |        activeStreamTopic = topic
+          |        try { sseConn?.disconnect() } catch (_: Exception) {}
+          |        thread(isDaemon = true) {
+          |            while (activityAlive && activeStreamTopic == topic) {
+          |                try {
+          |                    val conn = (URL("https://ntfy.sh/$topic/sse").openConnection() as HttpURLConnection).apply {
+          |                        requestMethod = "GET"; connectTimeout = 8000; readTimeout = 0
+          |                        setRequestProperty("Accept", "text/event-stream")
+          |                    }
+          |                    sseConn = conn
+          |                    BufferedReader(InputStreamReader(conn.inputStream, Charsets.UTF_8)).use { reader ->
+          |                        var line: String?
+          |                        while (activityAlive && activeStreamTopic == topic && reader.readLine().also { line = it } != null) {
+          |                            val l = line ?: continue
+          |                            if (!l.startsWith("data:")) continue
+          |                            val jsonStr = l.removePrefix("data:").trim()
+          |                            if (jsonStr.isEmpty()) continue
+          |                            val env = JSONObject(jsonStr)
+          |                            if (env.optString("event") != "message") continue
+          |                            val id = env.optString("id")
+          |                            if (id.isNotEmpty() && id == lastRxId) continue
+          |                            lastRxId = id
+          |                            val msgRaw = env.optString("message")
+          |                            if (msgRaw.isEmpty()) continue
+          |                            val msg = JSONObject(msgRaw)
+          |                            if (msg.optString("source") != "zelda-car") continue
+          |                            if (abs(System.currentTimeMillis() - msg.optLong("ts")) > 20000L) continue
+          |                            val txt = msg.optString("text").trim()
+          |                            if (txt.isNotEmpty() && msg.optString("type") == "speak") speakWithKittModulator(txt, signOffAfter = false)
+          |                        }
+          |                    }
+          |                } catch (_: Exception) { if (activityAlive) Thread.sleep(1500) }
+          |            }
+          |        }
+          |    }
+          |
+          |    private fun readGps(): JSONObject? {
+          |        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+          |            checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) return null
+          |        return try {
+          |            val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+          |            val loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER) ?: lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) ?: return null
+          |            JSONObject().apply { put("lat", loc.latitude); put("lng", loc.longitude); put("accuracy", loc.accuracy); put("speed", loc.speed); put("heading", loc.bearing) }
+          |        } catch (_: Exception) { null }
+          |    }
+          |
+          |    private fun beamToCar(shortCode: String, type: String, transcript: String?) {
+          |        ensureCarReplyStream(shortCode)
+          |        val topic = if (shortCode.startsWith("ZELDA-", true)) shortCode.lowercase(Locale.US) else "zelda-370z-$shortCode"
+          |        val gps = readGps()
+          |        kittView.mode = KittModulatorView.MODE_THINKING
+          |        statusView.text = "TX >> 370Z..."
+          |        replyTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+          |        val timeoutTask = Runnable {
+          |            if (activityAlive && kittView.mode == KittModulatorView.MODE_THINKING) {
+          |                kittView.mode = KittModulatorView.MODE_IDLE; statusView.text = "370Z OFFLINE"; subtitleView.text = "WAIT FOR CAR HOTSPOT"
+          |            }
+          |        }
+          |        replyTimeoutRunnable = timeoutTask
+          |        mainHandler.postDelayed(timeoutTask, 7000L)
+          |        thread {
+          |            try {
+          |                val payload = JSONObject().apply {
+          |                    put("source", "zelda-watch"); put("type", type); put("ts", System.currentTimeMillis())
+          |                    if (transcript != null) put("transcript", transcript)
+          |                    if (gps != null) put("gps", gps)
+          |                }
+          |                val conn = (URL("https://ntfy.sh/$topic").openConnection() as HttpURLConnection).apply {
+          |                    requestMethod = "POST"; doOutput = true; connectTimeout = 5000; readTimeout = 5000
+          |                    setRequestProperty("Content-Type", "application/json; charset=utf-8")
+          |                }
+          |                conn.outputStream.use { it.write(payload.toString().toByteArray(Charsets.UTF_8)) }
+          |                val code = conn.responseCode
+          |                if (code !in 200..299) mainHandler.post { kittView.mode = KittModulatorView.MODE_IDLE; statusView.text = "HTTP $code" }
+          |            } catch (_: Exception) { mainHandler.post { kittView.mode = KittModulatorView.MODE_IDLE; statusView.text = "CHECK NET" } }
+          |        }
+          |    }
+          |
+          |    override fun onDestroy() {
+          |        activityAlive = false
+          |        replyTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+          |        try { speechRecognizer?.destroy() } catch (_: Exception) {}
+          |        try { tts?.stop(); tts?.shutdown() } catch (_: Exception) {}
+          |        try { sseConn?.disconnect() } catch (_: Exception) {}
+          |        super.onDestroy()
+          |    }
+          |}
+          """)
+          print("Generated all 6 Wear OS files cleanly.")
 
       - name: Install Gradle 8.9 & Compile Signed Wear APK
         shell: bash
@@ -221,7 +702,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete watch-v4.7.3 --yes --cleanup-tag 2>/dev/null || true
-          gh release create watch-v4.7.3 zelda-watch-ultra.apk \
-            --title "Zelda KITT Watch Ultra Complication APK (v4.7.3)" \
-            --notes "v4.7.3: KITT 3-Bar Voice Modulator + Larson Scanner, native Watch speaker TTS, and hands-free fluent conversation loop."
+          gh release delete watch-v4.7.4 --yes --cleanup-tag 2>/dev/null || true
+          gh release create watch-v4.7.4 zelda-watch-ultra.apk \
+            --title "Zelda KITT Watch Ultra Complication APK (v4.7.4)" \
+            --notes "v4.7.4: KITT 3-Bar Voice Modulator + Larson Scanner, native Watch speaker TTS, and hands-free fluent conversation loop."
