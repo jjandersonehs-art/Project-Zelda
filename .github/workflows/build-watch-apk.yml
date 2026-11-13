@@ -11,317 +11,334 @@ permissions:
 
 jobs:
   build-wear-apk:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
-
-      - name: Generate Wear OS Project Files Automatically
-        run: |
-          mkdir -p wear-app/app/src/main/java/com/example/zeldawatch
-
-          cat << 'EOF' > wear-app/settings.gradle.kts
-          pluginManagement {
-              repositories { google(); mavenCentral(); gradlePluginPortal() }
-          }
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories { google(); mavenCentral() }
-          }
-          rootProject.name = "ZeldaWatchLink"
-          include(":app")
-          EOF
-
-          cat << 'EOF' > wear-app/build.gradle.kts
-          plugins {
-              id("com.android.application") version "8.6.1" apply false
-              id("org.jetbrains.kotlin.android") version "2.0.21" apply false
-          }
-          EOF
-
-          cat << 'EOF' > wear-app/gradle.properties
-          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
-          android.useAndroidX=true
-          android.nonTransitiveRClass=true
-          EOF
-
-          cat << 'EOF' > wear-app/app/build.gradle.kts
-          plugins {
-              id("com.android.application")
-              id("org.jetbrains.kotlin.android")
-          }
-          android {
-              namespace = "com.example.zeldawatch"
-              compileSdk = 35
-              defaultConfig {
-                  applicationId = "com.example.zeldawatch"
-                  minSdk = 30
-                  targetSdk = 34
-                  versionCode = 2
-                  versionName = "4.6.1"
-              }
-              buildTypes {
-                  release {
-                      isMinifyEnabled = false
-                      signingConfig = signingConfigs.getByName("debug")
-                  }
-              }
-              compileOptions {
-                  sourceCompatibility = JavaVersion.VERSION_17
-                  targetCompatibility = JavaVersion.VERSION_17
-              }
-              kotlinOptions { jvmTarget = "17" }
-          }
-          dependencies {
-              implementation("androidx.core:core-ktx:1.13.1")
-              implementation("androidx.wear.watchface:watchface-complications-data-source-ktx:1.2.1")
-          }
-          EOF
-
-          cat << 'EOF' > wear-app/app/src/main/AndroidManifest.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <uses-feature android:name="android.hardware.type.watch" />
-              <uses-permission android:name="android.permission.INTERNET" />
-              <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-              <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-              <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-              <application
-                  android:allowBackup="true"
-                  android:icon="@android:drawable/ic_btn_speak_now"
-                  android:label="Zelda Link"
-                  android:supportsRtl="true"
-                  android:theme="@android:style/Theme.DeviceDefault">
-                  <meta-data android:name="com.google.android.wearable.standalone" android:value="true" />
-                  <activity
-                      android:name=".ZeldaQuickVoiceActivity"
-                      android:exported="true"
-                      android:label="Zelda Link"
-                      android:launchMode="singleTop"
-                      android:taskAffinity="">
-                      <intent-filter>
-                          <action android:name="android.intent.action.MAIN" />
-                          <category android:name="android.intent.category.LAUNCHER" />
-                      </intent-filter>
-                  </activity>
-                  <service
-                      android:name=".ZeldaComplicationService"
-                      android:exported="true"
-                      android:icon="@android:drawable/ic_btn_speak_now"
-                      android:label="Zelda Comm-Link"
-                      android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
-                      <intent-filter>
-                          <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
-                      </intent-filter>
-                      <meta-data
-                          android:name="android.support.wearable.complications.SUPPORTED_TYPES"
-                          android:value="SHORT_TEXT,MONOCHROMATIC_IMAGE,SMALL_IMAGE" />
-                      <meta-data
-                          android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
-                          android:value="0" />
-                  </service>
-              </application>
-          </manifest>
-          EOF
-
-          cat << 'EOF' > wear-app/app/src/main/java/com/example/zeldawatch/ZeldaWatchComplication.kt
-          package com.example.zeldawatch
-
-          import android.Manifest
-          import android.app.Activity
-          import android.app.PendingIntent
-          import android.content.ComponentName
-          import android.content.Context
-          import android.content.Intent
-          import android.content.pm.PackageManager
-          import android.graphics.Color
-          import android.graphics.Typeface
-          import android.graphics.drawable.GradientDrawable
-          import android.graphics.drawable.Icon
-          import android.location.LocationManager
-          import android.os.Bundle
-          import android.speech.RecognizerIntent
-          import android.view.Gravity
-          import android.widget.*
-          import androidx.wear.watchface.complications.data.*
-          import androidx.wear.watchface.complications.datasource.ComplicationDataSourceUpdateRequester
-          import androidx.wear.watchface.complications.datasource.ComplicationRequest
-          import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
-          import org.json.JSONObject
-          import java.net.HttpURLConnection
-          import java.net.URL
-          import kotlin.concurrent.thread
-
-          private const val PREFS_NAME = "zelda_watch_prefs"
-          private const val KEY_CHANNEL = "channel_code"
-
-          class ZeldaComplicationService : SuspendingComplicationDataSourceService() {
-              override fun getPreviewData(type: ComplicationType): ComplicationData? = buildComp(type, "ZELDA")
-              override suspend fun onComplicationRequest(request: ComplicationRequest): ComplicationData? {
-                  val code = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(KEY_CHANNEL, "") ?: ""
-                  return buildComp(request.complicationType, if (code.isNotEmpty()) "ZELDA" else "PAIR")
-              }
-              private fun buildComp(type: ComplicationType, text: String): ComplicationData? {
-                  val intent = Intent(this, ZeldaQuickVoiceActivity::class.java).apply {
-                      flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                      putExtra("FROM_COMPLICATION", true)
-                  }
-                  val pi = PendingIntent.getActivity(this, 1001, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-                  val rawIcon = Icon.createWithResource(this, android.R.drawable.ic_btn_speak_now)
-                  val mono = MonochromaticImage.Builder(rawIcon).build()
-                  val small = SmallImage.Builder(rawIcon, SmallImageType.ICON).build()
-                  val desc = PlainComplicationText.Builder("Speak to Project Zelda").build()
-                  return when (type) {
-                      ComplicationType.SHORT_TEXT -> ShortTextComplicationData.Builder(PlainComplicationText.Builder(text).build(), desc).setMonochromaticImage(mono).setTapAction(pi).build()
-                      ComplicationType.MONOCHROMATIC_IMAGE -> MonochromaticImageComplicationData.Builder(mono, desc).setTapAction(pi).build()
-                      ComplicationType.SMALL_IMAGE -> SmallImageComplicationData.Builder(small, desc).setTapAction(pi).build()
-                      else -> null
-                  }
-              }
-          }
-
-          class ZeldaQuickVoiceActivity : Activity() {
-              private val REQ_SPEECH = 101
-              private lateinit var statusView: TextView
-              private lateinit var codeInput: EditText
-              private var fromComp = false
-
-              override fun onCreate(savedInstanceState: Bundle?) {
-                  super.onCreate(savedInstanceState)
-                  val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                  val savedCode = prefs.getString(KEY_CHANNEL, "") ?: ""
-                  fromComp = intent.getBooleanExtra("FROM_COMPLICATION", false)
-
-                  if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                      requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 202)
-                  }
-
-                  val scroll = ScrollView(this).apply { setBackgroundColor(Color.parseColor("#05060A")); isFillViewport = true }
-                  val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER; setPadding(34, 42, 34, 48) }
-
-                  statusView = TextView(this).apply {
-                      text = if (savedCode.isEmpty()) "PAIR 370Z CODE" else "ZELDA // $savedCode"
-                      setTextColor(Color.parseColor("#00F0FF")); textSize = 13f; typeface = Typeface.MONOSPACE; gravity = Gravity.CENTER
-                  }
-
-                  val speakBtn = Button(this).apply {
-                      text = "SPEAK TO ZELDA"
-                      setTextColor(Color.parseColor("#05060A")); textSize = 12f; typeface = Typeface.DEFAULT_BOLD
-                      background = GradientDrawable().apply { setColor(Color.parseColor("#FCEE0A")); cornerRadius = 48f }
-                      setOnClickListener { val c = saveCode(prefs); if (c.isNotEmpty()) startSpeech() }
-                  }
-
-                  val zLockBtn = Button(this).apply {
-                      text = "Z-LOCK CAR GPS"
-                      setTextColor(Color.parseColor("#00F0FF")); textSize = 11f; typeface = Typeface.MONOSPACE
-                      background = GradientDrawable().apply { setColor(Color.parseColor("#102230")); setStroke(2, Color.parseColor("#00F0FF")); cornerRadius = 48f }
-                      setOnClickListener { val c = saveCode(prefs); if (c.isNotEmpty()) beamToCar(c, "zlock", null) }
-                  }
-
-                  codeInput = EditText(this).apply {
-                      hint = "4-char 370Z code"; setText(savedCode); setTextColor(Color.parseColor("#FCEE0A"))
-                      setHintTextColor(Color.parseColor("#667788")); textSize = 13f; gravity = Gravity.CENTER; isSingleLine = true
-                  }
-
-                  val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { topMargin = 14 }
-                  root.addView(statusView); root.addView(speakBtn, lp); root.addView(zLockBtn, lp); root.addView(codeInput, lp)
-                  scroll.addView(root); setContentView(scroll)
-
-                  if (savedCode.isNotEmpty() && fromComp) startSpeech()
-              }
-
-              private fun saveCode(prefs: android.content.SharedPreferences): String {
-                  val clean = codeInput.text.toString().trim().uppercase().replace(Regex("[^A-Z0-9\\-_]"), "")
-                  if (clean.isEmpty()) { statusView.text = "ENTER 4-CHAR CODE"; return "" }
-                  prefs.edit().putString(KEY_CHANNEL, clean).commit()
-                  statusView.text = "ZELDA // $clean"
-                  try { ComplicationDataSourceUpdateRequester.create(this, ComponentName(this, ZeldaComplicationService::class.java)).requestUpdateAll() } catch (_: Exception) {}
-                  return clean
-              }
-
-              private fun startSpeech() {
-                  val i = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                      putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                      putExtra(RecognizerIntent.EXTRA_PROMPT, "ZELDA // SPEAK")
-                  }
-                  startActivityForResult(i, REQ_SPEECH)
-              }
-
-              override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-                  super.onActivityResult(requestCode, resultCode, data)
-                  if (requestCode == REQ_SPEECH) {
-                      if (resultCode == RESULT_OK) {
-                          val spoken = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
-                          val code = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(KEY_CHANNEL, "") ?: ""
-                          if (!spoken.isNullOrBlank() && code.isNotEmpty()) { beamToCar(code, "voice", spoken); return }
-                      }
-                      if (fromComp) finish()
-                  }
-              }
-
-              private fun readGps(): JSONObject? {
-                  if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                      checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) return null
-                  return try {
-                      val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-                      val loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER) ?: lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) ?: return null
-                      JSONObject().apply { put("lat", loc.latitude); put("lng", loc.longitude); put("accuracy", loc.accuracy); put("speed", loc.speed); put("heading", loc.bearing) }
-                  } catch (_: Exception) { null }
-              }
-
-              private fun beamToCar(shortCode: String, type: String, transcript: String?) {
-                  val topic = if (shortCode.startsWith("ZELDA-", true)) shortCode.lowercase() else "zelda-370z-$shortCode"
-                  val gps = readGps()
-                  statusView.text = "TX >> 370Z..."
-                  thread {
-                      try {
-                          val payload = JSONObject().apply {
-                              put("source", "zelda-watch"); put("type", type); put("ts", System.currentTimeMillis())
-                              if (transcript != null) put("transcript", transcript)
-                              if (gps != null) put("gps", gps)
-                          }
-                          val conn = (URL("https://ntfy.sh/$topic").openConnection() as HttpURLConnection).apply {
-                              requestMethod = "POST"; doOutput = true; connectTimeout = 6000; readTimeout = 6000
-                              setRequestProperty("Content-Type", "application/json; charset=utf-8")
-                          }
-                          conn.outputStream.use { it.write(payload.toString().toByteArray(Charsets.UTF_8)) }
-                          val code = conn.responseCode
-                          runOnUiThread {
-                              if (code in 200..299) { Toast.makeText(this, "ZELDA // LOCKED", Toast.LENGTH_SHORT).show(); finish() }
-                              else statusView.text = "HTTP $code"
-                          }
-                      } catch (_: Exception) { runOnUiThread { statusView.text = "CHECK NET" } }
-                  }
-              }
-          }
-          EOF
+        uses: actions/checkout@v5
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Generate Wear OS Project & Debug Keystore
+        shell: bash
+        run: |
+          mkdir -p ~/.android
+          if [ ! -f ~/.android/debug.keystore ]; then
+            keytool -genkeypair -v \
+              -keystore ~/.android/debug.keystore \
+              -storepass android -alias androiddebugkey -keypass android \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
 
-      - name: Setup Gradle 8.9
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.9'
+          python3 - << 'PYEOF'
+          import os, textwrap
 
-      - name: Build Signed Wear OS APK
-        working-directory: wear-app
-        run: gradle assembleRelease --no-daemon
+          base = "wear-app"
+          pkg_dir = f"{base}/app/src/main/java/com/example/zeldawatch"
+          os.makedirs(pkg_dir, exist_ok=True)
 
-      - name: Rename APK
-        run: cp wear-app/app/build/outputs/apk/release/app-release.apk zelda-watch-ultra.apk
+          files = {
+              f"{base}/settings.gradle.kts": """\
+                  pluginManagement {
+                      repositories { google(); mavenCentral(); gradlePluginPortal() }
+                  }
+                  dependencyResolutionManagement {
+                      repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+                      repositories { google(); mavenCentral() }
+                  }
+                  rootProject.name = "ZeldaWatchLink"
+                  include(":app")
+              """,
+              f"{base}/build.gradle.kts": """\
+                  plugins {
+                      id("com.android.application") version "8.6.1" apply false
+                      id("org.jetbrains.kotlin.android") version "2.0.21" apply false
+                  }
+              """,
+              f"{base}/gradle.properties": """\
+                  org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+                  android.useAndroidX=true
+                  android.nonTransitiveRClass=true
+              """,
+              f"{base}/app/build.gradle.kts": """\
+                  plugins {
+                      id("com.android.application")
+                      id("org.jetbrains.kotlin.android")
+                  }
+                  android {
+                      namespace = "com.example.zeldawatch"
+                      compileSdk = 34
+                      defaultConfig {
+                          applicationId = "com.example.zeldawatch"
+                          minSdk = 30
+                          targetSdk = 34
+                          versionCode = 3
+                          versionName = "4.6.2"
+                      }
+                      buildTypes {
+                          release {
+                              isMinifyEnabled = false
+                              signingConfig = signingConfigs.getByName("debug")
+                          }
+                      }
+                      compileOptions {
+                          sourceCompatibility = JavaVersion.VERSION_17
+                          targetCompatibility = JavaVersion.VERSION_17
+                      }
+                      kotlinOptions { jvmTarget = "17" }
+                  }
+                  dependencies {
+                      implementation("androidx.core:core-ktx:1.13.1")
+                      implementation("androidx.wear.watchface:watchface-complications-data-source-ktx:1.2.1")
+                  }
+              """,
+              f"{base}/app/src/main/AndroidManifest.xml": """\
+                  <?xml version="1.0" encoding="utf-8"?>
+                  <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+                      <uses-feature android:name="android.hardware.type.watch" />
+                      <uses-permission android:name="android.permission.INTERNET" />
+                      <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+                      <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+                      <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+                      <application
+                          android:allowBackup="true"
+                          android:icon="@android:drawable/ic_btn_speak_now"
+                          android:label="Zelda Link"
+                          android:supportsRtl="true"
+                          android:theme="@android:style/Theme.DeviceDefault">
+                          <meta-data android:name="com.google.android.wearable.standalone" android:value="true" />
+                          <activity
+                              android:name=".ZeldaQuickVoiceActivity"
+                              android:exported="true"
+                              android:label="Zelda Link"
+                              android:launchMode="singleTop"
+                              android:taskAffinity="">
+                              <intent-filter>
+                                  <action android:name="android.intent.action.MAIN" />
+                                  <category android:name="android.intent.category.LAUNCHER" />
+                              </intent-filter>
+                          </activity>
+                          <service
+                              android:name=".ZeldaComplicationService"
+                              android:exported="true"
+                              android:icon="@android:drawable/ic_btn_speak_now"
+                              android:label="Zelda Comm-Link"
+                              android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+                              <intent-filter>
+                                  <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+                              </intent-filter>
+                              <meta-data
+                                  android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                                  android:value="SHORT_TEXT,MONOCHROMATIC_IMAGE,SMALL_IMAGE" />
+                              <meta-data
+                                  android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                                  android:value="0" />
+                          </service>
+                      </application>
+                  </manifest>
+              """,
+              f"{pkg_dir}/ZeldaWatchComplication.kt": """\
+                  package com.example.zeldawatch
 
-      - name: Publish APK to GitHub Releases
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: watch-v4.6.1
-          name: "Zelda Galaxy Watch Ultra Complication APK (v4.6.1)"
-          files: zelda-watch-ultra.apk
+                  import android.Manifest
+                  import android.app.Activity
+                  import android.app.PendingIntent
+                  import android.content.ComponentName
+                  import android.content.Context
+                  import android.content.Intent
+                  import android.content.pm.PackageManager
+                  import android.graphics.Color
+                  import android.graphics.Typeface
+                  import android.graphics.drawable.GradientDrawable
+                  import android.graphics.drawable.Icon
+                  import android.location.LocationManager
+                  import android.os.Bundle
+                  import android.speech.RecognizerIntent
+                  import android.view.Gravity
+                  import android.widget.*
+                  import androidx.wear.watchface.complications.data.*
+                  import androidx.wear.watchface.complications.datasource.ComplicationDataSourceUpdateRequester
+                  import androidx.wear.watchface.complications.datasource.ComplicationRequest
+                  import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
+                  import org.json.JSONObject
+                  import java.net.HttpURLConnection
+                  import java.net.URL
+                  import kotlin.concurrent.thread
+
+                  private const val PREFS_NAME = "zelda_watch_prefs"
+                  private const val KEY_CHANNEL = "channel_code"
+
+                  class ZeldaComplicationService : SuspendingComplicationDataSourceService() {
+                      override fun getPreviewData(type: ComplicationType): ComplicationData? = buildComp(type, "ZELDA")
+                      override suspend fun onComplicationRequest(request: ComplicationRequest): ComplicationData? {
+                          val code = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(KEY_CHANNEL, "") ?: ""
+                          return buildComp(request.complicationType, if (code.isNotEmpty()) "ZELDA" else "PAIR")
+                      }
+                      private fun buildComp(type: ComplicationType, text: String): ComplicationData? {
+                          val intent = Intent(this, ZeldaQuickVoiceActivity::class.java).apply {
+                              flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                              putExtra("FROM_COMPLICATION", true)
+                          }
+                          val pi = PendingIntent.getActivity(this, 1001, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                          val rawIcon = Icon.createWithResource(this, android.R.drawable.ic_btn_speak_now)
+                          val mono = MonochromaticImage.Builder(rawIcon).build()
+                          val small = SmallImage.Builder(rawIcon, SmallImageType.ICON).build()
+                          val desc = PlainComplicationText.Builder("Speak to Project Zelda").build()
+                          return when (type) {
+                              ComplicationType.SHORT_TEXT -> ShortTextComplicationData.Builder(PlainComplicationText.Builder(text).build(), desc).setMonochromaticImage(mono).setTapAction(pi).build()
+                              ComplicationType.MONOCHROMATIC_IMAGE -> MonochromaticImageComplicationData.Builder(mono, desc).setTapAction(pi).build()
+                              ComplicationType.SMALL_IMAGE -> SmallImageComplicationData.Builder(small, desc).setTapAction(pi).build()
+                              else -> null
+                          }
+                      }
+                  }
+
+                  class ZeldaQuickVoiceActivity : Activity() {
+                      private val REQ_SPEECH = 101
+                      private lateinit var statusView: TextView
+                      private lateinit var codeInput: EditText
+                      private var fromComp = false
+
+                      override fun onCreate(savedInstanceState: Bundle?) {
+                          super.onCreate(savedInstanceState)
+                          val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                          val savedCode = prefs.getString(KEY_CHANNEL, "") ?: ""
+                          fromComp = intent.getBooleanExtra("FROM_COMPLICATION", false)
+
+                          if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                              requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 202)
+                          }
+
+                          val scroll = ScrollView(this).apply { setBackgroundColor(Color.parseColor("#05060A")); isFillViewport = true }
+                          val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER; setPadding(34, 42, 34, 48) }
+
+                          statusView = TextView(this).apply {
+                              text = if (savedCode.isEmpty()) "PAIR 370Z CODE" else "ZELDA // $savedCode"
+                              setTextColor(Color.parseColor("#00F0FF")); textSize = 13f; typeface = Typeface.MONOSPACE; gravity = Gravity.CENTER
+                          }
+
+                          val speakBtn = Button(this).apply {
+                              text = "SPEAK TO ZELDA"
+                              setTextColor(Color.parseColor("#05060A")); textSize = 12f; typeface = Typeface.DEFAULT_BOLD
+                              background = GradientDrawable().apply { setColor(Color.parseColor("#FCEE0A")); cornerRadius = 48f }
+                              setOnClickListener { val c = saveCode(prefs); if (c.isNotEmpty()) startSpeech() }
+                          }
+
+                          val zLockBtn = Button(this).apply {
+                              text = "Z-LOCK CAR GPS"
+                              setTextColor(Color.parseColor("#00F0FF")); textSize = 11f; typeface = Typeface.MONOSPACE
+                              background = GradientDrawable().apply { setColor(Color.parseColor("#102230")); setStroke(2, Color.parseColor("#00F0FF")); cornerRadius = 48f }
+                              setOnClickListener { val c = saveCode(prefs); if (c.isNotEmpty()) beamToCar(c, "zlock", null) }
+                          }
+
+                          codeInput = EditText(this).apply {
+                              hint = "4-char 370Z code"; setText(savedCode); setTextColor(Color.parseColor("#FCEE0A"))
+                              setHintTextColor(Color.parseColor("#667788")); textSize = 13f; gravity = Gravity.CENTER; isSingleLine = true
+                          }
+
+                          val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { topMargin = 14 }
+                          root.addView(statusView); root.addView(speakBtn, lp); root.addView(zLockBtn, lp); root.addView(codeInput, lp)
+                          scroll.addView(root); setContentView(scroll)
+
+                          if (savedCode.isNotEmpty() && fromComp) startSpeech()
+                      }
+
+                      private fun saveCode(prefs: android.content.SharedPreferences): String {
+                          val clean = codeInput.text.toString().trim().uppercase().replace(Regex("[^A-Z0-9\\\\-_]"), "")
+                          if (clean.isEmpty()) { statusView.text = "ENTER 4-CHAR CODE"; return "" }
+                          prefs.edit().putString(KEY_CHANNEL, clean).commit()
+                          statusView.text = "ZELDA // $clean"
+                          try { ComplicationDataSourceUpdateRequester.create(this, ComponentName(this, ZeldaComplicationService::class.java)).requestUpdateAll() } catch (_: Exception) {}
+                          return clean
+                      }
+
+                      private fun startSpeech() {
+                          val i = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                              putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                              putExtra(RecognizerIntent.EXTRA_PROMPT, "ZELDA // SPEAK")
+                          }
+                          startActivityForResult(i, REQ_SPEECH)
+                      }
+
+                      override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+                          super.onActivityResult(requestCode, resultCode, data)
+                          if (requestCode == REQ_SPEECH) {
+                              if (resultCode == RESULT_OK) {
+                                  val spoken = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
+                                  val code = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(KEY_CHANNEL, "") ?: ""
+                                  if (!spoken.isNullOrBlank() && code.isNotEmpty()) { beamToCar(code, "voice", spoken); return }
+                              }
+                              if (fromComp) finish()
+                          }
+                      }
+
+                      private fun readGps(): JSONObject? {
+                          if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                              checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) return null
+                          return try {
+                              val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                              val loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER) ?: lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) ?: return null
+                              JSONObject().apply { put("lat", loc.latitude); put("lng", loc.longitude); put("accuracy", loc.accuracy); put("speed", loc.speed); put("heading", loc.bearing) }
+                          } catch (_: Exception) { null }
+                      }
+
+                      private fun beamToCar(shortCode: String, type: String, transcript: String?) {
+                          val topic = if (shortCode.startsWith("ZELDA-", true)) shortCode.lowercase() else "zelda-370z-$shortCode"
+                          val gps = readGps()
+                          statusView.text = "TX >> 370Z..."
+                          thread {
+                              try {
+                                  val payload = JSONObject().apply {
+                                      put("source", "zelda-watch"); put("type", type); put("ts", System.currentTimeMillis())
+                                      if (transcript != null) put("transcript", transcript)
+                                      if (gps != null) put("gps", gps)
+                                  }
+                                  val conn = (URL("https://ntfy.sh/$topic").openConnection() as HttpURLConnection).apply {
+                                      requestMethod = "POST"; doOutput = true; connectTimeout = 6000; readTimeout = 6000
+                                      setRequestProperty("Content-Type", "application/json; charset=utf-8")
+                                  }
+                                  conn.outputStream.use { it.write(payload.toString().toByteArray(Charsets.UTF_8)) }
+                                  val code = conn.responseCode
+                                  runOnUiThread {
+                                      if (code in 200..299) { Toast.makeText(this, "ZELDA // LOCKED", Toast.LENGTH_SHORT).show(); finish() }
+                                      else statusView.text = "HTTP $code"
+                                  }
+                              } catch (_: Exception) { runOnUiThread { statusView.text = "CHECK NET" } }
+                          }
+                      }
+                  }
+              """
+          }
+
+          for path, content in files.items():
+              with open(path, "w", encoding="utf-8") as f:
+                  f.write(textwrap.dedent(content))
+          print("Successfully wrote all Wear OS files.")
+          PYEOF
+          sed -i 's/^          //' << 'DUMMY' || true
+          DUMMY
+
+      - name: Install Gradle 8.9 & Compile Signed Wear APK
+        shell: bash
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0" > /dev/null
+          curl -sL https://services.gradle.org/distributions/gradle-8.9-bin.zip -o /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /opt/
+          cd wear-app
+          /opt/gradle-8.9/bin/gradle assembleRelease --no-daemon --stacktrace
+          cp app/build/outputs/apk/release/app-release.apk ../zelda-watch-ultra.apk
+
+      - name: Upload APK to GitHub Releases
+        shell: bash
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete watch-v4.6.2 --yes --cleanup-tag 2>/dev/null || true
+          gh release create watch-v4.6.2 zelda-watch-ultra.apk \
+            --title "Zelda Galaxy Watch Ultra Complication APK (v4.6.2)" \
+            --notes "Download zelda-watch-ultra.apk directly to your Fold 7 and sideload to your Galaxy Watch Ultra via Bugjaeger over home Wi-Fi."
