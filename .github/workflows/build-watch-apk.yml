@@ -88,18 +88,14 @@ jobs:
           |        applicationId = "com.example.zeldawatch"
           |        minSdk = 30
           |        targetSdk = 34
-          |        versionCode = 8
-          |        versionName = "4.7.4"
+          |        versionCode = 9
+          |        versionName = "4.7.5"
           |    }
           |    buildTypes {
           |        release {
           |            isMinifyEnabled = false
           |            signingConfig = signingConfigs.getByName("debug")
           |        }
-          |    }
-          |    lint {
-          |        checkReleaseBuilds = false
-          |        abortOnError = false
           |    }
           |    compileOptions {
           |        sourceCompatibility = JavaVersion.VERSION_17
@@ -166,6 +162,366 @@ jobs:
           |</manifest>
           """)
 
+          save(pkg + "/KittModulatorView.java", """
+          |package com.example.zeldawatch;
+          |
+          |import android.content.Context;
+          |import android.graphics.Canvas;
+          |import android.graphics.Color;
+          |import android.graphics.Paint;
+          |import android.graphics.RectF;
+          |import android.view.View;
+          |
+          |public class KittModulatorView extends View {
+          |    public static final int MODE_IDLE = 0;
+          |    public static final int MODE_LISTENING = 1;
+          |    public static final int MODE_THINKING = 2;
+          |    public static final int MODE_SPEAKING = 3;
+          |
+          |    private int mode = MODE_IDLE;
+          |    private float micLevel = 0.25f;
+          |    private float wordPulseBoost = 0f;
+          |
+          |    private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+          |    private final RectF segRect = new RectF();
+          |    private final RectF frameRect = new RectF();
+          |
+          |    public KittModulatorView(Context context) {
+          |        super(context);
+          |    }
+          |
+          |    public int getMode() {
+          |        return mode;
+          |    }
+          |
+          |    public void setMode(int newMode) {
+          |        this.mode = newMode;
+          |        postInvalidateOnAnimation();
+          |    }
+          |
+          |    public void setMicLevel(float level) {
+          |        this.micLevel = Math.max(0.18f, Math.min(1.0f, level));
+          |    }
+          |
+          |    public void triggerWordPulse() {
+          |        this.wordPulseBoost = 1.0f;
+          |        postInvalidateOnAnimation();
+          |    }
+          |
+          |    @Override
+          |    protected void onDraw(Canvas canvas) {
+          |        super.onDraw(canvas);
+          |        float w = getWidth();
+          |        float h = getHeight();
+          |        long now = System.currentTimeMillis();
+          |
+          |        frameRect.set(6f, 6f, w - 6f, h - 6f);
+          |        paint.setStyle(Paint.Style.FILL);
+          |        paint.setColor(Color.parseColor("#07090F"));
+          |        canvas.drawRoundRect(frameRect, 26f, 26f, paint);
+          |
+          |        paint.setStyle(Paint.Style.STROKE);
+          |        paint.setStrokeWidth(2.5f);
+          |        if (mode == MODE_SPEAKING || mode == MODE_THINKING) {
+          |            paint.setColor(Color.parseColor("#FF1744"));
+          |        } else if (mode == MODE_LISTENING) {
+          |            paint.setColor(Color.parseColor("#00F0FF"));
+          |        } else {
+          |            paint.setColor(Color.parseColor("#334455"));
+          |        }
+          |        canvas.drawRoundRect(frameRect, 26f, 26f, paint);
+          |        paint.setStyle(Paint.Style.FILL);
+          |
+          |        if (mode == MODE_THINKING) {
+          |            int cols = 8;
+          |            float padX = 22f;
+          |            float gap = 6f;
+          |            float boxW = (w - padX * 2f - gap * (cols - 1)) / cols;
+          |            float boxH = h * 0.28f;
+          |            float topY = (h - boxH) / 2f;
+          |            float cycle = (now % 1100L) / 1100f;
+          |            float tri = (cycle < 0.5f) ? (cycle * 2f) : ((1f - cycle) * 2f);
+          |            float pos = tri * (cols - 1);
+          |            for (int i = 0; i < cols; i++) {
+          |                float alpha = Math.max(0.12f, 1f - Math.abs(i - pos) * 0.42f);
+          |                paint.setColor(Color.argb((int) (alpha * 255), 255, 23, 68));
+          |                float left = padX + i * (boxW + gap);
+          |                segRect.set(left, topY, left + boxW, topY + boxH);
+          |                canvas.drawRoundRect(segRect, 5f, 5f, paint);
+          |            }
+          |            postInvalidateOnAnimation();
+          |            return;
+          |        }
+          |
+          |        int halfPairs = 6;
+          |        float[] colMultipliers = new float[]{0.68f, 1.0f, 0.68f};
+          |        double t = now / 95.0;
+          |        if (wordPulseBoost > 0.02f) {
+          |            wordPulseBoost *= 0.86f;
+          |        } else {
+          |            wordPulseBoost = 0f;
+          |        }
+          |
+          |        float baseEnergy;
+          |        if (mode == MODE_SPEAKING) {
+          |            float wave = 0.48f + 0.32f * (float) Math.abs(Math.sin(t)) + 0.20f * (float) Math.abs(Math.sin(t * 2.3));
+          |            baseEnergy = Math.min(1f, wave + wordPulseBoost * 0.38f);
+          |        } else if (mode == MODE_LISTENING) {
+          |            baseEnergy = Math.max(0.18f, Math.min(1f, micLevel));
+          |        } else {
+          |            baseEnergy = 0.12f;
+          |        }
+          |
+          |        float colW = w * 0.19f;
+          |        float colGap = w * 0.07f;
+          |        float startX = (w - (colW * 3f + colGap * 2f)) / 2f;
+          |        float padY = 16f;
+          |        float segGap = 4f;
+          |        int totalSegs = halfPairs * 2;
+          |        float segH = (h - padY * 2f - segGap * (totalSegs - 1)) / totalSegs;
+          |        float centerY = h / 2f;
+          |
+          |        for (int c = 0; c < 3; c++) {
+          |            float colPhase = (c == 1) ? 1f : (0.85f + 0.15f * (float) Math.sin(t * 1.7 + c));
+          |            int activePairs = Math.max(1, (int) (baseEnergy * colMultipliers[c] * colPhase * halfPairs + 0.6f));
+          |            float left = startX + c * (colW + colGap);
+          |            for (int p = 0; p < halfPairs; p++) {
+          |                boolean lit = p < activePairs;
+          |                if (!lit) {
+          |                    paint.setColor(Color.parseColor("#181D26"));
+          |                } else if (mode == MODE_LISTENING) {
+          |                    paint.setColor((p >= halfPairs - 1) ? Color.parseColor("#FCEE0A") : Color.parseColor("#00F0FF"));
+          |                } else if (mode == MODE_SPEAKING) {
+          |                    paint.setColor((p >= halfPairs - 1) ? Color.parseColor("#FCEE0A") : Color.parseColor("#FF1744"));
+          |                } else {
+          |                    paint.setColor(Color.parseColor("#661022"));
+          |                }
+          |                float upBottom = centerY - segGap / 2f - p * (segH + segGap);
+          |                segRect.set(left, upBottom - segH, left + colW, upBottom);
+          |                canvas.drawRoundRect(segRect, 3f, 3f, paint);
+          |
+          |                float dnTop = centerY + segGap / 2f + p * (segH + segGap);
+          |                segRect.set(left, dnTop, left + colW, dnTop + segH);
+          |                canvas.drawRoundRect(segRect, 3f, 3f, paint);
+          |            }
+          |        }
+          |        if (mode != MODE_IDLE) {
+          |            postInvalidateOnAnimation();
+          |        }
+          |    }
+          |}
+          """)
+
+          save(pkg + "/KittSpeechEngine.java", """
+          |package com.example.zeldawatch;
+          |
+          |import android.content.Context;
+          |import android.content.Intent;
+          |import android.media.AudioAttributes;
+          |import android.os.Bundle;
+          |import android.os.Handler;
+          |import android.os.Looper;
+          |import android.speech.RecognitionListener;
+          |import android.speech.RecognizerIntent;
+          |import android.speech.SpeechRecognizer;
+          |import android.speech.tts.TextToSpeech;
+          |import android.speech.tts.UtteranceProgressListener;
+          |
+          |import java.util.ArrayList;
+          |import java.util.Locale;
+          |
+          |public class KittSpeechEngine {
+          |    public interface Callbacks {
+          |        void onListeningStarted();
+          |        void onRmsLevel(float level);
+          |        void onPartialTranscript(String partial);
+          |        void onScanningStarted();
+          |        void onFinalTranscript(String spoken);
+          |        void onNeedFallbackPrompt();
+          |        void onSilenceTimeout();
+          |        void onMicIdle();
+          |        void onTtsStarted();
+          |        void onTtsWordPulse();
+          |        void onTtsFinished(boolean signOff);
+          |    }
+          |
+          |    private final Context context;
+          |    private final Callbacks cb;
+          |    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+          |    private SpeechRecognizer sr;
+          |    private TextToSpeech tts;
+          |    private boolean ttsReady = false;
+          |    private String pendingSpeech = null;
+          |    private boolean pendingSignOff = false;
+          |
+          |    public KittSpeechEngine(Context ctx, Callbacks callbacks) {
+          |        this.context = ctx;
+          |        this.cb = callbacks;
+          |        initTts();
+          |    }
+          |
+          |    private void initTts() {
+          |        tts = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
+          |            @Override
+          |            public void onInit(int status) {
+          |                if (status == TextToSpeech.SUCCESS && tts != null) {
+          |                    tts.setLanguage(Locale.US);
+          |                    tts.setSpeechRate(1.10f);
+          |                    tts.setPitch(1.0f);
+          |                    tts.setAudioAttributes(new AudioAttributes.Builder()
+          |                            .setUsage(AudioAttributes.USAGE_ASSISTANT)
+          |                            .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+          |                            .build());
+          |                    tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+          |                        @Override
+          |                        public void onStart(String utteranceId) {
+          |                            mainHandler.post(new Runnable() {
+          |                                @Override public void run() { cb.onTtsStarted(); }
+          |                            });
+          |                        }
+          |
+          |                        @Override
+          |                        public void onRangeStart(String utteranceId, int start, int end, int frame) {
+          |                            mainHandler.post(new Runnable() {
+          |                                @Override public void run() { cb.onTtsWordPulse(); }
+          |                            });
+          |                        }
+          |
+          |                        @Override
+          |                        public void onDone(final String utteranceId) {
+          |                            mainHandler.post(new Runnable() {
+          |                                @Override public void run() {
+          |                                    cb.onTtsFinished("SIGN_OFF".equals(utteranceId));
+          |                                }
+          |                            });
+          |                        }
+          |
+          |                        @Override
+          |                        public void onError(String utteranceId) {
+          |                            mainHandler.post(new Runnable() {
+          |                                @Override public void run() { cb.onMicIdle(); }
+          |                            });
+          |                        }
+          |                    });
+          |                    ttsReady = true;
+          |                    if (pendingSpeech != null) {
+          |                        String s = pendingSpeech;
+          |                        boolean so = pendingSignOff;
+          |                        pendingSpeech = null;
+          |                        speak(s, so);
+          |                    }
+          |                }
+          |            }
+          |        });
+          |    }
+          |
+          |    public void stopTts() {
+          |        if (tts != null) {
+          |            try { tts.stop(); } catch (Exception ignored) {}
+          |        }
+          |    }
+          |
+          |    public void speak(String text, boolean signOff) {
+          |        if (!ttsReady || tts == null) {
+          |            pendingSpeech = text;
+          |            pendingSignOff = signOff;
+          |            return;
+          |        }
+          |        String uttId = signOff ? "SIGN_OFF" : ("KITT_" + System.currentTimeMillis());
+          |        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, uttId);
+          |    }
+          |
+          |    public void startListening() {
+          |        stopTts();
+          |        if (!SpeechRecognizer.isRecognitionAvailable(context)) {
+          |            cb.onNeedFallbackPrompt();
+          |            return;
+          |        }
+          |        try {
+          |            if (sr != null) {
+          |                try { sr.destroy(); } catch (Exception ignored) {}
+          |            }
+          |            sr = SpeechRecognizer.createSpeechRecognizer(context);
+          |            sr.setRecognitionListener(new RecognitionListener() {
+          |                @Override
+          |                public void onReadyForSpeech(Bundle params) {
+          |                    cb.onListeningStarted();
+          |                }
+          |
+          |                @Override
+          |                public void onBeginningOfSpeech() {}
+          |
+          |                @Override
+          |                public void onRmsChanged(float rmsdB) {
+          |                    cb.onRmsLevel((rmsdB + 2f) / 10f);
+          |                }
+          |
+          |                @Override
+          |                public void onBufferReceived(byte[] buffer) {}
+          |
+          |                @Override
+          |                public void onEndOfSpeech() {
+          |                    cb.onScanningStarted();
+          |                }
+          |
+          |                @Override
+          |                public void onError(int error) {
+          |                    if (error == SpeechRecognizer.ERROR_CLIENT || error == SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS) {
+          |                        cb.onNeedFallbackPrompt();
+          |                    } else if (error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT || error == SpeechRecognizer.ERROR_NO_MATCH) {
+          |                        cb.onSilenceTimeout();
+          |                    } else {
+          |                        cb.onMicIdle();
+          |                    }
+          |                }
+          |
+          |                @Override
+          |                public void onResults(Bundle results) {
+          |                    String top = "";
+          |                    if (results != null) {
+          |                        ArrayList<String> list = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+          |                        if (list != null && !list.isEmpty()) {
+          |                            top = list.get(0);
+          |                        }
+          |                    }
+          |                    cb.onFinalTranscript(top);
+          |                }
+          |
+          |                @Override
+          |                public void onPartialResults(Bundle partialResults) {
+          |                    if (partialResults != null) {
+          |                        ArrayList<String> list = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+          |                        if (list != null && !list.isEmpty()) {
+          |                            String p = list.get(0);
+          |                            if (p != null && !p.trim().isEmpty()) {
+          |                                cb.onPartialTranscript(p);
+          |                            }
+          |                        }
+          |                    }
+          |                }
+          |
+          |                @Override
+          |                public void onEvent(int eventType, Bundle params) {}
+          |            });
+          |
+          |            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+          |            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+          |            intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+          |            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 800L);
+          |            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 650L);
+          |            sr.startListening(intent);
+          |        } catch (Exception e) {
+          |            cb.onNeedFallbackPrompt();
+          |        }
+          |    }
+          |
+          |    public void shutdown() {
+          |        try { if (sr != null) sr.destroy(); } catch (Exception ignored) {}
+          |        try { if (tts != null) { tts.stop(); tts.shutdown(); } } catch (Exception ignored) {}
+          |    }
+          |}
+          """)
+
           save(pkg + "/ZeldaWatchComplication.kt", """
           |package com.example.zeldawatch
           |
@@ -176,24 +532,15 @@ jobs:
           |import android.content.Context
           |import android.content.Intent
           |import android.content.pm.PackageManager
-          |import android.graphics.Canvas
           |import android.graphics.Color
-          |import android.graphics.Paint
-          |import android.graphics.RectF
           |import android.graphics.Typeface
           |import android.graphics.drawable.GradientDrawable
           |import android.graphics.drawable.Icon
           |import android.location.LocationManager
-          |import android.media.AudioAttributes
           |import android.os.Bundle
           |import android.os.Handler
           |import android.os.Looper
-          |import android.speech.RecognitionListener
           |import android.speech.RecognizerIntent
-          |import android.speech.SpeechRecognizer
-          |import android.speech.tts.TextToSpeech
-          |import android.speech.tts.UtteranceProgressListener
-          |import android.util.AttributeSet
           |import android.view.Gravity
           |import android.view.View
           |import android.view.WindowManager
@@ -222,9 +569,6 @@ jobs:
           |import java.util.Locale
           |import kotlin.concurrent.thread
           |import kotlin.math.abs
-          |import kotlin.math.max
-          |import kotlin.math.min
-          |import kotlin.math.sin
           |
           |private const val PREFS_NAME = "zelda_watch_prefs"
           |private const val KEY_CHANNEL = "channel_code"
@@ -256,111 +600,7 @@ jobs:
           |    }
           |}
           |
-          |class KittModulatorView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
-          |    companion object {
-          |        const val MODE_IDLE = 0
-          |        const val MODE_LISTENING = 1
-          |        const val MODE_THINKING = 2
-          |        const val MODE_SPEAKING = 3
-          |    }
-          |
-          |    var mode: Int = MODE_IDLE
-          |        set(value) { field = value; postInvalidateOnAnimation() }
-          |    var micLevel: Float = 0.25f
-          |    var wordPulseBoost: Float = 0f
-          |
-          |    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-          |    private val segRect = RectF()
-          |    private val frameRect = RectF()
-          |
-          |    fun triggerWordPulse() { wordPulseBoost = 1.0f; postInvalidateOnAnimation() }
-          |
-          |    override fun onDraw(canvas: Canvas) {
-          |        super.onDraw(canvas)
-          |        val w = width.toFloat()
-          |        val h = height.toFloat()
-          |        val now = System.currentTimeMillis()
-          |
-          |        frameRect.set(6f, 6f, w - 6f, h - 6f)
-          |        paint.style = Paint.Style.FILL
-          |        paint.color = Color.parseColor("#07090F")
-          |        canvas.drawRoundRect(frameRect, 26f, 26f, paint)
-          |
-          |        paint.style = Paint.Style.STROKE
-          |        paint.strokeWidth = 2.5f
-          |        paint.color = when (mode) {
-          |            MODE_SPEAKING, MODE_THINKING -> Color.parseColor("#FF1744")
-          |            MODE_LISTENING -> Color.parseColor("#00F0FF")
-          |            else -> Color.parseColor("#334455")
-          |        }
-          |        canvas.drawRoundRect(frameRect, 26f, 26f, paint)
-          |        paint.style = Paint.Style.FILL
-          |
-          |        if (mode == MODE_THINKING) {
-          |            val cols = 8
-          |            val padX = 22f
-          |            val gap = 6f
-          |            val boxW = (w - padX * 2f - gap * (cols - 1)) / cols
-          |            val boxH = h * 0.28f
-          |            val topY = (h - boxH) / 2f
-          |            val cycle = (now % 1100L).toFloat() / 1100f
-          |            val tri = if (cycle < 0.5f) cycle * 2f else (1f - cycle) * 2f
-          |            val pos = tri * (cols - 1)
-          |            for (i in 0 until cols) {
-          |                val alpha = max(0.12f, 1f - abs(i - pos) * 0.42f)
-          |                paint.color = Color.argb((alpha * 255).toInt(), 255, 23, 68)
-          |                val left = padX + i * (boxW + gap)
-          |                segRect.set(left, topY, left + boxW, topY + boxH)
-          |                canvas.drawRoundRect(segRect, 5f, 5f, paint)
-          |            }
-          |            postInvalidateOnAnimation()
-          |            return
-          |        }
-          |
-          |        val halfPairs = 6
-          |        val colMultipliers = floatArrayOf(0.68f, 1.0f, 0.68f)
-          |        val t = now / 95.0
-          |        if (wordPulseBoost > 0.02f) wordPulseBoost *= 0.86f else wordPulseBoost = 0f
-          |        val baseEnergy = when (mode) {
-          |            MODE_SPEAKING -> min(1f, 0.48f + 0.32f * abs(sin(t)).toFloat() + 0.20f * abs(sin(t * 2.3)).toFloat() + wordPulseBoost * 0.38f)
-          |            MODE_LISTENING -> max(0.18f, min(1f, micLevel))
-          |            else -> 0.12f
-          |        }
-          |
-          |        val colW = w * 0.19f
-          |        val colGap = w * 0.07f
-          |        val startX = (w - (colW * 3f + colGap * 2f)) / 2f
-          |        val padY = 16f
-          |        val segGap = 4f
-          |        val totalSegs = halfPairs * 2
-          |        val segH = (h - padY * 2f - segGap * (totalSegs - 1)) / totalSegs
-          |        val centerY = h / 2f
-          |
-          |        for (c in 0..2) {
-          |            val colPhase = if (c == 1) 1f else (0.85f + 0.15f * sin(t * 1.7 + c).toFloat())
-          |            val activePairs = max(1, (baseEnergy * colMultipliers[c] * colPhase * halfPairs + 0.6f).toInt())
-          |            val left = startX + c * (colW + colGap)
-          |            for (p in 0 until halfPairs) {
-          |                val lit = p < activePairs
-          |                paint.color = when {
-          |                    !lit -> Color.parseColor("#181D26")
-          |                    mode == MODE_LISTENING -> if (p >= halfPairs - 1) Color.parseColor("#FCEE0A") else Color.parseColor("#00F0FF")
-          |                    mode == MODE_SPEAKING -> if (p >= halfPairs - 1) Color.parseColor("#FCEE0A") else Color.parseColor("#FF1744")
-          |                    else -> Color.parseColor("#661022")
-          |                }
-          |                val upBottom = centerY - segGap / 2f - p * (segH + segGap)
-          |                segRect.set(left, upBottom - segH, left + colW, upBottom)
-          |                canvas.drawRoundRect(segRect, 3f, 3f, paint)
-          |                val dnTop = centerY + segGap / 2f + p * (segH + segGap)
-          |                segRect.set(left, dnTop, left + colW, dnTop + segH)
-          |                canvas.drawRoundRect(segRect, 3f, 3f, paint)
-          |            }
-          |        }
-          |        if (mode != MODE_IDLE) postInvalidateOnAnimation()
-          |    }
-          |}
-          |
-          |class ZeldaQuickVoiceActivity : Activity() {
+          |class ZeldaQuickVoiceActivity : Activity(), KittSpeechEngine.Callbacks {
           |    private val REQ_SPEECH_FALLBACK = 101
           |    private val REQ_PERMS = 202
           |    private val mainHandler = Handler(Looper.getMainLooper())
@@ -370,11 +610,7 @@ jobs:
           |    private lateinit var subtitleView: TextView
           |    private lateinit var codeInput: EditText
           |    private lateinit var pairContainer: LinearLayout
-          |
-          |    private var speechRecognizer: SpeechRecognizer? = null
-          |    private var tts: TextToSpeech? = null
-          |    private var ttsReady = false
-          |    private var pendingSpeakText: String? = null
+          |    private lateinit var speechEngine: KittSpeechEngine
           |
           |    @Volatile private var activityAlive = true
           |    @Volatile private var sseConn: HttpURLConnection? = null
@@ -387,7 +623,8 @@ jobs:
           |        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
           |        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
           |        val savedCode = prefs.getString(KEY_CHANNEL, "") ?: ""
-          |        initWatchTts()
+          |
+          |        speechEngine = KittSpeechEngine(this, this)
           |
           |        val scroll = ScrollView(this).apply { setBackgroundColor(Color.parseColor("#040508")); isFillViewport = true }
           |        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER; setPadding(26, 26, 26, 30) }
@@ -399,7 +636,7 @@ jobs:
           |        kittView = KittModulatorView(this).apply {
           |            layoutParams = LinearLayout.LayoutParams(230, 126).apply { topMargin = 8 }
           |            setOnClickListener {
-          |                tts?.stop()
+          |                speechEngine.stopTts()
           |                val c = currentCode()
           |                if (c.isNotEmpty()) beginVoiceTurn() else pairContainer.visibility = View.VISIBLE
           |            }
@@ -451,55 +688,90 @@ jobs:
           |        }
           |    }
           |
-          |    private fun currentCode(): String = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(KEY_CHANNEL, "") ?: ""
+          |    override fun onListeningStarted() {
+          |        kittView.setMode(KittModulatorView.MODE_LISTENING)
+          |        statusView.text = "LISTENING..."
+          |        subtitleView.text = "SPEAK TO ZELDA..."
+          |    }
+          |
+          |    override fun onRmsLevel(level: Float) {
+          |        kittView.setMicLevel(level)
+          |    }
+          |
+          |    override fun onPartialTranscript(partial: String?) {
+          |        if (!partial.isNullOrBlank()) subtitleView.text = partial
+          |    }
+          |
+          |    override fun onScanningStarted() {
+          |        kittView.setMode(KittModulatorView.MODE_THINKING)
+          |        statusView.text = "SCANNING..."
+          |    }
+          |
+          |    override fun onFinalTranscript(spoken: String?) {
+          |        handleUserTranscript(spoken)
+          |    }
+          |
+          |    override fun onNeedFallbackPrompt() {
+          |        launchFallbackSpeechPrompt()
+          |    }
+          |
+          |    override fun onSilenceTimeout() {
+          |        kittView.setMode(KittModulatorView.MODE_IDLE)
+          |        statusView.text = "STANDING BY"
+          |        mainHandler.postDelayed({
+          |            if (activityAlive && kittView.getMode() == KittModulatorView.MODE_IDLE) finish()
+          |        }, 900)
+          |    }
+          |
+          |    override fun onMicIdle() {
+          |        kittView.setMode(KittModulatorView.MODE_IDLE)
+          |        statusView.text = "TAP VOICE BOX"
+          |    }
+          |
+          |    override fun onTtsStarted() {
+          |        kittView.setMode(KittModulatorView.MODE_SPEAKING)
+          |        statusView.text = "ZELDA // SPEAKING"
+          |    }
+          |
+          |    override fun onTtsWordPulse() {
+          |        kittView.triggerWordPulse()
+          |    }
+          |
+          |    override fun onTtsFinished(signOff: Boolean) {
+          |        if (signOff) {
+          |            finish()
+          |        } else if (activityAlive) {
+          |            mainHandler.postDelayed({ if (activityAlive) beginVoiceTurn() }, 350)
+          |        }
+          |    }
+          |
+          |    private fun currentCode(): String =
+          |        getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(KEY_CHANNEL, "") ?: ""
           |
           |    private fun checkAndRequestPerms(): Boolean {
           |        val needed = mutableListOf<String>()
-          |        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) needed.add(Manifest.permission.RECORD_AUDIO)
+          |        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+          |            needed.add(Manifest.permission.RECORD_AUDIO)
+          |        }
           |        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-          |            needed.add(Manifest.permission.ACCESS_FINE_LOCATION); needed.add(Manifest.permission.ACCESS_COARSE_LOCATION)
+          |            needed.add(Manifest.permission.ACCESS_FINE_LOCATION)
+          |            needed.add(Manifest.permission.ACCESS_COARSE_LOCATION)
           |        }
-          |        if (needed.isNotEmpty()) { requestPermissions(needed.toTypedArray(), REQ_PERMS); return false }
+          |        if (needed.isNotEmpty()) {
+          |            requestPermissions(needed.toTypedArray(), REQ_PERMS)
+          |            return false
+          |        }
           |        return true
-          |    }
-          |
-          |    private fun initWatchTts() {
-          |        tts = TextToSpeech(this) { status ->
-          |            if (status == TextToSpeech.SUCCESS) {
-          |                tts?.setLanguage(Locale.US)
-          |                tts?.setSpeechRate(1.10f)
-          |                tts?.setPitch(1.0f)
-          |                tts?.setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ASSISTANT).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build())
-          |                tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-          |                    override fun onStart(utteranceId: String?) {
-          |                        mainHandler.post { kittView.mode = KittModulatorView.MODE_SPEAKING; statusView.text = "ZELDA // SPEAKING" }
-          |                    }
-          |                    override fun onRangeStart(utteranceId: String?, start: Int, end: Int, frame: Int) {
-          |                        mainHandler.post { kittView.triggerWordPulse() }
-          |                    }
-          |                    override fun onDone(utteranceId: String?) {
-          |                        mainHandler.post {
-          |                            if (utteranceId == "SIGN_OFF") finish()
-          |                            else if (activityAlive) mainHandler.postDelayed({ if (activityAlive) beginVoiceTurn() }, 350)
-          |                        }
-          |                    }
-          |                    @Deprecated("Deprecated in Java")
-          |                    override fun onError(utteranceId: String?) {
-          |                        mainHandler.post { kittView.mode = KittModulatorView.MODE_IDLE }
-          |                    }
-          |                })
-          |                ttsReady = true
-          |                pendingSpeakText?.let { pendingSpeakText = null; speakWithKittModulator(it, false) }
-          |            }
-          |        }
           |    }
           |
           |    private fun speakWithKittModulator(text: String, signOffAfter: Boolean) {
           |        replyTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
-          |        mainHandler.post { subtitleView.text = text; kittView.mode = KittModulatorView.MODE_SPEAKING; statusView.text = "ZELDA // SPEAKING" }
-          |        if (!ttsReady || tts == null) { pendingSpeakText = text; return }
-          |        val uttId = if (signOffAfter) "SIGN_OFF" else "KITT_${System.currentTimeMillis()}"
-          |        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, uttId)
+          |        mainHandler.post {
+          |            subtitleView.text = text
+          |            kittView.setMode(KittModulatorView.MODE_SPEAKING)
+          |            statusView.text = "ZELDA // SPEAKING"
+          |        }
+          |        speechEngine.speak(text, signOffAfter)
           |    }
           |
           |    private fun saveCode(prefs: android.content.SharedPreferences): String {
@@ -509,58 +781,25 @@ jobs:
           |            if (ch.isLetterOrDigit() || ch == '-' || ch == '_') sb.append(ch)
           |        }
           |        val clean = sb.toString()
-          |        if (clean.isEmpty()) { statusView.text = "ENTER 4-CHAR CODE"; return "" }
+          |        if (clean.isEmpty()) {
+          |            statusView.text = "ENTER 4-CHAR CODE"
+          |            return ""
+          |        }
           |        prefs.edit().putString(KEY_CHANNEL, clean).commit()
           |        statusView.text = "KITT // $clean"
-          |        try { ComplicationDataSourceUpdateRequester.create(this, ComponentName(this, ZeldaComplicationService::class.java)).requestUpdateAll() } catch (_: Exception) {}
+          |        try {
+          |            ComplicationDataSourceUpdateRequester.create(this, ComponentName(this, ZeldaComplicationService::class.java)).requestUpdateAll()
+          |        } catch (_: Exception) {}
           |        return clean
           |    }
           |
           |    private fun beginVoiceTurn() {
           |        if (!activityAlive) return
-          |        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) { checkAndRequestPerms(); return }
-          |        tts?.stop()
-          |        if (!SpeechRecognizer.isRecognitionAvailable(this)) { launchFallbackSpeechPrompt(); return }
-          |        try {
-          |            speechRecognizer?.destroy()
-          |            val sr = SpeechRecognizer.createSpeechRecognizer(this)
-          |            speechRecognizer = sr
-          |            sr.setRecognitionListener(object : RecognitionListener {
-          |                override fun onReadyForSpeech(params: Bundle?) {
-          |                    kittView.mode = KittModulatorView.MODE_LISTENING; statusView.text = "LISTENING..."; subtitleView.text = "SPEAK TO ZELDA..."
-          |                }
-          |                override fun onBeginningOfSpeech() {}
-          |                override fun onRmsChanged(rmsdB: Float) { kittView.micLevel = ((rmsdB + 2f) / 10f).coerceIn(0.18f, 1.0f) }
-          |                override fun onBufferReceived(buffer: ByteArray?) {}
-          |                override fun onEndOfSpeech() { kittView.mode = KittModulatorView.MODE_THINKING; statusView.text = "SCANNING..." }
-          |                override fun onPartialResults(partialResults: Bundle?) {
-          |                    val part = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
-          |                    if (!part.isNullOrBlank()) subtitleView.text = part
-          |                }
-          |                override fun onResults(results: Bundle?) {
-          |                    handleUserTranscript(results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull())
-          |                }
-          |                override fun onError(error: Int) {
-          |                    if (error == SpeechRecognizer.ERROR_CLIENT || error == SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS) {
-          |                        launchFallbackSpeechPrompt(); return
-          |                    }
-          |                    if (error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT || error == SpeechRecognizer.ERROR_NO_MATCH) {
-          |                        kittView.mode = KittModulatorView.MODE_IDLE; statusView.text = "STANDING BY"
-          |                        mainHandler.postDelayed({ if (activityAlive && kittView.mode == KittModulatorView.MODE_IDLE) finish() }, 900)
-          |                    } else {
-          |                        kittView.mode = KittModulatorView.MODE_IDLE; statusView.text = "TAP VOICE BOX"
-          |                    }
-          |                }
-          |                override fun onEvent(eventType: Int, params: Bundle?) {}
-          |            })
-          |            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-          |                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-          |                putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-          |                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 800L)
-          |                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 650L)
-          |            }
-          |            sr.startListening(intent)
-          |        } catch (_: Exception) { launchFallbackSpeechPrompt() }
+          |        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+          |            checkAndRequestPerms()
+          |            return
+          |        }
+          |        speechEngine.startListening()
           |    }
           |
           |    private fun launchFallbackSpeechPrompt() {
@@ -570,27 +809,41 @@ jobs:
           |                putExtra(RecognizerIntent.EXTRA_PROMPT, "ZELDA // KITT LINK")
           |            }
           |            startActivityForResult(i, REQ_SPEECH_FALLBACK)
-          |        } catch (_: Exception) { statusView.text = "MIC ERR" }
+          |        } catch (_: Exception) {
+          |            statusView.text = "MIC ERR"
+          |        }
           |    }
           |
           |    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
           |        super.onActivityResult(requestCode, resultCode, data)
           |        if (requestCode == REQ_SPEECH_FALLBACK) {
-          |            if (resultCode == RESULT_OK) handleUserTranscript(data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull())
-          |            else finish()
+          |            if (resultCode == RESULT_OK) {
+          |                handleUserTranscript(data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull())
+          |            } else {
+          |                finish()
+          |            }
           |        }
           |    }
           |
           |    private fun handleUserTranscript(rawSpoken: String?) {
           |        val spoken = rawSpoken?.trim() ?: ""
-          |        if (spoken.isEmpty()) { kittView.mode = KittModulatorView.MODE_IDLE; return }
+          |        if (spoken.isEmpty()) {
+          |            kittView.setMode(KittModulatorView.MODE_IDLE)
+          |            return
+          |        }
           |        val low = spoken.lowercase(Locale.US)
-          |        if (low == "over and out" || low == "goodbye" || low == "goodbye zelda" || low == "stop listening" || low == "exit" || low == "close" || low == "thats all" || low == "that's all" || low == "that is all") {
+          |        if (low == "over and out" || low == "goodbye" || low == "goodbye zelda" ||
+          |            low == "stop listening" || low == "exit" || low == "close" ||
+          |            low == "thats all" || low == "that's all" || low == "that is all"
+          |        ) {
           |            speakWithKittModulator("Standing by, J.", signOffAfter = true)
           |            return
           |        }
           |        val code = currentCode()
-          |        if (code.isNotEmpty()) { subtitleView.text = spoken; beamToCar(code, "voice", spoken) }
+          |        if (code.isNotEmpty()) {
+          |            subtitleView.text = spoken
+          |            beamToCar(code, "voice", spoken)
+          |        }
           |    }
           |
           |    private fun ensureCarReplyStream(shortCode: String) {
@@ -607,9 +860,8 @@ jobs:
           |                    }
           |                    sseConn = conn
           |                    BufferedReader(InputStreamReader(conn.inputStream, Charsets.UTF_8)).use { reader ->
-          |                        var line: String?
-          |                        while (activityAlive && activeStreamTopic == topic && reader.readLine().also { line = it } != null) {
-          |                            val l = line ?: continue
+          |                        while (activityAlive && activeStreamTopic == topic) {
+          |                            val l = reader.readLine() ?: break
           |                            if (!l.startsWith("data:")) continue
           |                            val jsonStr = l.removePrefix("data:").trim()
           |                            if (jsonStr.isEmpty()) continue
@@ -624,21 +876,31 @@ jobs:
           |                            if (msg.optString("source") != "zelda-car") continue
           |                            if (abs(System.currentTimeMillis() - msg.optLong("ts")) > 20000L) continue
           |                            val txt = msg.optString("text").trim()
-          |                            if (txt.isNotEmpty() && msg.optString("type") == "speak") speakWithKittModulator(txt, signOffAfter = false)
+          |                            if (txt.isNotEmpty() && msg.optString("type") == "speak") {
+          |                                speakWithKittModulator(txt, signOffAfter = false)
+          |                            }
           |                        }
           |                    }
-          |                } catch (_: Exception) { if (activityAlive) Thread.sleep(1500) }
+          |                } catch (_: Exception) {
+          |                    if (activityAlive) Thread.sleep(1500)
+          |                }
           |            }
           |        }
           |    }
           |
           |    private fun readGps(): JSONObject? {
           |        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-          |            checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) return null
+          |            checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+          |        ) return null
           |        return try {
           |            val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-          |            val loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER) ?: lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) ?: return null
-          |            JSONObject().apply { put("lat", loc.latitude); put("lng", loc.longitude); put("accuracy", loc.accuracy); put("speed", loc.speed); put("heading", loc.bearing) }
+          |            val loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+          |                ?: lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+          |                ?: return null
+          |            JSONObject().apply {
+          |                put("lat", loc.latitude); put("lng", loc.longitude)
+          |                put("accuracy", loc.accuracy); put("speed", loc.speed); put("heading", loc.bearing)
+          |            }
           |        } catch (_: Exception) { null }
           |    }
           |
@@ -646,12 +908,14 @@ jobs:
           |        ensureCarReplyStream(shortCode)
           |        val topic = if (shortCode.startsWith("ZELDA-", true)) shortCode.lowercase(Locale.US) else "zelda-370z-$shortCode"
           |        val gps = readGps()
-          |        kittView.mode = KittModulatorView.MODE_THINKING
+          |        kittView.setMode(KittModulatorView.MODE_THINKING)
           |        statusView.text = "TX >> 370Z..."
           |        replyTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
           |        val timeoutTask = Runnable {
-          |            if (activityAlive && kittView.mode == KittModulatorView.MODE_THINKING) {
-          |                kittView.mode = KittModulatorView.MODE_IDLE; statusView.text = "370Z OFFLINE"; subtitleView.text = "WAIT FOR CAR HOTSPOT"
+          |            if (activityAlive && kittView.getMode() == KittModulatorView.MODE_THINKING) {
+          |                kittView.setMode(KittModulatorView.MODE_IDLE)
+          |                statusView.text = "370Z OFFLINE"
+          |                subtitleView.text = "WAIT FOR CAR HOTSPOT"
           |            }
           |        }
           |        replyTimeoutRunnable = timeoutTask
@@ -669,22 +933,26 @@ jobs:
           |                }
           |                conn.outputStream.use { it.write(payload.toString().toByteArray(Charsets.UTF_8)) }
           |                val code = conn.responseCode
-          |                if (code !in 200..299) mainHandler.post { kittView.mode = KittModulatorView.MODE_IDLE; statusView.text = "HTTP $code" }
-          |            } catch (_: Exception) { mainHandler.post { kittView.mode = KittModulatorView.MODE_IDLE; statusView.text = "CHECK NET" } }
+          |                if (code !in 200..299) {
+          |                    mainHandler.post { kittView.setMode(KittModulatorView.MODE_IDLE); statusView.text = "HTTP $code" }
+          |                }
+          |            } catch (_: Exception) {
+          |                mainHandler.post { kittView.setMode(KittModulatorView.MODE_IDLE); statusView.text = "CHECK NET" }
+          |            }
           |        }
           |    }
           |
           |    override fun onDestroy() {
           |        activityAlive = false
           |        replyTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
-          |        try { speechRecognizer?.destroy() } catch (_: Exception) {}
-          |        try { tts?.stop(); tts?.shutdown() } catch (_: Exception) {}
+          |        if (::speechEngine.isInitialized) speechEngine.shutdown()
           |        try { sseConn?.disconnect() } catch (_: Exception) {}
           |        super.onDestroy()
           |    }
           |}
           """)
-          print("Generated all 6 Wear OS files cleanly.")
+
+          print("Generated all KITT Wear OS files cleanly.")
 
       - name: Install Gradle 8.9 & Compile Signed Wear APK
         shell: bash
@@ -694,7 +962,7 @@ jobs:
           curl -sL https://services.gradle.org/distributions/gradle-8.9-bin.zip -o /tmp/gradle.zip
           unzip -q /tmp/gradle.zip -d /opt/
           cd wear-app
-          /opt/gradle-8.9/bin/gradle assembleRelease --no-daemon --stacktrace
+          /opt/gradle-8.9/bin/gradle assembleRelease --no-daemon --console=plain
           cp app/build/outputs/apk/release/app-release.apk ../zelda-watch-ultra.apk
 
       - name: Upload APK to GitHub Releases
@@ -702,7 +970,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete watch-v4.7.4 --yes --cleanup-tag 2>/dev/null || true
-          gh release create watch-v4.7.4 zelda-watch-ultra.apk \
-            --title "Zelda KITT Watch Ultra Complication APK (v4.7.4)" \
-            --notes "v4.7.4: KITT 3-Bar Voice Modulator + Larson Scanner, native Watch speaker TTS, and hands-free fluent conversation loop."
+          gh release delete watch-v4.7.5 --yes --cleanup-tag 2>/dev/null || true
+          gh release create watch-v4.7.5 zelda-watch-ultra.apk \
+            --title "Zelda KITT Watch Ultra Complication APK (v4.7.5)" \
+            --notes "v4.7.5: KITT 3-Bar Voice Modulator + Larson Scanner, native Watch speaker TTS, and hands-free fluent conversation loop."
