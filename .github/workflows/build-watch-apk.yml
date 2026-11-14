@@ -90,8 +90,8 @@ jobs:
           |        applicationId = "com.example.zeldawatch"
           |        minSdk = 30
           |        targetSdk = 34
-          |        versionCode = 12
-          |        versionName = "4.8.2"
+          |        versionCode = 13
+          |        versionName = "4.8.3"
           |    }
           |    buildTypes {
           |        release {
@@ -1353,8 +1353,8 @@ jobs:
           |        applicationId = "com.example.zeldabridge"
           |        minSdk = 28
           |        targetSdk = 34
-          |        versionCode = 3
-          |        versionName = "4.8.2"
+          |        versionCode = 4
+          |        versionName = "4.8.3"
           |    }
           |    buildTypes {
           |        release {
@@ -1830,9 +1830,13 @@ jobs:
           |                        while (alive && activeTopic == topic) {
           |                            val l = reader.readLine() ?: break
           |                            if (!l.startsWith("data:")) continue
-          |                            val env = JSONObject(l.removePrefix("data:").trim().ifEmpty { continue })
+          |                            val jsonStr = l.removePrefix("data:").trim()
+          |                            if (jsonStr.isEmpty()) continue
+          |                            val env = JSONObject(jsonStr)
           |                            if (env.optString("event") != "message") continue
-          |                            val msg = JSONObject(env.optString("message").ifEmpty { continue })
+          |                            val msgStr = env.optString("message")
+          |                            if (msgStr.isEmpty()) continue
+          |                            val msg = JSONObject(msgStr)
           |                            if (msg.optString("source") == "zelda-car" &&
           |                                msg.optString("type") == "request-gps" &&
           |                                abs(System.currentTimeMillis() - msg.optLong("ts")) < 20000L
@@ -1851,9 +1855,7 @@ jobs:
           |    override fun onLocationChanged(loc: Location) {
           |        latestLoc = loc
           |    }
-          |    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
-          |    override fun onProviderEnabled(provider: String) {}
-          |    override fun onProviderDisabled(provider: String) {}
+          |
           |
           |    override fun onDestroy() {
           |        alive = false
@@ -1864,7 +1866,7 @@ jobs:
           |}
           """)
 
-          print("Generated Watch Ultra + Fold 7 Health Connect Bridge v4.8.2 cleanly.")
+          print("Generated Watch Ultra + Fold 7 Health Connect Bridge v4.8.3 cleanly.")
 
       - name: Install Gradle 8.11.1 & Compile Both Signed APKs
         shell: bash
@@ -1874,7 +1876,8 @@ jobs:
           curl -sL https://services.gradle.org/distributions/gradle-8.11.1-bin.zip -o /tmp/gradle.zip
           unzip -q /tmp/gradle.zip -d /opt/
           cd zelda-android-suite
-          /opt/gradle-8.11.1/bin/gradle :wear-app:assembleRelease :phone-bridge:assembleRelease --no-daemon --console=plain
+          set -o pipefail
+          /opt/gradle-8.11.1/bin/gradle :wear-app:assembleRelease :phone-bridge:assembleRelease --no-daemon --console=plain 2>&1 | tee /tmp/gradle.log || { echo "=== EXACT COMPILER ERRORS ==="; grep -E "^e: |FAILURE:" /tmp/gradle.log || true; exit 1; }
           cp wear-app/build/outputs/apk/release/wear-app-release.apk ../zelda-watch-ultra.apk
           cp phone-bridge/build/outputs/apk/release/phone-bridge-release.apk ../zelda-fold7-health-bridge.apk
 
@@ -1883,7 +1886,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete watch-v4.8.2 --yes --cleanup-tag 2>/dev/null || true
-          gh release create watch-v4.8.2 zelda-watch-ultra.apk zelda-fold7-health-bridge.apk \
-            --title "Zelda v4.8.2: Neon Wave Watch APK + Fold 7 Health Connect Bridge APK" \
+          gh release delete watch-v4.8.3 --yes --cleanup-tag 2>/dev/null || true
+          gh release create watch-v4.8.3 zelda-watch-ultra.apk zelda-fold7-health-bridge.apk \
+            --title "Zelda v4.8.3: Neon Wave Watch APK + Fold 7 Health Connect Bridge APK" \
             --notes "Download zelda-watch-ultra.apk (for Galaxy Watch Ultra via Bugjaeger) and zelda-fold7-health-bridge.apk (install directly on Galaxy Z Fold 7 for Health Connect + GPS + 1-Tap API Key sync)."
