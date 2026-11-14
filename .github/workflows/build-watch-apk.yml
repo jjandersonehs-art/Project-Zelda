@@ -68,7 +68,7 @@ jobs:
           save(root_dir + "/build.gradle.kts", """
           |plugins {
           |    id("com.android.application") version "8.9.2" apply false
-          |    id("org.jetbrains.kotlin.android") version "2.0.21" apply false
+          |    id("org.jetbrains.kotlin.android") version "2.1.20" apply false
           |}
           """)
 
@@ -90,8 +90,8 @@ jobs:
           |        applicationId = "com.example.zeldawatch"
           |        minSdk = 30
           |        targetSdk = 34
-          |        versionCode = 11
-          |        versionName = "4.8.1"
+          |        versionCode = 12
+          |        versionName = "4.8.2"
           |    }
           |    buildTypes {
           |        release {
@@ -1353,8 +1353,8 @@ jobs:
           |        applicationId = "com.example.zeldabridge"
           |        minSdk = 28
           |        targetSdk = 34
-          |        versionCode = 2
-          |        versionName = "4.8.1"
+          |        versionCode = 3
+          |        versionName = "4.8.2"
           |    }
           |    buildTypes {
           |        release {
@@ -1377,6 +1377,7 @@ jobs:
           |    implementation("androidx.activity:activity-ktx:1.9.3")
           |    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
           |    implementation("androidx.health.connect:connect-client:1.1.0")
+          |    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
           |}
           """)
 
@@ -1420,11 +1421,18 @@ jobs:
           |            <intent-filter>
           |                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
           |            </intent-filter>
+          |        </activity>
+          |
+          |        <activity-alias
+          |            android:name="ViewPermissionUsageActivity"
+          |            android:exported="true"
+          |            android:targetActivity=".ZeldaBridgeActivity"
+          |            android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
           |            <intent-filter>
           |                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
           |                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
           |            </intent-filter>
-          |        </activity>
+          |        </activity-alias>
           |    </application>
           |</manifest>
           """)
@@ -1682,28 +1690,28 @@ jobs:
           |
           |            // 1. Latest Heart Rate
           |            val hrResp = client.readRecords(
-          |                ReadRecordsRequest(HeartRateRecord::class, TimeRangeFilter.between(dayAgo, now))
+          |                ReadRecordsRequest(recordType = HeartRateRecord::class, timeRangeFilter = TimeRangeFilter.between(dayAgo, now))
           |            )
           |            val lastSample = hrResp.records.flatMap { it.samples }.maxByOrNull { it.time }
           |            if (lastSample != null) out.put("bpm", lastSample.beatsPerMinute)
           |
           |            // 2. Resting Heart Rate
           |            val rhrResp = client.readRecords(
-          |                ReadRecordsRequest(RestingHeartRateRecord::class, TimeRangeFilter.between(twoDaysAgo, now))
+          |                ReadRecordsRequest(recordType = RestingHeartRateRecord::class, timeRangeFilter = TimeRangeFilter.between(twoDaysAgo, now))
           |            )
           |            val lastRhr = rhrResp.records.maxByOrNull { it.time }
           |            if (lastRhr != null) out.put("restingHr", lastRhr.beatsPerMinute)
           |
           |            // 3. HRV (RMSSD from Hume Pod / Watch Ultra)
           |            val hrvResp = client.readRecords(
-          |                ReadRecordsRequest(HeartRateVariabilityRmssdRecord::class, TimeRangeFilter.between(twoDaysAgo, now))
+          |                ReadRecordsRequest(recordType = HeartRateVariabilityRmssdRecord::class, timeRangeFilter = TimeRangeFilter.between(twoDaysAgo, now))
           |            )
           |            val lastHrv = hrvResp.records.maxByOrNull { it.time }
           |            if (lastHrv != null) out.put("hrvRmssd", lastHrv.heartRateVariabilityMillis.roundToInt())
           |
           |            // 4. Last Sleep Session Duration
           |            val sleepResp = client.readRecords(
-          |                ReadRecordsRequest(SleepSessionRecord::class, TimeRangeFilter.between(twoDaysAgo, now))
+          |                ReadRecordsRequest(recordType = SleepSessionRecord::class, timeRangeFilter = TimeRangeFilter.between(twoDaysAgo, now))
           |            )
           |            val latestSleep = sleepResp.records.maxByOrNull { it.endTime }
           |            if (latestSleep != null) {
@@ -1714,16 +1722,16 @@ jobs:
           |            // 5. Today's Steps
           |            val startOfDay = now.minus(Duration.ofHours(18))
           |            val stepsResp = client.readRecords(
-          |                ReadRecordsRequest(StepsRecord::class, TimeRangeFilter.between(startOfDay, now))
+          |                ReadRecordsRequest(recordType = StepsRecord::class, timeRangeFilter = TimeRangeFilter.between(startOfDay, now))
           |            )
           |            if (stepsResp.records.isNotEmpty()) {
-          |                val totalSteps = stepsResp.records.maxOf { it.count }
+          |                val totalSteps = stepsResp.records.sumOf { it.count }
           |                out.put("steps", totalSteps)
           |            }
           |
           |            // 6. SpO2
           |            val spo2Resp = client.readRecords(
-          |                ReadRecordsRequest(OxygenSaturationRecord::class, TimeRangeFilter.between(twoDaysAgo, now))
+          |                ReadRecordsRequest(recordType = OxygenSaturationRecord::class, timeRangeFilter = TimeRangeFilter.between(twoDaysAgo, now))
           |            )
           |            val lastSpo2 = spo2Resp.records.maxByOrNull { it.time }
           |            if (lastSpo2 != null) out.put("spo2", lastSpo2.percentage.value.roundToInt())
@@ -1856,7 +1864,7 @@ jobs:
           |}
           """)
 
-          print("Generated Watch Ultra + Fold 7 Health Connect Bridge v4.8.1 cleanly.")
+          print("Generated Watch Ultra + Fold 7 Health Connect Bridge v4.8.2 cleanly.")
 
       - name: Install Gradle 8.11.1 & Compile Both Signed APKs
         shell: bash
@@ -1875,7 +1883,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete watch-v4.8.1 --yes --cleanup-tag 2>/dev/null || true
-          gh release create watch-v4.8.1 zelda-watch-ultra.apk zelda-fold7-health-bridge.apk \
-            --title "Zelda v4.8.1: Neon Wave Watch APK + Fold 7 Health Connect Bridge APK" \
+          gh release delete watch-v4.8.2 --yes --cleanup-tag 2>/dev/null || true
+          gh release create watch-v4.8.2 zelda-watch-ultra.apk zelda-fold7-health-bridge.apk \
+            --title "Zelda v4.8.2: Neon Wave Watch APK + Fold 7 Health Connect Bridge APK" \
             --notes "Download zelda-watch-ultra.apk (for Galaxy Watch Ultra via Bugjaeger) and zelda-fold7-health-bridge.apk (install directly on Galaxy Z Fold 7 for Health Connect + GPS + 1-Tap API Key sync)."
