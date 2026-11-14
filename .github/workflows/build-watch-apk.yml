@@ -1,4 +1,4 @@
-name: Build Zelda KITT Watch APK
+name: Build Zelda Watch Ultra & Fold 7 Health Bridge APKs
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  build-wear-apk:
+  build-zelda-apks:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout Repo
@@ -34,14 +34,16 @@ jobs:
               -dname "CN=Android Debug,O=Android,C=US"
           fi
 
-      - name: Generate KITT Wear OS Project Files
+      - name: Generate Watch Ultra & Fold 7 Health Bridge Projects
         shell: python
         run: |
           import os
 
-          base = "wear-app"
-          pkg = base + "/app/src/main/java/com/example/zeldawatch"
-          os.makedirs(pkg, exist_ok=True)
+          root_dir = "zelda-android-suite"
+          watch_pkg = root_dir + "/wear-app/src/main/java/com/example/zeldawatch"
+          phone_pkg = root_dir + "/phone-bridge/src/main/java/com/example/zeldabridge"
+          os.makedirs(watch_pkg, exist_ok=True)
+          os.makedirs(phone_pkg, exist_ok=True)
 
           def save(path, raw):
               out = []
@@ -51,7 +53,7 @@ jobs:
               with open(path, "w", encoding="utf-8") as f:
                   f.write("\n".join(out) + "\n")
 
-          save(base + "/settings.gradle.kts", """
+          save(root_dir + "/settings.gradle.kts", """
           |pluginManagement {
           |    repositories { google(); mavenCentral(); gradlePluginPortal() }
           |}
@@ -59,24 +61,24 @@ jobs:
           |    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
           |    repositories { google(); mavenCentral() }
           |}
-          |rootProject.name = "ZeldaWatchLink"
-          |include(":app")
+          |rootProject.name = "ZeldaNeuralSuite"
+          |include(":wear-app", ":phone-bridge")
           """)
 
-          save(base + "/build.gradle.kts", """
+          save(root_dir + "/build.gradle.kts", """
           |plugins {
           |    id("com.android.application") version "8.6.1" apply false
           |    id("org.jetbrains.kotlin.android") version "2.0.21" apply false
           |}
           """)
 
-          save(base + "/gradle.properties", """
-          |org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+          save(root_dir + "/gradle.properties", """
+          |org.gradle.jvmargs=-Xmx2560m -Dfile.encoding=UTF-8
           |android.useAndroidX=true
           |android.nonTransitiveRClass=true
           """)
 
-          save(base + "/app/build.gradle.kts", """
+          save(root_dir + "/wear-app/build.gradle.kts", """
           |plugins {
           |    id("com.android.application")
           |    id("org.jetbrains.kotlin.android")
@@ -88,8 +90,8 @@ jobs:
           |        applicationId = "com.example.zeldawatch"
           |        minSdk = 30
           |        targetSdk = 34
-          |        versionCode = 9
-          |        versionName = "4.7.5"
+          |        versionCode = 10
+          |        versionName = "4.8.0"
           |    }
           |    buildTypes {
           |        release {
@@ -109,7 +111,7 @@ jobs:
           |}
           """)
 
-          save(base + "/app/src/main/AndroidManifest.xml", """
+          save(root_dir + "/wear-app/src/main/AndroidManifest.xml", """
           |<?xml version="1.0" encoding="utf-8"?>
           |<manifest xmlns:android="http://schemas.android.com/apk/res/android">
           |    <uses-feature android:name="android.hardware.type.watch" />
@@ -117,6 +119,8 @@ jobs:
           |    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
           |    <uses-permission android:name="android.permission.RECORD_AUDIO" />
           |    <uses-permission android:name="android.permission.VIBRATE" />
+          |    <uses-permission android:name="android.permission.BODY_SENSORS" />
+          |    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
           |    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
           |    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
           |    <queries>
@@ -162,14 +166,17 @@ jobs:
           |</manifest>
           """)
 
-          save(pkg + "/KittModulatorView.java", """
+          save(watch_pkg + "/KittModulatorView.java", """
           |package com.example.zeldawatch;
           |
           |import android.content.Context;
+          |import android.graphics.BlurMaskFilter;
           |import android.graphics.Canvas;
           |import android.graphics.Color;
+          |import android.graphics.LinearGradient;
           |import android.graphics.Paint;
-          |import android.graphics.RectF;
+          |import android.graphics.Path;
+          |import android.graphics.Shader;
           |import android.view.View;
           |
           |public class KittModulatorView extends View {
@@ -179,15 +186,32 @@ jobs:
           |    public static final int MODE_SPEAKING = 3;
           |
           |    private int mode = MODE_IDLE;
-          |    private float micLevel = 0.25f;
+          |    private float micLevel = 0.22f;
+          |    private float smoothAmp = 0.18f;
           |    private float wordPulseBoost = 0f;
           |
-          |    private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-          |    private final RectF segRect = new RectF();
-          |    private final RectF frameRect = new RectF();
+          |    private final Paint glowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+          |    private final Paint corePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+          |    private final Paint horizonPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+          |    private final Path wavePath = new Path();
+          |    private LinearGradient activeShader = null;
+          |    private int lastW = 0;
+          |    private int lastMode = -1;
           |
           |    public KittModulatorView(Context context) {
           |        super(context);
+          |        setLayerType(LAYER_TYPE_SOFTWARE, null);
+          |
+          |        glowPaint.setStyle(Paint.Style.STROKE);
+          |        glowPaint.setStrokeCap(Paint.Cap.ROUND);
+          |        glowPaint.setStrokeJoin(Paint.Join.ROUND);
+          |        glowPaint.setMaskFilter(new BlurMaskFilter(11f, BlurMaskFilter.Blur.NORMAL));
+          |
+          |        corePaint.setStyle(Paint.Style.STROKE);
+          |        corePaint.setStrokeCap(Paint.Cap.ROUND);
+          |        corePaint.setStrokeJoin(Paint.Join.ROUND);
+          |
+          |        horizonPaint.setStyle(Paint.Style.STROKE);
           |    }
           |
           |    public int getMode() {
@@ -200,7 +224,7 @@ jobs:
           |    }
           |
           |    public void setMicLevel(float level) {
-          |        this.micLevel = Math.max(0.18f, Math.min(1.0f, level));
+          |        this.micLevel = Math.max(0.14f, Math.min(1.0f, level));
           |    }
           |
           |    public void triggerWordPulse() {
@@ -208,111 +232,144 @@ jobs:
           |        postInvalidateOnAnimation();
           |    }
           |
+          |    private void updateGradientIfNeeded(int w) {
+          |        if (w <= 0) return;
+          |        if (w == lastW && mode == lastMode && activeShader != null) return;
+          |        lastW = w;
+          |        lastMode = mode;
+          |
+          |        int[] colors;
+          |        if (mode == MODE_SPEAKING) {
+          |            colors = new int[]{
+          |                Color.parseColor("#00F0FF"),
+          |                Color.parseColor("#B026FF"),
+          |                Color.parseColor("#FF2CF7"),
+          |                Color.parseColor("#00F0FF")
+          |            };
+          |        } else if (mode == MODE_THINKING) {
+          |            colors = new int[]{
+          |                Color.parseColor("#7C4DFF"),
+          |                Color.parseColor("#FF1744"),
+          |                Color.parseColor("#FF2CF7"),
+          |                Color.parseColor("#00E5FF")
+          |            };
+          |        } else if (mode == MODE_LISTENING) {
+          |            colors = new int[]{
+          |                Color.parseColor("#00E5FF"),
+          |                Color.parseColor("#7C4DFF"),
+          |                Color.parseColor("#EA80FC"),
+          |                Color.parseColor("#00F0FF")
+          |            };
+          |        } else {
+          |            colors = new int[]{
+          |                Color.parseColor("#005B7F"),
+          |                Color.parseColor("#5E2B97"),
+          |                Color.parseColor("#881B68"),
+          |                Color.parseColor("#005B7F")
+          |            };
+          |        }
+          |
+          |        float[] positions = new float[]{0f, 0.35f, 0.7f, 1f};
+          |        activeShader = new LinearGradient(0f, 0f, (float) w, 0f, colors, positions, Shader.TileMode.CLAMP);
+          |        glowPaint.setShader(activeShader);
+          |        corePaint.setShader(activeShader);
+          |    }
+          |
           |    @Override
           |    protected void onDraw(Canvas canvas) {
           |        super.onDraw(canvas);
-          |        float w = getWidth();
-          |        float h = getHeight();
+          |        int wInt = getWidth();
+          |        int hInt = getHeight();
+          |        if (wInt <= 0 || hInt <= 0) return;
+          |
+          |        updateGradientIfNeeded(wInt);
+          |
+          |        float w = (float) wInt;
+          |        float h = (float) hInt;
+          |        float cy = h * 0.5f;
           |        long now = System.currentTimeMillis();
           |
-          |        frameRect.set(6f, 6f, w - 6f, h - 6f);
-          |        paint.setStyle(Paint.Style.FILL);
-          |        paint.setColor(Color.parseColor("#07090F"));
-          |        canvas.drawRoundRect(frameRect, 26f, 26f, paint);
-          |
-          |        paint.setStyle(Paint.Style.STROKE);
-          |        paint.setStrokeWidth(2.5f);
-          |        if (mode == MODE_SPEAKING || mode == MODE_THINKING) {
-          |            paint.setColor(Color.parseColor("#FF1744"));
-          |        } else if (mode == MODE_LISTENING) {
-          |            paint.setColor(Color.parseColor("#00F0FF"));
-          |        } else {
-          |            paint.setColor(Color.parseColor("#334455"));
-          |        }
-          |        canvas.drawRoundRect(frameRect, 26f, 26f, paint);
-          |        paint.setStyle(Paint.Style.FILL);
-          |
-          |        if (mode == MODE_THINKING) {
-          |            int cols = 8;
-          |            float padX = 22f;
-          |            float gap = 6f;
-          |            float boxW = (w - padX * 2f - gap * (cols - 1)) / cols;
-          |            float boxH = h * 0.28f;
-          |            float topY = (h - boxH) / 2f;
-          |            float cycle = (now % 1100L) / 1100f;
-          |            float tri = (cycle < 0.5f) ? (cycle * 2f) : ((1f - cycle) * 2f);
-          |            float pos = tri * (cols - 1);
-          |            for (int i = 0; i < cols; i++) {
-          |                float alpha = Math.max(0.12f, 1f - Math.abs(i - pos) * 0.42f);
-          |                paint.setColor(Color.argb((int) (alpha * 255), 255, 23, 68));
-          |                float left = padX + i * (boxW + gap);
-          |                segRect.set(left, topY, left + boxW, topY + boxH);
-          |                canvas.drawRoundRect(segRect, 5f, 5f, paint);
-          |            }
-          |            postInvalidateOnAnimation();
-          |            return;
-          |        }
-          |
-          |        int halfPairs = 6;
-          |        float[] colMultipliers = new float[]{0.68f, 1.0f, 0.68f};
-          |        double t = now / 95.0;
           |        if (wordPulseBoost > 0.02f) {
-          |            wordPulseBoost *= 0.86f;
+          |            wordPulseBoost *= 0.88f;
           |        } else {
           |            wordPulseBoost = 0f;
           |        }
           |
-          |        float baseEnergy;
+          |        float targetAmp;
+          |        double speed;
           |        if (mode == MODE_SPEAKING) {
-          |            float wave = 0.48f + 0.32f * (float) Math.abs(Math.sin(t)) + 0.20f * (float) Math.abs(Math.sin(t * 2.3));
-          |            baseEnergy = Math.min(1f, wave + wordPulseBoost * 0.38f);
+          |            double pulse = 0.42 + 0.30 * Math.abs(Math.sin(now / 115.0)) + 0.22 * Math.abs(Math.sin(now / 53.0));
+          |            targetAmp = Math.min(1.0f, (float) pulse + wordPulseBoost * 0.35f);
+          |            speed = now / 170.0;
           |        } else if (mode == MODE_LISTENING) {
-          |            baseEnergy = Math.max(0.18f, Math.min(1f, micLevel));
+          |            targetAmp = Math.max(0.22f, micLevel * 0.92f);
+          |            speed = now / 210.0;
+          |        } else if (mode == MODE_THINKING) {
+          |            targetAmp = 0.38f + 0.16f * (float) Math.sin(now / 140.0);
+          |            speed = now / 95.0;
           |        } else {
-          |            baseEnergy = 0.12f;
+          |            targetAmp = 0.11f;
+          |            speed = now / 420.0;
           |        }
           |
-          |        float colW = w * 0.19f;
-          |        float colGap = w * 0.07f;
-          |        float startX = (w - (colW * 3f + colGap * 2f)) / 2f;
-          |        float padY = 16f;
-          |        float segGap = 4f;
-          |        int totalSegs = halfPairs * 2;
-          |        float segH = (h - padY * 2f - segGap * (totalSegs - 1)) / totalSegs;
-          |        float centerY = h / 2f;
+          |        smoothAmp += (targetAmp - smoothAmp) * 0.24f;
+          |        float maxDisp = h * 0.43f * smoothAmp;
           |
-          |        for (int c = 0; c < 3; c++) {
-          |            float colPhase = (c == 1) ? 1f : (0.85f + 0.15f * (float) Math.sin(t * 1.7 + c));
-          |            int activePairs = Math.max(1, (int) (baseEnergy * colMultipliers[c] * colPhase * halfPairs + 0.6f));
-          |            float left = startX + c * (colW + colGap);
-          |            for (int p = 0; p < halfPairs; p++) {
-          |                boolean lit = p < activePairs;
-          |                if (!lit) {
-          |                    paint.setColor(Color.parseColor("#181D26"));
-          |                } else if (mode == MODE_LISTENING) {
-          |                    paint.setColor((p >= halfPairs - 1) ? Color.parseColor("#FCEE0A") : Color.parseColor("#00F0FF"));
-          |                } else if (mode == MODE_SPEAKING) {
-          |                    paint.setColor((p >= halfPairs - 1) ? Color.parseColor("#FCEE0A") : Color.parseColor("#FF1744"));
+          |        // Subtle glowing center horizon filament
+          |        horizonPaint.setStrokeWidth(1.5f);
+          |        horizonPaint.setColor(Color.argb(65, 0, 240, 255));
+          |        canvas.drawLine(w * 0.04f, cy, w * 0.96f, cy, horizonPaint);
+          |
+          |        // 5 braided harmonic ribbons pinched cleanly at left/right edges (Shutterstock neon wave look)
+          |        float[] freqs = new float[]{1.6f, 2.3f, 3.1f, 3.9f, 4.8f};
+          |        float[] phases = new float[]{0.0f, 1.25f, 2.55f, 3.95f, 5.15f};
+          |        float[] ampScales = new float[]{1.0f, 0.84f, 0.72f, 0.56f, 0.40f};
+          |        float[] strokeWidths = new float[]{3.2f, 2.6f, 2.2f, 1.8f, 1.4f};
+          |
+          |        int steps = 56;
+          |        float dx = w / steps;
+          |
+          |        for (int s = 0; s < 5; s++) {
+          |            wavePath.reset();
+          |            double phaseShift = speed * (s % 2 == 0 ? 1.0 : -0.82) + phases[s];
+          |            float f = freqs[s];
+          |            float aScale = ampScales[s];
+          |
+          |            for (int i = 0; i <= steps; i++) {
+          |                float x = i * dx;
+          |                float u = (float) i / (float) steps;
+          |                // Smooth raised-cosine pinch envelope -> tapers to 0 at circular bezel edges
+          |                double env = Math.pow(Math.sin(Math.PI * u), 1.65);
+          |                double primary = Math.sin(u * Math.PI * 2.0 * f + phaseShift);
+          |                double harmonic = 0.32 * Math.cos(u * Math.PI * 2.0 * (f * 0.5 + 1.0) - phaseShift * 0.7);
+          |                float y = cy + (float) (env * maxDisp * aScale * (primary + harmonic) * 0.78);
+          |
+          |                if (i == 0) {
+          |                    wavePath.moveTo(x, y);
           |                } else {
-          |                    paint.setColor(Color.parseColor("#661022"));
+          |                    wavePath.lineTo(x, y);
           |                }
-          |                float upBottom = centerY - segGap / 2f - p * (segH + segGap);
-          |                segRect.set(left, upBottom - segH, left + colW, upBottom);
-          |                canvas.drawRoundRect(segRect, 3f, 3f, paint);
-          |
-          |                float dnTop = centerY + segGap / 2f + p * (segH + segGap);
-          |                segRect.set(left, dnTop, left + colW, dnTop + segH);
-          |                canvas.drawRoundRect(segRect, 3f, 3f, paint);
           |            }
+          |
+          |            glowPaint.setStrokeWidth(strokeWidths[s] * 3.1f);
+          |            glowPaint.setAlpha(s < 2 ? 135 : 90);
+          |            canvas.drawPath(wavePath, glowPaint);
+          |
+          |            corePaint.setStrokeWidth(strokeWidths[s]);
+          |            corePaint.setAlpha(s == 0 ? 255 : 215);
+          |            canvas.drawPath(wavePath, corePaint);
           |        }
+          |
           |        if (mode != MODE_IDLE) {
           |            postInvalidateOnAnimation();
+          |        } else {
+          |            postInvalidateDelayed(48);
           |        }
           |    }
           |}
           """)
 
-          save(pkg + "/KittSpeechEngine.java", """
+          save(watch_pkg + "/KittSpeechEngine.java", """
           |package com.example.zeldawatch;
           |
           |import android.content.Context;
@@ -329,6 +386,7 @@ jobs:
           |
           |import java.util.ArrayList;
           |import java.util.Locale;
+          |import java.util.concurrent.atomic.AtomicInteger;
           |
           |public class KittSpeechEngine {
           |    public interface Callbacks {
@@ -351,8 +409,9 @@ jobs:
           |    private SpeechRecognizer sr;
           |    private TextToSpeech tts;
           |    private boolean ttsReady = false;
-          |    private String pendingSpeech = null;
-          |    private boolean pendingSignOff = false;
+          |    private final ArrayList<String> preInitQueue = new ArrayList<>();
+          |    private boolean preInitSignOff = false;
+          |    private final AtomicInteger activeUtterances = new AtomicInteger(0);
           |
           |    public KittSpeechEngine(Context ctx, Callbacks callbacks) {
           |        this.context = ctx;
@@ -366,7 +425,7 @@ jobs:
           |            public void onInit(int status) {
           |                if (status == TextToSpeech.SUCCESS && tts != null) {
           |                    tts.setLanguage(Locale.US);
-          |                    tts.setSpeechRate(1.10f);
+          |                    tts.setSpeechRate(1.08f);
           |                    tts.setPitch(1.0f);
           |                    tts.setAudioAttributes(new AudioAttributes.Builder()
           |                            .setUsage(AudioAttributes.USAGE_ASSISTANT)
@@ -389,26 +448,33 @@ jobs:
           |
           |                        @Override
           |                        public void onDone(final String utteranceId) {
+          |                            final int remaining = activeUtterances.decrementAndGet();
+          |                            if (remaining < 0) activeUtterances.set(0);
           |                            mainHandler.post(new Runnable() {
           |                                @Override public void run() {
-          |                                    cb.onTtsFinished("SIGN_OFF".equals(utteranceId));
+          |                                    if ("SIGN_OFF".equals(utteranceId)) {
+          |                                        cb.onTtsFinished(true);
+          |                                    } else if (remaining <= 0) {
+          |                                        cb.onTtsFinished(false);
+          |                                    }
           |                                }
           |                            });
           |                        }
           |
           |                        @Override
           |                        public void onError(String utteranceId) {
+          |                            activeUtterances.set(0);
           |                            mainHandler.post(new Runnable() {
           |                                @Override public void run() { cb.onMicIdle(); }
           |                            });
           |                        }
           |                    });
           |                    ttsReady = true;
-          |                    if (pendingSpeech != null) {
-          |                        String s = pendingSpeech;
-          |                        boolean so = pendingSignOff;
-          |                        pendingSpeech = null;
-          |                        speak(s, so);
+          |                    if (!preInitQueue.isEmpty()) {
+          |                        for (int i = 0; i < preInitQueue.size(); i++) {
+          |                            speak(preInitQueue.get(i), preInitSignOff && i == preInitQueue.size() - 1, i > 0);
+          |                        }
+          |                        preInitQueue.clear();
           |                    }
           |                }
           |            }
@@ -416,19 +482,27 @@ jobs:
           |    }
           |
           |    public void stopTts() {
+          |        activeUtterances.set(0);
           |        if (tts != null) {
           |            try { tts.stop(); } catch (Exception ignored) {}
           |        }
           |    }
           |
-          |    public void speak(String text, boolean signOff) {
+          |    public void speak(String text, boolean signOff, boolean appendChunk) {
           |        if (!ttsReady || tts == null) {
-          |            pendingSpeech = text;
-          |            pendingSignOff = signOff;
+          |            if (!appendChunk) preInitQueue.clear();
+          |            preInitQueue.add(text);
+          |            preInitSignOff = signOff;
           |            return;
           |        }
-          |        String uttId = signOff ? "SIGN_OFF" : ("KITT_" + System.currentTimeMillis());
-          |        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, uttId);
+          |        if (!appendChunk) {
+          |            activeUtterances.set(1);
+          |        } else {
+          |            activeUtterances.incrementAndGet();
+          |        }
+          |        int queueMode = appendChunk ? TextToSpeech.QUEUE_ADD : TextToSpeech.QUEUE_FLUSH;
+          |        String uttId = signOff ? "SIGN_OFF" : ("KITT_" + System.nanoTime());
+          |        tts.speak(text, queueMode, null, uttId);
           |    }
           |
           |    public void startListening() {
@@ -507,8 +581,8 @@ jobs:
           |            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
           |            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
           |            intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
-          |            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 800L);
-          |            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 650L);
+          |            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 750L);
+          |            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 600L);
           |            sr.startListening(intent);
           |        } catch (Exception e) {
           |            cb.onNeedFallbackPrompt();
@@ -522,11 +596,169 @@ jobs:
           |}
           """)
 
-          save(pkg + "/ZeldaWatchComplication.kt", """
+          save(watch_pkg + "/WatchTelemetryTracker.java", """
+          |package com.example.zeldawatch;
+          |
+          |import android.Manifest;
+          |import android.content.Context;
+          |import android.content.pm.PackageManager;
+          |import android.hardware.Sensor;
+          |import android.hardware.SensorEvent;
+          |import android.hardware.SensorEventListener;
+          |import android.hardware.SensorManager;
+          |import android.location.Location;
+          |import android.location.LocationListener;
+          |import android.location.LocationManager;
+          |import android.os.Bundle;
+          |import android.os.Looper;
+          |
+          |import org.json.JSONObject;
+          |
+          |public class WatchTelemetryTracker implements SensorEventListener, LocationListener {
+          |    public interface Listener {
+          |        void onHeartRateChanged(int bpm);
+          |        void onFreshGpsFix(Location loc);
+          |    }
+          |
+          |    private final Context context;
+          |    private final Listener listener;
+          |    private final SensorManager sensorManager;
+          |    private final LocationManager locationManager;
+          |
+          |    private volatile int latestBpm = 0;
+          |    private volatile int latestSteps = -1;
+          |    private volatile Location freshestLocation = null;
+          |
+          |    public WatchTelemetryTracker(Context ctx, Listener cb) {
+          |        this.context = ctx;
+          |        this.listener = cb;
+          |        this.sensorManager = (SensorManager) ctx.getSystemService(Context.SENSOR_SERVICE);
+          |        this.locationManager = (LocationManager) ctx.getSystemService(Context.LOCATION_SERVICE);
+          |    }
+          |
+          |    public void start() {
+          |        try {
+          |            if (sensorManager != null && context.checkSelfPermission(Manifest.permission.BODY_SENSORS) == PackageManager.PERMISSION_GRANTED) {
+          |                Sensor hr = sensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE);
+          |                if (hr != null) {
+          |                    sensorManager.registerListener(this, hr, SensorManager.SENSOR_DELAY_NORMAL);
+          |                }
+          |                Sensor sc = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+          |                if (sc != null) {
+          |                    sensorManager.registerListener(this, sc, SensorManager.SENSOR_DELAY_NORMAL);
+          |                }
+          |            }
+          |        } catch (Exception ignored) {}
+          |
+          |        requestActiveGpsFix();
+          |    }
+          |
+          |    public void requestActiveGpsFix() {
+          |        if (locationManager == null) return;
+          |        boolean fine = context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+          |        boolean coarse = context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+          |        if (!fine && !coarse) return;
+          |
+          |        try {
+          |            Location lastGps = fine ? locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) : null;
+          |            Location lastNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+          |            if (lastGps != null) freshestLocation = lastGps;
+          |            else if (lastNet != null && freshestLocation == null) freshestLocation = lastNet;
+          |
+          |            if (fine && locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+          |                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000L, 1f, this, Looper.getMainLooper());
+          |            }
+          |            if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+          |                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000L, 2f, this, Looper.getMainLooper());
+          |            }
+          |        } catch (Exception ignored) {}
+          |    }
+          |
+          |    public JSONObject buildGpsJson() {
+          |        Location loc = freshestLocation;
+          |        if (loc == null && locationManager != null) {
+          |            try {
+          |                if (context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+          |                    loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+          |                }
+          |                if (loc == null && context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+          |                    loc = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+          |                }
+          |            } catch (Exception ignored) {}
+          |        }
+          |        if (loc == null) return null;
+          |        try {
+          |            JSONObject g = new JSONObject();
+          |            g.put("lat", loc.getLatitude());
+          |            g.put("lng", loc.getLongitude());
+          |            g.put("accuracy", loc.getAccuracy());
+          |            g.put("speed", loc.getSpeed());
+          |            g.put("heading", loc.getBearing());
+          |            return g;
+          |        } catch (Exception e) {
+          |            return null;
+          |        }
+          |    }
+          |
+          |    public JSONObject buildBiometricsJson() {
+          |        if (latestBpm <= 0 && latestSteps < 0) return null;
+          |        try {
+          |            JSONObject b = new JSONObject();
+          |            if (latestBpm > 0) b.put("bpm", latestBpm);
+          |            if (latestSteps >= 0) b.put("steps", latestSteps);
+          |            return b;
+          |        } catch (Exception e) {
+          |            return null;
+          |        }
+          |    }
+          |
+          |    public int getLatestBpm() {
+          |        return latestBpm;
+          |    }
+          |
+          |    @Override
+          |    public void onSensorChanged(SensorEvent event) {
+          |        if (event == null || event.values == null || event.values.length == 0) return;
+          |        int type = event.sensor.getType();
+          |        if (type == Sensor.TYPE_HEART_RATE) {
+          |            int val = Math.round(event.values[0]);
+          |            if (val > 30 && val < 240) {
+          |                latestBpm = val;
+          |                if (listener != null) listener.onHeartRateChanged(val);
+          |            }
+          |        } else if (type == Sensor.TYPE_STEP_COUNTER) {
+          |            latestSteps = Math.round(event.values[0]);
+          |        }
+          |    }
+          |
+          |    @Override
+          |    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+          |
+          |    @Override
+          |    public void onLocationChanged(Location location) {
+          |        if (location != null) {
+          |            freshestLocation = location;
+          |            if (listener != null) listener.onFreshGpsFix(location);
+          |        }
+          |    }
+          |
+          |    @Override public void onStatusChanged(String provider, int status, Bundle extras) {}
+          |    @Override public void onProviderEnabled(String provider) {}
+          |    @Override public void onProviderDisabled(String provider) {}
+          |
+          |    public void stop() {
+          |        try { if (sensorManager != null) sensorManager.unregisterListener(this); } catch (Exception ignored) {}
+          |        try { if (locationManager != null) locationManager.removeUpdates(this); } catch (Exception ignored) {}
+          |    }
+          |}
+          """)
+
+          save(watch_pkg + "/ZeldaWatchComplication.kt", """
           |package com.example.zeldawatch
           |
           |import android.Manifest
           |import android.app.Activity
+          |import android.app.AlertDialog
           |import android.app.PendingIntent
           |import android.content.ComponentName
           |import android.content.Context
@@ -536,18 +768,18 @@ jobs:
           |import android.graphics.Typeface
           |import android.graphics.drawable.GradientDrawable
           |import android.graphics.drawable.Icon
-          |import android.location.LocationManager
+          |import android.location.Location
           |import android.os.Bundle
           |import android.os.Handler
           |import android.os.Looper
           |import android.speech.RecognizerIntent
+          |import android.text.TextUtils
+          |import android.util.TypedValue
           |import android.view.Gravity
-          |import android.view.View
           |import android.view.WindowManager
-          |import android.widget.Button
           |import android.widget.EditText
+          |import android.widget.FrameLayout
           |import android.widget.LinearLayout
-          |import android.widget.ScrollView
           |import android.widget.TextView
           |import androidx.wear.watchface.complications.data.ComplicationData
           |import androidx.wear.watchface.complications.data.ComplicationType
@@ -590,7 +822,7 @@ jobs:
           |        val rawIcon = Icon.createWithResource(this, android.R.drawable.ic_btn_speak_now)
           |        val mono = MonochromaticImage.Builder(rawIcon).build()
           |        val small = SmallImage.Builder(rawIcon, SmallImageType.ICON).build()
-          |        val desc = PlainComplicationText.Builder("Zelda KITT Comlink").build()
+          |        val desc = PlainComplicationText.Builder("Zelda Neural Link").build()
           |        return when (type) {
           |            ComplicationType.SHORT_TEXT -> ShortTextComplicationData.Builder(PlainComplicationText.Builder(text).build(), desc).setMonochromaticImage(mono).setTapAction(pi).build()
           |            ComplicationType.MONOCHROMATIC_IMAGE -> MonochromaticImageComplicationData.Builder(mono, desc).setTapAction(pi).build()
@@ -600,23 +832,29 @@ jobs:
           |    }
           |}
           |
-          |class ZeldaQuickVoiceActivity : Activity(), KittSpeechEngine.Callbacks {
+          |class ZeldaQuickVoiceActivity : Activity(), KittSpeechEngine.Callbacks, WatchTelemetryTracker.Listener {
           |    private val REQ_SPEECH_FALLBACK = 101
           |    private val REQ_PERMS = 202
           |    private val mainHandler = Handler(Looper.getMainLooper())
           |
-          |    private lateinit var kittView: KittModulatorView
+          |    private lateinit var waveView: KittModulatorView
           |    private lateinit var statusView: TextView
           |    private lateinit var subtitleView: TextView
-          |    private lateinit var codeInput: EditText
-          |    private lateinit var pairContainer: LinearLayout
+          |    private lateinit var zLockDot: TextView
+          |    private lateinit var bpmDot: TextView
+          |    private lateinit var linkDot: TextView
           |    private lateinit var speechEngine: KittSpeechEngine
+          |    private lateinit var telemetry: WatchTelemetryTracker
           |
           |    @Volatile private var activityAlive = true
           |    @Volatile private var sseConn: HttpURLConnection? = null
+          |    @Volatile private var pendingZLockReply = false
           |    private var activeStreamTopic = ""
           |    private var lastRxId = ""
           |    private var replyTimeoutRunnable: Runnable? = null
+          |
+          |    private fun dp(v: Float): Int =
+          |        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, v, resources.displayMetrics).toInt()
           |
           |    override fun onCreate(savedInstanceState: Bundle?) {
           |        super.onCreate(savedInstanceState)
@@ -625,77 +863,224 @@ jobs:
           |        val savedCode = prefs.getString(KEY_CHANNEL, "") ?: ""
           |
           |        speechEngine = KittSpeechEngine(this, this)
+          |        telemetry = WatchTelemetryTracker(this, this)
           |
-          |        val scroll = ScrollView(this).apply { setBackgroundColor(Color.parseColor("#040508")); isFillViewport = true }
-          |        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER; setPadding(26, 26, 26, 30) }
+          |        // Full-bleed non-scrolling circular layout calibrated to round Watch Ultra inset!
+          |        val screenW = resources.displayMetrics.widthPixels
+          |        val screenH = resources.displayMetrics.heightPixels
+          |        val safePadX = (screenW * 0.11f).toInt()
+          |        val safePadY = (screenH * 0.12f).toInt()
           |
-          |        statusView = TextView(this).apply {
-          |            text = if (savedCode.isEmpty()) "PAIR 370Z CODE" else "KITT // $savedCode"
-          |            setTextColor(Color.parseColor("#00F0FF")); textSize = 11f; typeface = Typeface.MONOSPACE; gravity = Gravity.CENTER
+          |        val root = FrameLayout(this).apply {
+          |            setBackgroundColor(Color.parseColor("#03040A"))
           |        }
-          |        kittView = KittModulatorView(this).apply {
-          |            layoutParams = LinearLayout.LayoutParams(230, 126).apply { topMargin = 8 }
+          |
+          |        // Top subtle status header tucked inside top circular arc
+          |        statusView = TextView(this).apply {
+          |            text = if (savedCode.isEmpty()) "TAP LINK TO PAIR" else "ZELDA // $savedCode"
+          |            setTextColor(Color.parseColor("#80EAFF"))
+          |            setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f)
+          |            typeface = Typeface.MONOSPACE
+          |            letterSpacing = 0.10f
+          |            gravity = Gravity.CENTER
+          |            setOnClickListener { showPairDialog() }
+          |        }
+          |        val topLp = FrameLayout.LayoutParams(
+          |            FrameLayout.LayoutParams.MATCH_PARENT,
+          |            FrameLayout.LayoutParams.WRAP_CONTENT,
+          |            Gravity.TOP or Gravity.CENTER_HORIZONTAL
+          |        ).apply {
+          |            setMargins(safePadX, safePadY, safePadX, 0)
+          |        }
+          |        root.addView(statusView, topLp)
+          |
+          |        // Edge-to-edge Neon Multi-Ribbon Waveform across the center equator
+          |        waveView = KittModulatorView(this).apply {
           |            setOnClickListener {
           |                speechEngine.stopTts()
           |                val c = currentCode()
-          |                if (c.isNotEmpty()) beginVoiceTurn() else pairContainer.visibility = View.VISIBLE
+          |                if (c.isNotEmpty()) beginVoiceTurn() else showPairDialog()
+          |            }
+          |            setOnLongClickListener {
+          |                showPairDialog()
+          |                true
           |            }
           |        }
+          |        val waveLp = FrameLayout.LayoutParams(
+          |            FrameLayout.LayoutParams.MATCH_PARENT,
+          |            (screenH * 0.44f).toInt(),
+          |            Gravity.CENTER
+          |        ).apply {
+          |            bottomMargin = dp(10f)
+          |        }
+          |        root.addView(waveView, waveLp)
+          |
+          |        // Crisp 2-line subtitle floating cleanly below the waveform
+          |        val bottomStack = LinearLayout(this).apply {
+          |            orientation = LinearLayout.VERTICAL
+          |            gravity = Gravity.CENTER_HORIZONTAL
+          |        }
+          |
           |        subtitleView = TextView(this).apply {
-          |            text = "TAP VOICE BOX TO SPEAK"
-          |            setTextColor(Color.parseColor("#E6F7FF")); textSize = 11f; gravity = Gravity.CENTER; maxLines = 3; setPadding(8, 8, 8, 4)
+          |            text = if (savedCode.isEmpty()) "Tap LINK below to pair 4-char code" else "Tap wave to speak"
+          |            setTextColor(Color.parseColor("#E8F4FF"))
+          |            setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
+          |            gravity = Gravity.CENTER
+          |            maxLines = 2
+          |            ellipsize = TextUtils.TruncateAt.END
+          |            setPadding(dp(8f), 0, dp(8f), dp(6f))
           |        }
           |
-          |        val actionRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER }
-          |        val zLockChip = Button(this).apply {
-          |            text = "Z-LOCK"; setTextColor(Color.parseColor("#00F0FF")); textSize = 10f
-          |            background = GradientDrawable().apply { setColor(Color.parseColor("#0D1E2A")); setStroke(2, Color.parseColor("#00F0FF")); cornerRadius = 40f }
-          |            setPadding(18, 8, 18, 8)
-          |            setOnClickListener { val c = currentCode(); if (c.isNotEmpty()) beamToCar(c, "zlock", null) else pairContainer.visibility = View.VISIBLE }
+          |        // Minimal micro-hud dock tucked cleanly inside the bottom bezel curve (never clips!)
+          |        val microDock = LinearLayout(this).apply {
+          |            orientation = LinearLayout.HORIZONTAL
+          |            gravity = Gravity.CENTER
+          |            background = GradientDrawable().apply {
+          |                setColor(Color.parseColor("#111626"))
+          |                setStroke(1, Color.parseColor("#293855"))
+          |                cornerRadius = 999f
+          |            }
+          |            setPadding(dp(10f), dp(4f), dp(10f), dp(4f))
           |        }
-          |        val cfgChip = Button(this).apply {
-          |            text = "CODE"; setTextColor(Color.parseColor("#FCEE0A")); textSize = 10f
-          |            background = GradientDrawable().apply { setColor(Color.parseColor("#1B1908")); setStroke(2, Color.parseColor("#FCEE0A")); cornerRadius = 40f }
-          |            setPadding(18, 8, 18, 8)
-          |            setOnClickListener { pairContainer.visibility = if (pairContainer.visibility == View.VISIBLE) View.GONE else View.VISIBLE }
-          |        }
-          |        val chipLp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { setMargins(6, 6, 6, 0) }
-          |        actionRow.addView(zLockChip, chipLp); actionRow.addView(cfgChip, chipLp)
           |
-          |        pairContainer = LinearLayout(this).apply {
-          |            orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER
-          |            visibility = if (savedCode.isEmpty()) View.VISIBLE else View.GONE
-          |        }
-          |        codeInput = EditText(this).apply {
-          |            hint = "4-char 370Z code"; setText(savedCode); setTextColor(Color.parseColor("#FCEE0A"))
-          |            setHintTextColor(Color.parseColor("#667788")); textSize = 12f; gravity = Gravity.CENTER; setSingleLine(true)
-          |        }
-          |        val saveCodeBtn = Button(this).apply {
-          |            text = "SAVE & LINK"; textSize = 11f
+          |        zLockDot = TextView(this).apply {
+          |            text = "◎ GPS"
+          |            setTextColor(Color.parseColor("#00F0FF"))
+          |            setTextSize(TypedValue.COMPLEX_UNIT_SP, 9.5f)
+          |            typeface = Typeface.MONOSPACE
+          |            setPadding(dp(6f), dp(2f), dp(6f), dp(2f))
           |            setOnClickListener {
-          |                val c = saveCode(prefs)
-          |                if (c.isNotEmpty()) { pairContainer.visibility = View.GONE; ensureCarReplyStream(c); beginVoiceTurn() }
+          |                val c = currentCode()
+          |                if (c.isNotEmpty()) triggerZLockWithFreshSatelliteFix(c) else showPairDialog()
           |            }
           |        }
-          |        pairContainer.addView(codeInput); pairContainer.addView(saveCodeBtn)
-          |        root.addView(statusView); root.addView(kittView); root.addView(subtitleView); root.addView(actionRow); root.addView(pairContainer)
-          |        scroll.addView(root); setContentView(scroll)
+          |
+          |        bpmDot = TextView(this).apply {
+          |            text = "♥ --"
+          |            setTextColor(Color.parseColor("#FF4081"))
+          |            setTextSize(TypedValue.COMPLEX_UNIT_SP, 9.5f)
+          |            typeface = Typeface.MONOSPACE
+          |            setPadding(dp(6f), dp(2f), dp(6f), dp(2f))
+          |        }
+          |
+          |        linkDot = TextView(this).apply {
+          |            text = if (savedCode.isEmpty()) "⚙ PAIR" else "⚙ $savedCode"
+          |            setTextColor(Color.parseColor("#D580FF"))
+          |            setTextSize(TypedValue.COMPLEX_UNIT_SP, 9.5f)
+          |            typeface = Typeface.MONOSPACE
+          |            setPadding(dp(6f), dp(2f), dp(6f), dp(2f))
+          |            setOnClickListener { showPairDialog() }
+          |        }
+          |
+          |        microDock.addView(zLockDot)
+          |        microDock.addView(bpmDot)
+          |        microDock.addView(linkDot)
+          |
+          |        bottomStack.addView(subtitleView)
+          |        bottomStack.addView(microDock)
+          |
+          |        val bottomLp = FrameLayout.LayoutParams(
+          |            FrameLayout.LayoutParams.MATCH_PARENT,
+          |            FrameLayout.LayoutParams.WRAP_CONTENT,
+          |            Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+          |        ).apply {
+          |            setMargins(safePadX, 0, safePadX, safePadY)
+          |        }
+          |        root.addView(bottomStack, bottomLp)
+          |
+          |        setContentView(root)
           |
           |        val hasPerms = checkAndRequestPerms()
-          |        if (savedCode.isNotEmpty()) {
+          |        telemetry.start()
+          |
+          |        if (savedCode.isEmpty()) {
+          |            showPairDialog()
+          |        } else {
           |            ensureCarReplyStream(savedCode)
-          |            if (hasPerms) mainHandler.postDelayed({ beginVoiceTurn() }, 180)
+          |            if (hasPerms) mainHandler.postDelayed({ beginVoiceTurn() }, 160)
+          |        }
+          |    }
+          |
+          |    private fun showPairDialog() {
+          |        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+          |        val existing = prefs.getString(KEY_CHANNEL, "") ?: ""
+          |        val input = EditText(this).apply {
+          |            hint = "4-char car code"
+          |            setText(existing)
+          |            setTextColor(Color.parseColor("#00F0FF"))
+          |            setHintTextColor(Color.parseColor("#778899"))
+          |            gravity = Gravity.CENTER
+          |            setSingleLine(true)
+          |        }
+          |        AlertDialog.Builder(this)
+          |            .setTitle("370Z 4-Char Code")
+          |            .setView(input)
+          |            .setPositiveButton("LINK") { _, _ ->
+          |                val raw = input.text.toString().trim().uppercase(Locale.US)
+          |                val sb = StringBuilder()
+          |                for (ch in raw) {
+          |                    if (ch.isLetterOrDigit() || ch == '-' || ch == '_') sb.append(ch)
+          |                }
+          |                val clean = sb.toString()
+          |                if (clean.isNotEmpty()) {
+          |                    prefs.edit().putString(KEY_CHANNEL, clean).commit()
+          |                    statusView.text = "ZELDA // $clean"
+          |                    linkDot.text = "⚙ $clean"
+          |                    try {
+          |                        ComplicationDataSourceUpdateRequester.create(
+          |                            this,
+          |                            ComponentName(this, ZeldaComplicationService::class.java)
+          |                        ).requestUpdateAll()
+          |                    } catch (_: Exception) {}
+          |                    ensureCarReplyStream(clean)
+          |                    beginVoiceTurn()
+          |                }
+          |            }
+          |            .setNegativeButton("CANCEL", null)
+          |            .show()
+          |    }
+          |
+          |    override fun onHeartRateChanged(bpm: Int) {
+          |        mainHandler.post {
+          |            bpmDot.text = "♥ $bpm"
+          |        }
+          |    }
+          |
+          |    override fun onFreshGpsFix(loc: Location) {
+          |        if (pendingZLockReply) {
+          |            pendingZLockReply = false
+          |            val c = currentCode()
+          |            if (c.isNotEmpty()) beamToCar(c, "zlock", null)
+          |        }
+          |    }
+          |
+          |    private fun triggerZLockWithFreshSatelliteFix(code: String) {
+          |        statusView.text = "LOCKING GPS..."
+          |        subtitleView.text = "Acquiring satellite lock..."
+          |        waveView.setMode(KittModulatorView.MODE_THINKING)
+          |        telemetry.requestActiveGpsFix()
+          |        val existingGps = telemetry.buildGpsJson()
+          |        if (existingGps != null) {
+          |            beamToCar(code, "zlock", null)
+          |        } else {
+          |            pendingZLockReply = true
+          |            mainHandler.postDelayed({
+          |                if (pendingZLockReply) {
+          |                    pendingZLockReply = false
+          |                    beamToCar(code, "zlock", null)
+          |                }
+          |            }, 2500L)
           |        }
           |    }
           |
           |    override fun onListeningStarted() {
-          |        kittView.setMode(KittModulatorView.MODE_LISTENING)
-          |        statusView.text = "LISTENING..."
-          |        subtitleView.text = "SPEAK TO ZELDA..."
+          |        waveView.setMode(KittModulatorView.MODE_LISTENING)
+          |        statusView.text = "LISTENING"
+          |        subtitleView.text = "Speak now..."
           |    }
           |
           |    override fun onRmsLevel(level: Float) {
-          |        kittView.setMicLevel(level)
+          |        waveView.setMicLevel(level)
           |    }
           |
           |    override fun onPartialTranscript(partial: String?) {
@@ -703,8 +1088,8 @@ jobs:
           |    }
           |
           |    override fun onScanningStarted() {
-          |        kittView.setMode(KittModulatorView.MODE_THINKING)
-          |        statusView.text = "SCANNING..."
+          |        waveView.setMode(KittModulatorView.MODE_THINKING)
+          |        statusView.text = "PROCESSING"
           |    }
           |
           |    override fun onFinalTranscript(spoken: String?) {
@@ -716,32 +1101,32 @@ jobs:
           |    }
           |
           |    override fun onSilenceTimeout() {
-          |        kittView.setMode(KittModulatorView.MODE_IDLE)
-          |        statusView.text = "STANDING BY"
+          |        waveView.setMode(KittModulatorView.MODE_IDLE)
+          |        statusView.text = "STANDBY"
           |        mainHandler.postDelayed({
-          |            if (activityAlive && kittView.getMode() == KittModulatorView.MODE_IDLE) finish()
+          |            if (activityAlive && waveView.getMode() == KittModulatorView.MODE_IDLE) finish()
           |        }, 900)
           |    }
           |
           |    override fun onMicIdle() {
-          |        kittView.setMode(KittModulatorView.MODE_IDLE)
-          |        statusView.text = "TAP VOICE BOX"
+          |        waveView.setMode(KittModulatorView.MODE_IDLE)
+          |        statusView.text = "TAP WAVE"
           |    }
           |
           |    override fun onTtsStarted() {
-          |        kittView.setMode(KittModulatorView.MODE_SPEAKING)
-          |        statusView.text = "ZELDA // SPEAKING"
+          |        waveView.setMode(KittModulatorView.MODE_SPEAKING)
+          |        statusView.text = "ZELDA"
           |    }
           |
           |    override fun onTtsWordPulse() {
-          |        kittView.triggerWordPulse()
+          |        waveView.triggerWordPulse()
           |    }
           |
           |    override fun onTtsFinished(signOff: Boolean) {
           |        if (signOff) {
           |            finish()
           |        } else if (activityAlive) {
-          |            mainHandler.postDelayed({ if (activityAlive) beginVoiceTurn() }, 350)
+          |            mainHandler.postDelayed({ if (activityAlive) beginVoiceTurn() }, 300)
           |        }
           |    }
           |
@@ -757,6 +1142,12 @@ jobs:
           |            needed.add(Manifest.permission.ACCESS_FINE_LOCATION)
           |            needed.add(Manifest.permission.ACCESS_COARSE_LOCATION)
           |        }
+          |        if (checkSelfPermission(Manifest.permission.BODY_SENSORS) != PackageManager.PERMISSION_GRANTED) {
+          |            needed.add(Manifest.permission.BODY_SENSORS)
+          |        }
+          |        if (checkSelfPermission(Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) {
+          |            needed.add(Manifest.permission.ACTIVITY_RECOGNITION)
+          |        }
           |        if (needed.isNotEmpty()) {
           |            requestPermissions(needed.toTypedArray(), REQ_PERMS)
           |            return false
@@ -764,33 +1155,14 @@ jobs:
           |        return true
           |    }
           |
-          |    private fun speakWithKittModulator(text: String, signOffAfter: Boolean) {
+          |    private fun speakWithModulator(text: String, signOffAfter: Boolean, isChunk: Boolean) {
           |        replyTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
           |        mainHandler.post {
           |            subtitleView.text = text
-          |            kittView.setMode(KittModulatorView.MODE_SPEAKING)
-          |            statusView.text = "ZELDA // SPEAKING"
+          |            waveView.setMode(KittModulatorView.MODE_SPEAKING)
+          |            statusView.text = "ZELDA"
           |        }
-          |        speechEngine.speak(text, signOffAfter)
-          |    }
-          |
-          |    private fun saveCode(prefs: android.content.SharedPreferences): String {
-          |        val raw = codeInput.text.toString().trim().uppercase(Locale.US)
-          |        val sb = StringBuilder()
-          |        for (ch in raw) {
-          |            if (ch.isLetterOrDigit() || ch == '-' || ch == '_') sb.append(ch)
-          |        }
-          |        val clean = sb.toString()
-          |        if (clean.isEmpty()) {
-          |            statusView.text = "ENTER 4-CHAR CODE"
-          |            return ""
-          |        }
-          |        prefs.edit().putString(KEY_CHANNEL, clean).commit()
-          |        statusView.text = "KITT // $clean"
-          |        try {
-          |            ComplicationDataSourceUpdateRequester.create(this, ComponentName(this, ZeldaComplicationService::class.java)).requestUpdateAll()
-          |        } catch (_: Exception) {}
-          |        return clean
+          |        speechEngine.speak(text, signOffAfter, isChunk)
           |    }
           |
           |    private fun beginVoiceTurn() {
@@ -799,6 +1171,7 @@ jobs:
           |            checkAndRequestPerms()
           |            return
           |        }
+          |        telemetry.start()
           |        speechEngine.startListening()
           |    }
           |
@@ -806,7 +1179,7 @@ jobs:
           |        try {
           |            val i = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
           |                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-          |                putExtra(RecognizerIntent.EXTRA_PROMPT, "ZELDA // KITT LINK")
+          |                putExtra(RecognizerIntent.EXTRA_PROMPT, "ZELDA // SPEAK")
           |            }
           |            startActivityForResult(i, REQ_SPEECH_FALLBACK)
           |        } catch (_: Exception) {
@@ -828,7 +1201,7 @@ jobs:
           |    private fun handleUserTranscript(rawSpoken: String?) {
           |        val spoken = rawSpoken?.trim() ?: ""
           |        if (spoken.isEmpty()) {
-          |            kittView.setMode(KittModulatorView.MODE_IDLE)
+          |            waveView.setMode(KittModulatorView.MODE_IDLE)
           |            return
           |        }
           |        val low = spoken.lowercase(Locale.US)
@@ -836,13 +1209,15 @@ jobs:
           |            low == "stop listening" || low == "exit" || low == "close" ||
           |            low == "thats all" || low == "that's all" || low == "that is all"
           |        ) {
-          |            speakWithKittModulator("Standing by, J.", signOffAfter = true)
+          |            speakWithModulator("Standing by, J.", signOffAfter = true, isChunk = false)
           |            return
           |        }
           |        val code = currentCode()
           |        if (code.isNotEmpty()) {
           |            subtitleView.text = spoken
           |            beamToCar(code, "voice", spoken)
+          |        } else {
+          |            showPairDialog()
           |        }
           |    }
           |
@@ -874,10 +1249,19 @@ jobs:
           |                            if (msgRaw.isEmpty()) continue
           |                            val msg = JSONObject(msgRaw)
           |                            if (msg.optString("source") != "zelda-car") continue
-          |                            if (abs(System.currentTimeMillis() - msg.optLong("ts")) > 20000L) continue
-          |                            val txt = msg.optString("text").trim()
-          |                            if (txt.isNotEmpty() && msg.optString("type") == "speak") {
-          |                                speakWithKittModulator(txt, signOffAfter = false)
+          |                            if (abs(System.currentTimeMillis() - msg.optLong("ts")) > 25000L) continue
+          |
+          |                            val msgType = msg.optString("type")
+          |                            if (msgType == "speak") {
+          |                                val txt = msg.optString("text").trim()
+          |                                val isChunk = msg.optBoolean("chunk", false)
+          |                                if (txt.isNotEmpty()) {
+          |                                    speakWithModulator(txt, signOffAfter = false, isChunk = isChunk)
+          |                                }
+          |                            } else if (msgType == "request-gps") {
+          |                                telemetry.requestActiveGpsFix()
+          |                                val c = currentCode()
+          |                                if (c.isNotEmpty()) beamToCar(c, "gps-reply", null)
           |                            }
           |                        }
           |                    }
@@ -888,44 +1272,36 @@ jobs:
           |        }
           |    }
           |
-          |    private fun readGps(): JSONObject? {
-          |        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-          |            checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-          |        ) return null
-          |        return try {
-          |            val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-          |            val loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-          |                ?: lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-          |                ?: return null
-          |            JSONObject().apply {
-          |                put("lat", loc.latitude); put("lng", loc.longitude)
-          |                put("accuracy", loc.accuracy); put("speed", loc.speed); put("heading", loc.bearing)
-          |            }
-          |        } catch (_: Exception) { null }
-          |    }
-          |
           |    private fun beamToCar(shortCode: String, type: String, transcript: String?) {
           |        ensureCarReplyStream(shortCode)
           |        val topic = if (shortCode.startsWith("ZELDA-", true)) shortCode.lowercase(Locale.US) else "zelda-370z-$shortCode"
-          |        val gps = readGps()
-          |        kittView.setMode(KittModulatorView.MODE_THINKING)
-          |        statusView.text = "TX >> 370Z..."
-          |        replyTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
-          |        val timeoutTask = Runnable {
-          |            if (activityAlive && kittView.getMode() == KittModulatorView.MODE_THINKING) {
-          |                kittView.setMode(KittModulatorView.MODE_IDLE)
-          |                statusView.text = "370Z OFFLINE"
-          |                subtitleView.text = "WAIT FOR CAR HOTSPOT"
+          |        val gps = telemetry.buildGpsJson()
+          |        val bio = telemetry.buildBiometricsJson()
+          |
+          |        if (type == "voice" || type == "zlock") {
+          |            waveView.setMode(KittModulatorView.MODE_THINKING)
+          |            statusView.text = "LINKING 370Z"
+          |            replyTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+          |            val timeoutTask = Runnable {
+          |                if (activityAlive && waveView.getMode() == KittModulatorView.MODE_THINKING) {
+          |                    waveView.setMode(KittModulatorView.MODE_IDLE)
+          |                    statusView.text = "370Z OFFLINE"
+          |                    subtitleView.text = "Waiting for car HUD..."
+          |                }
           |            }
+          |            replyTimeoutRunnable = timeoutTask
+          |            mainHandler.postDelayed(timeoutTask, 7500L)
           |        }
-          |        replyTimeoutRunnable = timeoutTask
-          |        mainHandler.postDelayed(timeoutTask, 7000L)
+          |
           |        thread {
           |            try {
           |                val payload = JSONObject().apply {
-          |                    put("source", "zelda-watch"); put("type", type); put("ts", System.currentTimeMillis())
+          |                    put("source", "zelda-watch")
+          |                    put("type", type)
+          |                    put("ts", System.currentTimeMillis())
           |                    if (transcript != null) put("transcript", transcript)
           |                    if (gps != null) put("gps", gps)
+          |                    if (bio != null) put("biometrics", bio)
           |                }
           |                val conn = (URL("https://ntfy.sh/$topic").openConnection() as HttpURLConnection).apply {
           |                    requestMethod = "POST"; doOutput = true; connectTimeout = 5000; readTimeout = 5000
@@ -933,11 +1309,19 @@ jobs:
           |                }
           |                conn.outputStream.use { it.write(payload.toString().toByteArray(Charsets.UTF_8)) }
           |                val code = conn.responseCode
-          |                if (code !in 200..299) {
-          |                    mainHandler.post { kittView.setMode(KittModulatorView.MODE_IDLE); statusView.text = "HTTP $code" }
+          |                if (code !in 200..299 && (type == "voice" || type == "zlock")) {
+          |                    mainHandler.post {
+          |                        waveView.setMode(KittModulatorView.MODE_IDLE)
+          |                        statusView.text = "HTTP $code"
+          |                    }
           |                }
           |            } catch (_: Exception) {
-          |                mainHandler.post { kittView.setMode(KittModulatorView.MODE_IDLE); statusView.text = "CHECK NET" }
+          |                if (type == "voice" || type == "zlock") {
+          |                    mainHandler.post {
+          |                        waveView.setMode(KittModulatorView.MODE_IDLE)
+          |                        statusView.text = "CHECK NET"
+          |                    }
+          |                }
           |            }
           |        }
           |    }
@@ -945,6 +1329,7 @@ jobs:
           |    override fun onDestroy() {
           |        activityAlive = false
           |        replyTimeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+          |        if (::telemetry.isInitialized) telemetry.stop()
           |        if (::speechEngine.isInitialized) speechEngine.shutdown()
           |        try { sseConn?.disconnect() } catch (_: Exception) {}
           |        super.onDestroy()
@@ -952,25 +1337,542 @@ jobs:
           |}
           """)
 
-          print("Generated all KITT Wear OS files cleanly.")
+          save(root_dir + "/phone-bridge/build.gradle.kts", """
+          |plugins {
+          |    id("com.android.application")
+          |    id("org.jetbrains.kotlin.android")
+          |}
+          |android {
+          |    namespace = "com.example.zeldabridge"
+          |    compileSdk = 35
+          |    defaultConfig {
+          |        applicationId = "com.example.zeldabridge"
+          |        minSdk = 28
+          |        targetSdk = 34
+          |        versionCode = 1
+          |        versionName = "4.8.0"
+          |    }
+          |    buildTypes {
+          |        release {
+          |            isMinifyEnabled = false
+          |            signingConfig = signingConfigs.getByName("debug")
+          |        }
+          |    }
+          |    compileOptions {
+          |        sourceCompatibility = JavaVersion.VERSION_17
+          |        targetCompatibility = JavaVersion.VERSION_17
+          |    }
+          |    kotlinOptions { jvmTarget = "17" }
+          |}
+          |dependencies {
+          |    implementation("androidx.core:core-ktx:1.13.1")
+          |    implementation("androidx.activity:activity-ktx:1.9.3")
+          |    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+          |    implementation("androidx.health.connect:connect-client:1.1.0")
+          |}
+          """)
 
-      - name: Install Gradle 8.9 & Compile Signed Wear APK
+          save(root_dir + "/phone-bridge/src/main/AndroidManifest.xml", """
+          |<?xml version="1.0" encoding="utf-8"?>
+          |<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+          |    <uses-permission android:name="android.permission.INTERNET" />
+          |    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+          |    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+          |    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+          |
+          |    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
+          |    <uses-permission android:name="android.permission.health.READ_RESTING_HEART_RATE" />
+          |    <uses-permission android:name="android.permission.health.READ_HEART_RATE_VARIABILITY" />
+          |    <uses-permission android:name="android.permission.health.READ_SLEEP" />
+          |    <uses-permission android:name="android.permission.health.READ_STEPS" />
+          |    <uses-permission android:name="android.permission.health.READ_OXYGEN_SATURATION" />
+          |
+          |    <queries>
+          |        <package android:name="com.google.android.apps.healthdata" />
+          |        <intent>
+          |            <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+          |        </intent>
+          |    </queries>
+          |
+          |    <application
+          |        android:allowBackup="true"
+          |        android:icon="@android:drawable/ic_dialog_info"
+          |        android:label="Zelda Neural Bridge"
+          |        android:supportsRtl="true"
+          |        android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
+          |
+          |        <activity
+          |            android:name=".ZeldaBridgeActivity"
+          |            android:exported="true"
+          |            android:label="Zelda Neural Bridge">
+          |            <intent-filter>
+          |                <action android:name="android.intent.action.MAIN" />
+          |                <category android:name="android.intent.category.LAUNCHER" />
+          |            </intent-filter>
+          |            <intent-filter>
+          |                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+          |            </intent-filter>
+          |            <intent-filter>
+          |                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+          |                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+          |            </intent-filter>
+          |        </activity>
+          |    </application>
+          |</manifest>
+          """)
+
+          save(phone_pkg + "/ZeldaBridgeActivity.kt", """
+          |package com.example.zeldabridge
+          |
+          |import android.Manifest
+          |import android.content.Context
+          |import android.content.pm.PackageManager
+          |import android.graphics.Color
+          |import android.graphics.Typeface
+          |import android.graphics.drawable.GradientDrawable
+          |import android.location.Location
+          |import android.location.LocationListener
+          |import android.location.LocationManager
+          |import android.os.Bundle
+          |import android.os.Looper
+          |import android.util.TypedValue
+          |import android.view.Gravity
+          |import android.widget.Button
+          |import android.widget.EditText
+          |import android.widget.LinearLayout
+          |import android.widget.ScrollView
+          |import android.widget.TextView
+          |import androidx.activity.ComponentActivity
+          |import androidx.health.connect.client.HealthConnectClient
+          |import androidx.health.connect.client.PermissionController
+          |import androidx.health.connect.client.permission.HealthPermission
+          |import androidx.health.connect.client.records.HeartRateRecord
+          |import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
+          |import androidx.health.connect.client.records.OxygenSaturationRecord
+          |import androidx.health.connect.client.records.RestingHeartRateRecord
+          |import androidx.health.connect.client.records.SleepSessionRecord
+          |import androidx.health.connect.client.records.StepsRecord
+          |import androidx.health.connect.client.request.ReadRecordsRequest
+          |import androidx.health.connect.client.time.TimeRangeFilter
+          |import androidx.lifecycle.lifecycleScope
+          |import kotlinx.coroutines.Dispatchers
+          |import kotlinx.coroutines.launch
+          |import kotlinx.coroutines.withContext
+          |import org.json.JSONObject
+          |import java.io.BufferedReader
+          |import java.io.InputStreamReader
+          |import java.net.HttpURLConnection
+          |import java.net.URL
+          |import java.time.Duration
+          |import java.time.Instant
+          |import java.util.Locale
+          |import kotlin.concurrent.thread
+          |import kotlin.math.abs
+          |import kotlin.math.roundToInt
+          |
+          |class ZeldaBridgeActivity : ComponentActivity(), LocationListener {
+          |    private val PREFS = "zelda_fold7_bridge_prefs"
+          |    private val KEY_CODE = "car_code"
+          |    private val KEY_API = "gemini_key"
+          |
+          |    private lateinit var statusLabel: TextView
+          |    private lateinit var metricsBox: TextView
+          |    private lateinit var codeInput: EditText
+          |    private lateinit var apiKeyInput: EditText
+          |    private var locationManager: LocationManager? = null
+          |    @Volatile private var latestLoc: Location? = null
+          |    @Volatile private var alive = true
+          |    @Volatile private var sseConn: HttpURLConnection? = null
+          |    private var activeTopic = ""
+          |
+          |    private val healthPermissions = setOf(
+          |        HealthPermission.getReadPermission(HeartRateRecord::class),
+          |        HealthPermission.getReadPermission(RestingHeartRateRecord::class),
+          |        HealthPermission.getReadPermission(HeartRateVariabilityRmssdRecord::class),
+          |        HealthPermission.getReadPermission(SleepSessionRecord::class),
+          |        HealthPermission.getReadPermission(StepsRecord::class),
+          |        HealthPermission.getReadPermission(OxygenSaturationRecord::class)
+          |    )
+          |
+          |    private val requestHealthPerms = registerForActivityResult(
+          |        PermissionController.createRequestPermissionResultContract()
+          |    ) { _ ->
+          |        syncHealthAndGpsToCar(beamKeyToo = false)
+          |    }
+          |
+          |    private fun dp(v: Float): Int =
+          |        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, v, resources.displayMetrics).toInt()
+          |
+          |    override fun onCreate(savedInstanceState: Bundle?) {
+          |        super.onCreate(savedInstanceState)
+          |        val prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+          |        val savedCode = prefs.getString(KEY_CODE, "") ?: ""
+          |        val savedKey = prefs.getString(KEY_API, "") ?: ""
+          |
+          |        locationManager = getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+          |        requestPhoneGps()
+          |
+          |        val scroll = ScrollView(this).apply {
+          |            setBackgroundColor(Color.parseColor("#05070E"))
+          |            isFillViewport = true
+          |        }
+          |        val root = LinearLayout(this).apply {
+          |            orientation = LinearLayout.VERTICAL
+          |            setPadding(dp(22f), dp(36f), dp(22f), dp(28f))
+          |        }
+          |
+          |        val title = TextView(this).apply {
+          |            text = "ZELDA // FOLD 7 NEURAL BRIDGE"
+          |            setTextColor(Color.parseColor("#00F0FF"))
+          |            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+          |            typeface = Typeface.MONOSPACE
+          |        }
+          |
+          |        val sub = TextView(this).apply {
+          |            text = "Health Connect (Watch Ultra + Hume Pod) + Precision GPS + 1-Tap Car API Key Vault"
+          |            setTextColor(Color.parseColor("#90A4AE"))
+          |            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+          |            setPadding(0, dp(4f), 0, dp(16f))
+          |        }
+          |
+          |        statusLabel = TextView(this).apply {
+          |            text = "STATUS: READY"
+          |            setTextColor(Color.parseColor("#EA80FC"))
+          |            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+          |            typeface = Typeface.MONOSPACE
+          |            setPadding(0, 0, 0, dp(12f))
+          |        }
+          |
+          |        codeInput = EditText(this).apply {
+          |            hint = "4-Char 370Z Pairing Code (e.g. K9X2)"
+          |            setText(savedCode)
+          |            setTextColor(Color.parseColor("#00F0FF"))
+          |            setHintTextColor(Color.parseColor("#546E7A"))
+          |            setSingleLine(true)
+          |        }
+          |
+          |        apiKeyInput = EditText(this).apply {
+          |            hint = "Optional: Paste Gemini AIza... Key to Beam to 370Z"
+          |            setText(savedKey)
+          |            setTextColor(Color.parseColor("#FCEE0A"))
+          |            setHintTextColor(Color.parseColor("#546E7A"))
+          |            setSingleLine(true)
+          |        }
+          |
+          |        val permBtn = makeCyberButton("1. GRANT HEALTH CONNECT + GPS", "#00E5FF", "#0A1E29") {
+          |            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+          |                requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 301)
+          |            }
+          |            val sdkStatus = HealthConnectClient.getSdkStatus(this)
+          |            if (sdkStatus == HealthConnectClient.SDK_AVAILABLE) {
+          |                requestHealthPerms.launch(healthPermissions)
+          |            } else {
+          |                statusLabel.text = "STATUS: INSTALL OR UPDATE HEALTH CONNECT"
+          |            }
+          |        }
+          |
+          |        val syncBtn = makeCyberButton("2. BEAM HEALTH + GPS + KEY TO 370Z", "#FF2CF7", "#230B2E") {
+          |            saveInputs(prefs)
+          |            syncHealthAndGpsToCar(beamKeyToo = true)
+          |        }
+          |
+          |        metricsBox = TextView(this).apply {
+          |            text = "Biometrics preview will appear here after sync.
+          |
+          |Note on Android 14/15/16: If Health Connect checkboxes are greyed out, open Phone Settings -> Apps -> Zelda Neural Bridge -> top-right 3 dots -> Allow restricted settings."
+          |            setTextColor(Color.parseColor("#CFD8DC"))
+          |            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
+          |            typeface = Typeface.MONOSPACE
+          |            background = GradientDrawable().apply {
+          |                setColor(Color.parseColor("#0B101D"))
+          |                setStroke(2, Color.parseColor("#1E2D45"))
+          |                cornerRadius = dp(12f).toFloat()
+          |            }
+          |            setPadding(dp(14f), dp(14f), dp(14f), dp(14f))
+          |        }
+          |
+          |        val gapLp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+          |            topMargin = dp(12f)
+          |        }
+          |
+          |        root.addView(title)
+          |        root.addView(sub)
+          |        root.addView(statusLabel)
+          |        root.addView(codeInput)
+          |        root.addView(apiKeyInput, gapLp)
+          |        root.addView(permBtn, gapLp)
+          |        root.addView(syncBtn, gapLp)
+          |        root.addView(metricsBox, gapLp)
+          |        scroll.addView(root)
+          |        setContentView(scroll)
+          |
+          |        if (savedCode.isNotEmpty()) {
+          |            listenForCarZLockRequests(savedCode)
+          |            syncHealthAndGpsToCar(beamKeyToo = false)
+          |        }
+          |    }
+          |
+          |    private fun makeCyberButton(label: String, strokeHex: String, fillHex: String, onClick: () -> Unit): Button {
+          |        return Button(this).apply {
+          |            text = label
+          |            setTextColor(Color.parseColor(strokeHex))
+          |            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
+          |            typeface = Typeface.MONOSPACE
+          |            gravity = Gravity.CENTER
+          |            background = GradientDrawable().apply {
+          |                setColor(Color.parseColor(fillHex))
+          |                setStroke(3, Color.parseColor(strokeHex))
+          |                cornerRadius = 999f
+          |            }
+          |            setPadding(dp(16f), dp(14f), dp(16f), dp(14f))
+          |            setOnClickListener { onClick() }
+          |        }
+          |    }
+          |
+          |    private fun saveInputs(prefs: android.content.SharedPreferences): String {
+          |        val rawCode = codeInput.text.toString().trim().uppercase(Locale.US)
+          |        val sb = StringBuilder()
+          |        for (c in rawCode) {
+          |            if (c.isLetterOrDigit() || c == '-' || c == '_') sb.append(c)
+          |        }
+          |        val cleanCode = sb.toString()
+          |        val cleanKey = apiKeyInput.text.toString().trim()
+          |        prefs.edit().putString(KEY_CODE, cleanCode).putString(KEY_API, cleanKey).commit()
+          |        if (cleanCode.isNotEmpty()) listenForCarZLockRequests(cleanCode)
+          |        return cleanCode
+          |    }
+          |
+          |    private fun requestPhoneGps() {
+          |        val lm = locationManager ?: return
+          |        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+          |            checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+          |        ) return
+          |        try {
+          |            latestLoc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+          |                ?: lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+          |            if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+          |                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 4000L, 2f, this, Looper.getMainLooper())
+          |            }
+          |            if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+          |                lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000L, 3f, this, Looper.getMainLooper())
+          |            }
+          |        } catch (_: Exception) {}
+          |    }
+          |
+          |    private suspend fun readHealthConnectSnapshot(): JSONObject = withContext(Dispatchers.IO) {
+          |        val out = JSONObject()
+          |        if (HealthConnectClient.getSdkStatus(this@ZeldaBridgeActivity) != HealthConnectClient.SDK_AVAILABLE) {
+          |            return@withContext out
+          |        }
+          |        try {
+          |            val client = HealthConnectClient.getOrCreate(this@ZeldaBridgeActivity)
+          |            val now = Instant.now()
+          |            val dayAgo = now.minus(Duration.ofHours(24))
+          |            val twoDaysAgo = now.minus(Duration.ofHours(36))
+          |
+          |            // 1. Latest Heart Rate
+          |            val hrResp = client.readRecords(
+          |                ReadRecordsRequest(HeartRateRecord::class, TimeRangeFilter.between(dayAgo, now))
+          |            )
+          |            val lastSample = hrResp.records.flatMap { it.samples }.maxByOrNull { it.time }
+          |            if (lastSample != null) out.put("bpm", lastSample.beatsPerMinute)
+          |
+          |            // 2. Resting Heart Rate
+          |            val rhrResp = client.readRecords(
+          |                ReadRecordsRequest(RestingHeartRateRecord::class, TimeRangeFilter.between(twoDaysAgo, now))
+          |            )
+          |            val lastRhr = rhrResp.records.maxByOrNull { it.time }
+          |            if (lastRhr != null) out.put("restingHr", lastRhr.beatsPerMinute)
+          |
+          |            // 3. HRV (RMSSD from Hume Pod / Watch Ultra)
+          |            val hrvResp = client.readRecords(
+          |                ReadRecordsRequest(HeartRateVariabilityRmssdRecord::class, TimeRangeFilter.between(twoDaysAgo, now))
+          |            )
+          |            val lastHrv = hrvResp.records.maxByOrNull { it.time }
+          |            if (lastHrv != null) out.put("hrvRmssd", lastHrv.heartRateVariabilityMillis.roundToInt())
+          |
+          |            // 4. Last Sleep Session Duration
+          |            val sleepResp = client.readRecords(
+          |                ReadRecordsRequest(SleepSessionRecord::class, TimeRangeFilter.between(twoDaysAgo, now))
+          |            )
+          |            val latestSleep = sleepResp.records.maxByOrNull { it.endTime }
+          |            if (latestSleep != null) {
+          |                val mins = Duration.between(latestSleep.startTime, latestSleep.endTime).toMinutes()
+          |                out.put("sleepHours", (mins / 6.0).roundToInt() / 10.0)
+          |            }
+          |
+          |            // 5. Today's Steps
+          |            val startOfDay = now.minus(Duration.ofHours(18))
+          |            val stepsResp = client.readRecords(
+          |                ReadRecordsRequest(StepsRecord::class, TimeRangeFilter.between(startOfDay, now))
+          |            )
+          |            if (stepsResp.records.isNotEmpty()) {
+          |                val totalSteps = stepsResp.records.maxOf { it.count }
+          |                out.put("steps", totalSteps)
+          |            }
+          |
+          |            // 6. SpO2
+          |            val spo2Resp = client.readRecords(
+          |                ReadRecordsRequest(OxygenSaturationRecord::class, TimeRangeFilter.between(twoDaysAgo, now))
+          |            )
+          |            val lastSpo2 = spo2Resp.records.maxByOrNull { it.time }
+          |            if (lastSpo2 != null) out.put("spo2", lastSpo2.percentage.value.roundToInt())
+          |        } catch (_: Exception) {}
+          |        out
+          |    }
+          |
+          |    private fun syncHealthAndGpsToCar(beamKeyToo: Boolean) {
+          |        val prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+          |        val code = prefs.getString(KEY_CODE, "") ?: ""
+          |        val gemKey = prefs.getString(KEY_API, "") ?: ""
+          |        if (code.isEmpty()) {
+          |            statusLabel.text = "STATUS: ENTER 4-CHAR CAR CODE FIRST"
+          |            return
+          |        }
+          |        requestPhoneGps()
+          |        statusLabel.text = "STATUS: READING HEALTH CONNECT + GPS..."
+          |
+          |        lifecycleScope.launch {
+          |            val healthJson = readHealthConnectSnapshot()
+          |            val loc = latestLoc
+          |            val gpsJson = if (loc != null) {
+          |                JSONObject().apply {
+          |                    put("lat", loc.latitude)
+          |                    put("lng", loc.longitude)
+          |                    put("accuracy", loc.accuracy)
+          |                    put("speed", loc.speed)
+          |                    put("heading", loc.bearing)
+          |                }
+          |            } else null
+          |
+          |            val topic = if (code.startsWith("ZELDA-", true)) code.lowercase(Locale.US) else "zelda-370z-$code"
+          |            val sentOk = withContext(Dispatchers.IO) {
+          |                try {
+          |                    if (beamKeyToo && gemKey.startsWith("AIza") && gemKey.length >= 29) {
+          |                        postNtfy(topic, JSONObject().apply {
+          |                            put("source", "zelda-phone")
+          |                            put("type", "key-sync")
+          |                            put("geminiKey", gemKey)
+          |                            put("ts", System.currentTimeMillis())
+          |                        })
+          |                    }
+          |                    postNtfy(topic, JSONObject().apply {
+          |                        put("source", "zelda-phone")
+          |                        put("type", "health-sync")
+          |                        put("health", healthJson)
+          |                        if (gpsJson != null) put("gps", gpsJson)
+          |                        put("ts", System.currentTimeMillis())
+          |                    })
+          |                } catch (_: Exception) {
+          |                    false
+          |                }
+          |            }
+          |
+          |            statusLabel.text = if (sentOk) "STATUS: BEAMED TO 370Z ($code)!" else "STATUS: NETWORK ERROR"
+          |            metricsBox.text = buildString {
+          |                append("370Z Channel : ").append(topic).append("
+          |")
+          |                append("Phone GPS    : ").append(if (loc != null) "${loc.latitude}, ${loc.longitude} (±${loc.accuracy.roundToInt()}m)" else "Waiting for GPS permission").append("
+          |")
+          |                append("Live / Last HR: ").append(healthJson.optInt("bpm", 0).let { if (it > 0) "$it BPM" else "--" }).append("
+          |")
+          |                append("Resting HR   : ").append(healthJson.optInt("restingHr", 0).let { if (it > 0) "$it BPM" else "--" }).append("
+          |")
+          |                append("HRV (RMSSD)  : ").append(healthJson.optInt("hrvRmssd", 0).let { if (it > 0) "$it ms" else "--" }).append("
+          |")
+          |                append("Last Sleep   : ").append(if (healthJson.has("sleepHours")) "${healthJson.optDouble("sleepHours")} hrs" else "--").append("
+          |")
+          |                append("SpO2         : ").append(healthJson.optInt("spo2", 0).let { if (it > 0) "$it%" else "--" }).append("
+          |")
+          |                append("API Key Beam : ").append(if (beamKeyToo && gemKey.startsWith("AIza")) "Sent to Car Vault!" else "Unchanged")
+          |            }
+          |        }
+          |    }
+          |
+          |    private fun postNtfy(topic: String, body: JSONObject): Boolean {
+          |        val conn = (URL("https://ntfy.sh/$topic").openConnection() as HttpURLConnection).apply {
+          |            requestMethod = "POST"
+          |            doOutput = true
+          |            connectTimeout = 6000
+          |            readTimeout = 6000
+          |            setRequestProperty("Content-Type", "application/json; charset=utf-8")
+          |        }
+          |        conn.outputStream.use { it.write(body.toString().toByteArray(Charsets.UTF_8)) }
+          |        return conn.responseCode in 200..299
+          |    }
+          |
+          |    private fun listenForCarZLockRequests(shortCode: String) {
+          |        val topic = if (shortCode.startsWith("ZELDA-", true)) shortCode.lowercase(Locale.US) else "zelda-370z-$shortCode"
+          |        if (topic == activeTopic && sseConn != null) return
+          |        activeTopic = topic
+          |        try { sseConn?.disconnect() } catch (_: Exception) {}
+          |
+          |        thread(isDaemon = true) {
+          |            while (alive && activeTopic == topic) {
+          |                try {
+          |                    val conn = (URL("https://ntfy.sh/$topic/sse").openConnection() as HttpURLConnection).apply {
+          |                        requestMethod = "GET"; connectTimeout = 8000; readTimeout = 0
+          |                        setRequestProperty("Accept", "text/event-stream")
+          |                    }
+          |                    sseConn = conn
+          |                    BufferedReader(InputStreamReader(conn.inputStream, Charsets.UTF_8)).use { reader ->
+          |                        while (alive && activeTopic == topic) {
+          |                            val l = reader.readLine() ?: break
+          |                            if (!l.startsWith("data:")) continue
+          |                            val env = JSONObject(l.removePrefix("data:").trim().ifEmpty { continue })
+          |                            if (env.optString("event") != "message") continue
+          |                            val msg = JSONObject(env.optString("message").ifEmpty { continue })
+          |                            if (msg.optString("source") == "zelda-car" &&
+          |                                msg.optString("type") == "request-gps" &&
+          |                                abs(System.currentTimeMillis() - msg.optLong("ts")) < 20000L
+          |                            ) {
+          |                                runOnUiThread { syncHealthAndGpsToCar(beamKeyToo = false) }
+          |                            }
+          |                        }
+          |                    }
+          |                } catch (_: Exception) {
+          |                    if (alive) Thread.sleep(2000)
+          |                }
+          |            }
+          |        }
+          |    }
+          |
+          |    override fun onLocationChanged(loc: Location) {
+          |        latestLoc = loc
+          |    }
+          |    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+          |    override fun onProviderEnabled(provider: String) {}
+          |    override fun onProviderDisabled(provider: String) {}
+          |
+          |    override fun onDestroy() {
+          |        alive = false
+          |        try { locationManager?.removeUpdates(this) } catch (_: Exception) {}
+          |        try { sseConn?.disconnect() } catch (_: Exception) {}
+          |        super.onDestroy()
+          |    }
+          |}
+          """)
+
+          print("Generated Watch Ultra + Fold 7 Health Connect Bridge projects cleanly.")
+
+      - name: Install Gradle 8.9 & Compile Both Signed APKs
         shell: bash
         run: |
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0" > /dev/null
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "platforms;android-35" "build-tools;34.0.0" > /dev/null
           curl -sL https://services.gradle.org/distributions/gradle-8.9-bin.zip -o /tmp/gradle.zip
           unzip -q /tmp/gradle.zip -d /opt/
-          cd wear-app
-          /opt/gradle-8.9/bin/gradle assembleRelease --no-daemon --console=plain
-          cp app/build/outputs/apk/release/app-release.apk ../zelda-watch-ultra.apk
+          cd zelda-android-suite
+          /opt/gradle-8.9/bin/gradle :wear-app:assembleRelease :phone-bridge:assembleRelease --no-daemon --console=plain
+          cp wear-app/build/outputs/apk/release/wear-app-release.apk ../zelda-watch-ultra.apk
+          cp phone-bridge/build/outputs/apk/release/phone-bridge-release.apk ../zelda-fold7-health-bridge.apk
 
-      - name: Upload APK to GitHub Releases
+      - name: Upload Both APKs to GitHub Releases
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete watch-v4.7.5 --yes --cleanup-tag 2>/dev/null || true
-          gh release create watch-v4.7.5 zelda-watch-ultra.apk \
-            --title "Zelda KITT Watch Ultra Complication APK (v4.7.5)" \
-            --notes "v4.7.5: KITT 3-Bar Voice Modulator + Larson Scanner, native Watch speaker TTS, and hands-free fluent conversation loop."
+          gh release delete watch-v4.8.0 --yes --cleanup-tag 2>/dev/null || true
+          gh release create watch-v4.8.0 zelda-watch-ultra.apk zelda-fold7-health-bridge.apk \
+            --title "Zelda v4.8.0: Neon Wave Watch APK + Fold 7 Health Connect Bridge APK" \
+            --notes "Download zelda-watch-ultra.apk (for Galaxy Watch Ultra via Bugjaeger) and zelda-fold7-health-bridge.apk (install directly on Galaxy Z Fold 7 for Health Connect + GPS + 1-Tap API Key sync)."
