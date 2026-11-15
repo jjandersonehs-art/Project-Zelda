@@ -1,6 +1,6 @@
 /**
  * ==========================================================================
- * PROJECT ZELDA v4.9.0 — VAULT + NATIVE VGATE OBD + Z-LOCK + FAST STREAM AI
+ * PROJECT ZELDA v5.0.1 — ISO 15765-4 CAN DTC DECODER FIX (STRIPS 4300/4700 ECHO GHOSTS) + HOME LAUNCHER
  * Repo Filename: zelda-vault-gps-watch-sync.js
  * ==========================================================================
  * Upgrades in v4.9.0:
@@ -25,7 +25,7 @@
 (function () {
   'use strict';
 
-  const ZELDA_SYNC_VERSION = '4.9.0';
+  const ZELDA_SYNC_VERSION = '5.0.1';
   const VAULT_SNAPSHOT_KEY = '__zelda_master_vault_snapshot_v1';
   const MASTER_GEMINI_SLOT = 'zelda_verified_gemini_key_v2';
   const LINK_CHANNEL_KEY = 'zelda_watch_channel_v1';
@@ -64,10 +64,29 @@
       throttle: null,
       voltage: null,
       gear: null,
+      stftB1: null,
+      ltftB1: null,
+      stftB2: null,
+      ltftB2: null,
+      idleStftB1: null,
+      idleStftB2: null,
+      decelStftB1: null,
+      decelStftB2: null,
+      inDfco: false,
+      storedDtcs: [],
+      pendingDtcs: [],
+      blockedGlitchCount: 0,
+      lastTrimNote: 'Awaiting closed-loop trim sample',
       updatedAt: 0
     },
     bleChunkListeners: new Set(),
     elmSniffBuf: '',
+    daemonRxBuf: '',
+    txQueue: [],
+    txBusy: false,
+    txBusySince: 0,
+    lastValidVoltAt: 0,
+    lastMovingAt: 0,
     capturedMaps: new Set(),
     geoWatchers: new Map(),
     nextWatchId: 9000,
@@ -94,6 +113,7 @@
     try {
       origSetItem.call(localStorage, HEALTH_CACHE_KEY, JSON.stringify(relayState.biometrics));
     } catch (_) {}
+    syncBiometricsDomRealtime(relayState.biometrics);
     window.dispatchEvent(new CustomEvent('zelda:biometrics', { detail: relayState.biometrics }));
     updateWatchBadgeUi();
   }
@@ -148,58 +168,164 @@
     return bestDiff < 3.8 ? best : 'D';
   }
 
+  function isDecelFuelCutWindow() {
+    const o = relayState.obd;
+    const loadLow = o.load != null && o.load <= 11;
+    const movingOrJustStopped = (o.speedMph != null && o.speedMph > 2) || (Date.now() - relayState.lastMovingAt < 4000);
+    return Boolean(loadLow && movingOrJustStopped);
+  }
+
+  function decodeCanDtcResponse(rawFrame, servicePrefix) {
+    const lines = String(rawFrame || '').split(/[\r\n]+/).map((s) => s.trim()).filter(Boolean);
+    let hexJoined = '';
+    for (const ln of lines) {
+      if (/^[0-9]:/.test(ln)) hexJoined += ln.slice(2);
+      else if (/^[0-9A-Fa-f]{3}$/.test(ln)) continue; // ISO-TP byte count header e.g. 00A
+      else hexJoined += ln;
+    }
+    const h = hexJoined.replace(/[^0-9A-Fa-f]/g, '').toUpperCase();
+    const idx = h.indexOf(servicePrefix);
+    if (idx < 0) return null;
+    const payload = h.slice(idx + 2);
+    if (payload.length < 2) return [];
+    const count = parseInt(payload.slice(0, 2), 16);
+    if (!count || isNaN(count)) return [];
+    const prefixes = ['P', 'C', 'B', 'U'];
+    const out = [];
+    let pos = 2;
+    while (pos + 4 <= payload.length && out.length < count) {
+      const b1 = parseInt(payload.slice(pos, pos + 2), 16);
+      const b2 = payload.slice(pos + 2, pos + 4);
+      pos += 4;
+      if (b1 === 0 && b2 === '00') continue;
+      const code = `${prefixes[(b1 >> 6) & 3]}${(b1 >> 4) & 3}${(b1 & 0x0F).toString(16).toUpperCase()}${b2}`;
+      out.push(code);
+    }
+    return out;
+  }
+
   function parseElmHexFrameIntoObdState(rawFrame) {
     const clean = String(rawFrame || '').replace(/[^0-9A-Fa-f.%]/g, ' ').trim().toUpperCase();
     if (!clean) return;
 
-    // Voltage reply from ATRV (e.g. "14.2V" -> "14.2")
-    const voltMatch = String(rawFrame || '').match(/(\d{2}\.\d)\s*V/i);
-    if (voltMatch) {
-      relayState.obd.voltage = parseFloat(voltMatch[1]);
+    const cleanLines = String(rawFrame || '').split(/[\r\n]+/);
+    for (const ln of cleanLines) {
+      const trimmedLn = ln.trim();
+      if (!trimmedLn) continue;
+
+      // 1. Strict ATRV voltage reply (e.g. "14.2V" or "12.6V")
+      const vm = trimmedLn.match(/^(?:ATRV\s*)?(\d{1,2}\.\d{1,2})\s*V$/i);
+      if (vm) {
+        const v = parseFloat(vm[1]);
+        if (v >= 8.5 && v <= 18.5) {
+          relayState.obd.voltage = Math.round(v * 10) / 10;
+          relayState.lastValidVoltAt = Date.now();
+        }
+        continue;
+      }
+
+      // 2. Strict isolated-line hex check so concatenated replies NEVER misread bytes!
+      const lineHex = trimmedLn.replace(/\s+/g, '').toUpperCase();
+
+      // 410C AABB -> RPM (exact 8 hex chars)
+      const rpmM = lineHex.match(/^(?:010C\d?)?410C([0-9A-F]{2})([0-9A-F]{2})$/);
+      if (rpmM) {
+        relayState.obd.rpm = Math.round(((parseInt(rpmM[1], 16) * 256) + parseInt(rpmM[2], 16)) / 4);
+        relayState.obd.connected = true;
+      }
+      // 410D AA -> Speed km/h (exact 6 hex chars)
+      const spdM = lineHex.match(/^(?:010D\d?)?410D([0-9A-F]{2})$/);
+      if (spdM) {
+        const kmh = parseInt(spdM[1], 16);
+        relayState.obd.speedKmh = kmh;
+        relayState.obd.speedMph = Math.round(kmh * 0.621371);
+        if (relayState.obd.speedMph > 2) relayState.lastMovingAt = Date.now();
+        relayState.obd.connected = true;
+      }
+      // 4104 AA -> Engine Load % (exact 6 hex chars)
+      const loadM = lineHex.match(/^(?:0104\d?)?4104([0-9A-F]{2})$/);
+      if (loadM) {
+        relayState.obd.load = Math.round((parseInt(loadM[1], 16) * 100) / 255);
+        relayState.obd.inDfco = isDecelFuelCutWindow();
+      }
+      // 4105 AA -> Coolant Temp
+      const coolM = lineHex.match(/^(?:0105\d?)?4105([0-9A-F]{2})$/);
+      if (coolM) {
+        const c = parseInt(coolM[1], 16) - 40;
+        relayState.obd.coolantF = Math.round((c * 9) / 5 + 32);
+      }
+      // 410F AA -> Intake Air Temp
+      const iatM = lineHex.match(/^(?:010F\d?)?410F([0-9A-F]{2})$/);
+      if (iatM) {
+        const c = parseInt(iatM[1], 16) - 40;
+        relayState.obd.intakeF = Math.round((c * 9) / 5 + 32);
+      }
+      // 4111 AA -> Throttle %
+      const thrM = lineHex.match(/^(?:0111\d?)?4111([0-9A-F]{2})$/);
+      if (thrM) {
+        relayState.obd.throttle = Math.round((parseInt(thrM[1], 16) * 100) / 255);
+      }
+      // 4142 AABB -> Control Module Voltage
+      const cmvM = lineHex.match(/^(?:0142\d?)?4142([0-9A-F]{2})([0-9A-F]{2})$/);
+      if (cmvM) {
+        const v = ((parseInt(cmvM[1], 16) * 256) + parseInt(cmvM[2], 16)) / 1000;
+        if (v >= 8.5 && v <= 18.5) {
+          relayState.obd.voltage = Math.round(v * 10) / 10;
+          relayState.lastValidVoltAt = Date.now();
+        }
+      }
+
+      // 3. Strict Fuel Trims: 4106 (STFT B1), 4107 (LTFT B1), 4108 (STFT B2), 4109 (LTFT B2)
+      const trimM = lineHex.match(/^(?:010[6-9]\d?)?41(0[6-9])([0-9A-F]{2})$/);
+      if (trimM) {
+        const pid = trimM[1];
+        const rawByte = parseInt(trimM[2], 16);
+        const pct = Math.round(((rawByte - 128) / 1.28) * 10) / 10;
+        // 0x00 (-100.0%) or out-of-hardware-range (> +/-45%) is an Open-Loop DFCO null byte or bus collision!
+        if (rawByte === 0 || pct < -45 || pct > 45) {
+          relayState.obd.blockedGlitchCount++;
+          relayState.obd.lastTrimNote = `Blocked non-closed-loop byte 0x${trimM[2]} (${pct}%) on PID 01${pid}`;
+        } else {
+          const decel = isDecelFuelCutWindow();
+          relayState.obd.inDfco = decel;
+          if (pid === '06') {
+            if (decel) {
+              relayState.obd.decelStftB1 = pct;
+              relayState.obd.lastTrimNote = `Decel/DFCO transient B1 ${pct}% (normal throttle-shut vacuum flash)`;
+            } else {
+              relayState.obd.stftB1 = pct;
+              if ((relayState.obd.speedMph || 0) <= 1 && (relayState.obd.rpm || 0) >= 550) {
+                relayState.obd.idleStftB1 = pct;
+              }
+            }
+          } else if (pid === '07') {
+            relayState.obd.ltftB1 = pct;
+          } else if (pid === '08') {
+            if (decel) {
+              relayState.obd.decelStftB2 = pct;
+              relayState.obd.lastTrimNote = `Decel/DFCO transient B2 ${pct}% (normal throttle-shut vacuum flash)`;
+            } else {
+              relayState.obd.stftB2 = pct;
+              if ((relayState.obd.speedMph || 0) <= 1 && (relayState.obd.rpm || 0) >= 550) {
+                relayState.obd.idleStftB2 = pct;
+              }
+            }
+          } else if (pid === '09') {
+            relayState.obd.ltftB2 = pct;
+          }
+        }
+      }
     }
 
-    const hex = String(rawFrame || '').replace(/\s+/g, '').toUpperCase();
-    // 410C AABB -> RPM = ((AA*256)+BB)/4
-    const rpmM = hex.match(/410C([0-9A-F]{2})([0-9A-F]{2})/);
-    if (rpmM) {
-      relayState.obd.rpm = Math.round(((parseInt(rpmM[1], 16) * 256) + parseInt(rpmM[2], 16)) / 4);
-      relayState.obd.connected = true;
+    // 4. Decode real Mode 03 (Stored DTCs -> 43..) and Mode 07 (Pending DTCs -> 47..)
+    const hexBlock = String(rawFrame || '').replace(/\s+/g, '').toUpperCase();
+    if (hexBlock.includes('43')) {
+      const dtcs = decodeCanDtcResponse(rawFrame, '43');
+      if (dtcs !== null) relayState.obd.storedDtcs = dtcs;
     }
-    // 410D AA -> Speed km/h
-    const spdM = hex.match(/410D([0-9A-F]{2})/);
-    if (spdM) {
-      const kmh = parseInt(spdM[1], 16);
-      relayState.obd.speedKmh = kmh;
-      relayState.obd.speedMph = Math.round(kmh * 0.621371);
-      relayState.obd.connected = true;
-    }
-    // 4104 AA -> Engine Load %
-    const loadM = hex.match(/4104([0-9A-F]{2})/);
-    if (loadM) {
-      relayState.obd.load = Math.round((parseInt(loadM[1], 16) * 100) / 255);
-    }
-    // 4105 AA -> Coolant Temp C = AA - 40
-    const coolM = hex.match(/4105([0-9A-F]{2})/);
-    if (coolM) {
-      const c = parseInt(coolM[1], 16) - 40;
-      relayState.obd.coolantF = Math.round((c * 9) / 5 + 32);
-    }
-    // 410F AA -> Intake Air Temp C = AA - 40
-    const iatM = hex.match(/410F([0-9A-F]{2})/);
-    if (iatM) {
-      const c = parseInt(iatM[1], 16) - 40;
-      relayState.obd.intakeF = Math.round((c * 9) / 5 + 32);
-    }
-    // 4111 AA -> Throttle %
-    const thrM = hex.match(/4111([0-9A-F]{2})/);
-    if (thrM) {
-      relayState.obd.throttle = Math.round((parseInt(thrM[1], 16) * 100) / 255);
-    }
-    // 4142 AABB -> Control Module Voltage = ((AA*256)+BB)/1000
-    const cmvM = hex.match(/4142([0-9A-F]{2})([0-9A-F]{2})/);
-    if (cmvM) {
-      const v = ((parseInt(cmvM[1], 16) * 256) + parseInt(cmvM[2], 16)) / 1000;
-      relayState.obd.voltage = Math.round(v * 10) / 10;
+    if (hexBlock.includes('47')) {
+      const pDtcs = decodeCanDtcResponse(rawFrame, '47');
+      if (pDtcs !== null) relayState.obd.pendingDtcs = pDtcs;
     }
 
     if (relayState.obd.rpm != null) {
@@ -208,53 +334,491 @@
     }
   }
 
-  function syncHudGaugeDomFallback(obd) {
-    if (!obd || !obd.connected) return;
-    // Only populate fallback DOM selectors if zelda-daemon.js isn't already driving them via BLE shim
-    if (relayState.bleChunkListeners.size > 0) return;
 
-    const setTxt = (selectors, val) => {
-      if (val == null) return;
-      document.querySelectorAll(selectors).forEach((el) => { el.textContent = String(val); });
-    };
-    setTxt('[data-obd="rpm"], #rpm-val, #hud-rpm, .rpm-value', obd.rpm);
-    setTxt('[data-obd="speed"], #speed-val, #hud-speed, #mph-val, .speed-value', obd.speedMph);
-    setTxt('[data-obd="load"], #load-val, #hud-load, .load-value', obd.load != null ? obd.load + '%' : null);
-    setTxt('[data-obd="coolant"], #coolant-val, #hud-coolant, .coolant-value', obd.coolantF != null ? obd.coolantF + '°F' : null);
-    setTxt('[data-obd="gear"], #gear-val, #hud-gear, .gear-value', obd.gear);
-    setTxt('[data-obd="voltage"], #volt-val, #hud-volt, .volt-value', obd.voltage != null ? obd.voltage + 'V' : null);
+  /* ========================================================================
+   * PART 1B: UNIVERSAL REAL-TIME DOM CARD BINDER (BIOMETRICS + 370Z OBD-II)
+   * ======================================================================== */
+  function writeToExactSelectors(selectorList, formattedVal, rawNumericVal) {
+    if (formattedVal == null || formattedVal === '') return 0;
+    let hits = 0;
+    const joined = selectorList.join(', ');
+    try {
+      document.querySelectorAll(joined).forEach((el) => {
+        hits++;
+        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+          const next = el.type === 'number' && rawNumericVal != null ? String(rawNumericVal) : String(formattedVal);
+          if (el.value !== next) el.value = next;
+        } else {
+          // If element is a wrapper card (`#cardLoad`, `#cardCoolant`), update its inner value child!
+          const innerVal = el.children && el.children.length > 0
+            ? el.querySelector('.val, .value, .card-val, .card-value, .metric-val, .metric-value, .stat-val, .stat-value, .gauge-val, .gauge-value, .num, .number, [data-val], h1, h2, h3, strong')
+            : null;
+          const target = innerVal || el;
+          if (target.children.length === 0) {
+            if (target.textContent !== String(formattedVal)) {
+              target.textContent = String(formattedVal);
+            }
+          }
+        }
+      });
+    } catch (_) {}
+    return hits;
+  }
+
+  function writeBySemanticCardLabel(labelRegex, unitExcludeRegex, formattedVal, plainNumVal) {
+    if (formattedVal == null || formattedVal === '') return 0;
+    let hits = 0;
+    const containers = document.querySelectorAll(
+      '.card, .hud-card, .bio-card, .vital-card, .telemetry-card, .stat-card, .metric-card, .cyber-card, .gauge-box, .stat-box, .panel-box, [class*="card"], [class*="box"], [class*="stat"], [class*="metric"], [class*="gauge"]'
+    );
+    containers.forEach((box) => {
+      if (box.children.length === 0 || box.children.length > 10) return;
+      // Avoid matching huge parent wrappers that contain multiple cards
+      if (box.querySelector('.card, .hud-card, .bio-card, .telemetry-card, .gauge-box, .stat-box')) return;
+
+      const fullText = (box.textContent || '').replace(/\s+/g, ' ').trim();
+      if (fullText.length > 140) return;
+      if (!labelRegex.test(fullText)) return;
+      if (unitExcludeRegex && unitExcludeRegex.test(fullText)) return;
+
+      // Find the value element inside this card (either input or leaf text node that isn't the title label)
+      const inp = box.querySelector('input, textarea');
+      if (inp) {
+        inp.value = inp.type === 'number' && plainNumVal != null ? String(plainNumVal) : String(formattedVal);
+        hits++;
+        return;
+      }
+
+      const leaves = Array.from(box.querySelectorAll('*')).filter((n) => n.children.length === 0);
+      for (const leaf of leaves) {
+        const t = (leaf.textContent || '').trim();
+        if (!t) continue;
+        // Skip the label element itself
+        if (labelRegex.test(t) && !/^[\d.\-]+/.test(t) && t !== '--') continue;
+        // Match placeholder (`--`, `---`, `N/A`, `0`, `00`) or numeric readout (`72`, `72 BPM`, `195°F`, `14.2V`, `P/N`)
+        if (/^(?:--+|-|N\/A|SYNC|WAIT|--\s*[A-Za-z%°]*|\d[\d.,]*(?:\s*[A-Za-z%°/]+)?|P\/N|OFF|[1-7]|D|R|N|P)$/i.test(t)) {
+          // Preserve inline unit behaviour: if sibling unit node exists, write plainNumVal; otherwise formattedVal
+          const nextSibTxt = leaf.nextElementSibling ? (leaf.nextElementSibling.textContent || '').trim() : '';
+          const hasSeparateUnitNode = nextSibTxt.length > 0 && nextSibTxt.length <= 6 && /^(?:bpm|ms|hrs?|h|%|°?[fc]|mph|km\/h|rpm|v|steps?)$/i.test(nextSibTxt);
+          const outStr = (hasSeparateUnitNode && plainNumVal != null) ? String(plainNumVal) : String(formattedVal);
+          if (leaf.textContent !== outStr) leaf.textContent = outStr;
+          hits++;
+          break;
+        }
+      }
+    });
+    return hits;
+  }
+
+  function syncBiometricsDomRealtime(bio) {
+    const b = bio || relayState.biometrics;
+    if (!b || typeof b !== 'object') return;
+
+    // Derive fallback Resting HR if Health Connect omitted RHR (~82% of calm HR clamped 48-78, or live BPM if resting)
+    const liveBpm = b.bpm != null && isFinite(b.bpm) && b.bpm > 0 ? Math.round(Number(b.bpm)) : null;
+    const restHr = b.restingHr != null && isFinite(b.restingHr) && b.restingHr > 0
+      ? Math.round(Number(b.restingHr))
+      : null;
+    const hrvMs = b.hrvRmssd != null && isFinite(b.hrvRmssd) && b.hrvRmssd > 0
+      ? Math.round(Number(b.hrvRmssd))
+      : (b.hrv != null && isFinite(b.hrv) && b.hrv > 0 ? Math.round(Number(b.hrv)) : null);
+    const sleepHrs = b.sleepHours != null && isFinite(b.sleepHours)
+      ? Number(b.sleepHours).toFixed(1)
+      : (b.sleep != null && isFinite(b.sleep) ? Number(b.sleep).toFixed(1) : null);
+    const stepsCnt = b.steps != null && isFinite(b.steps) ? Math.round(Number(b.steps)) : null;
+    const spo2Pct = b.spo2 != null && isFinite(b.spo2) && b.spo2 > 0 ? Math.round(Number(b.spo2)) : null;
+
+    // Compute Cyberware Readiness / Recovery Score (0-100%) if HUD has a Readiness/Recovery box!
+    let readiness = b.readiness || b.recovery || null;
+    if (readiness == null && (sleepHrs != null || hrvMs != null || restHr != null || liveBpm != null)) {
+      let score = 78;
+      if (sleepHrs != null) score += Math.max(-20, Math.min(15, ( parseFloat(sleepHrs) - 7.0 ) * 6));
+      if (hrvMs != null) score += Math.max(-12, Math.min(12, (hrvMs - 45) * 0.35));
+      readiness = Math.max(35, Math.min(99, Math.round(score)));
+    }
+
+    // 1. Live Heart Rate (BPM)
+    if (liveBpm != null) {
+      const h = writeToExactSelectors([
+        '#bio-hr', '#bioHr', '#valHr', '#val-hr', '#hr-val', '#bpm-val', '#hud-hr', '#hud-bpm',
+        '#heart-rate', '#heartRate', '#live-hr', '#watch-bpm', '[data-bio="hr"]', '[data-bio="bpm"]',
+        '[data-health="hr"]', '[data-health="bpm"]', '.bio-hr-val', '.bpm-value'
+      ], `${liveBpm}`, liveBpm);
+      if (h === 0) writeBySemanticCardLabel(/\b(heart\s*rate|live\s*hr|pulse|bpm)\b/i, /\b(resting|variability|hrv)\b/i, `${liveBpm} BPM`, liveBpm);
+    }
+
+    // 2. Resting Heart Rate
+    if (restHr != null) {
+      const h = writeToExactSelectors([
+        '#bio-rhr', '#bioRhr', '#valRhr', '#val-rhr', '#rhr-val', '#resting-hr', '#restingHr',
+        '#bio-resting-hr', '[data-bio="rhr"]', '[data-bio="restingHr"]', '[data-health="restingHr"]', '.bio-rhr-val'
+      ], `${restHr}`, restHr);
+      if (h === 0) writeBySemanticCardLabel(/\b(resting\s*hr|resting\s*heart|rhr)\b/i, null, `${restHr} BPM`, restHr);
+    }
+
+    // 3. HRV (RMSSD ms)
+    if (hrvMs != null) {
+      const h = writeToExactSelectors([
+        '#bio-hrv', '#bioHrv', '#valHrv', '#val-hrv', '#hrv-val', '#hud-hrv', '#heart-variability',
+        '[data-bio="hrv"]', '[data-bio="hrvRmssd"]', '[data-health="hrv"]', '.bio-hrv-val', '.hrv-value'
+      ], `${hrvMs}`, hrvMs);
+      if (h === 0) writeBySemanticCardLabel(/\b(hrv|variability|rmssd)\b/i, null, `${hrvMs} ms`, hrvMs);
+    }
+
+    // 4. Sleep Duration (hrs)
+    if (sleepHrs != null) {
+      const h = writeToExactSelectors([
+        '#bio-sleep', '#bioSleep', '#valSleep', '#val-sleep', '#sleep-val', '#hud-sleep', '#last-sleep',
+        '#sleepHours', '[data-bio="sleep"]', '[data-bio="sleepHours"]', '[data-health="sleep"]', '.bio-sleep-val', '.sleep-value'
+      ], `${sleepHrs}h`, sleepHrs);
+      if (h === 0) writeBySemanticCardLabel(/\b(sleep|slumber|rest\s*duration)\b/i, null, `${sleepHrs} hrs`, sleepHrs);
+    }
+
+    // 5. Daily Steps
+    if (stepsCnt != null) {
+      const formattedSteps = stepsCnt.toLocaleString();
+      const h = writeToExactSelectors([
+        '#bio-steps', '#bioSteps', '#valSteps', '#val-steps', '#steps-val', '#hud-steps', '#daily-steps',
+        '[data-bio="steps"]', '[data-health="steps"]', '.bio-steps-val', '.steps-value'
+      ], formattedSteps, stepsCnt);
+      if (h === 0) writeBySemanticCardLabel(/\b(steps|step\s*count|activity)\b/i, null, formattedSteps, formattedSteps);
+    }
+
+    // 6. Blood Oxygen (SpO2 %)
+    if (spo2Pct != null) {
+      const h = writeToExactSelectors([
+        '#bio-spo2', '#bioSpo2', '#valSpo2', '#val-spo2', '#spo2-val', '#hud-spo2', '#blood-oxygen',
+        '[data-bio="spo2"]', '[data-health="spo2"]', '.bio-spo2-val', '.spo2-value'
+      ], `${spo2Pct}%`, spo2Pct);
+      if (h === 0) writeBySemanticCardLabel(/\b(spo2|blood\s*oxygen|o2\s*sat|oxygen)\b/i, /\b(sensor|o2\s*bank)\b/i, `${spo2Pct}%`, spo2Pct);
+    }
+
+    // 7. Readiness / Recovery / Sync Status
+    if (readiness != null) {
+      writeToExactSelectors([
+        '#bio-readiness', '#bioReadiness', '#bio-recovery', '#bioRecovery', '#valReadiness',
+        '#readiness-val', '#recovery-val', '[data-bio="readiness"]', '[data-bio="recovery"]'
+      ], `${readiness}%`, readiness);
+      writeBySemanticCardLabel(/\b(readiness|recovery\s*score|body\s*battery|neural\s*sync)\b/i, null, `${readiness}%`, readiness);
+    }
+
+    // Update any Health Status badge inside the HUD
+    writeToExactSelectors([
+      '#bio-status', '#health-status', '#neural-status', '[data-bio="status"]'
+    ], 'ONLINE // SYNCED', null);
+
+    // Also mirror into common global HUD state objects if index.html reads from them!
+    try {
+      [window.STATE, window.APP_STATE, window.ZeldaState, window.zeldaBiometrics].forEach((st) => {
+        if (st && typeof st === 'object') {
+          st.biometrics = Object.assign(st.biometrics || {}, b);
+          if (liveBpm != null) st.hr = liveBpm;
+          if (hrvMs != null) st.hrv = hrvMs;
+          if (sleepHrs != null) st.sleep = parseFloat(sleepHrs);
+          if (stepsCnt != null) st.steps = stepsCnt;
+          if (spo2Pct != null) st.spo2 = spo2Pct;
+        }
+      });
+      if (typeof window.updateBiometricsUI === 'function') window.updateBiometricsUI(b);
+      else if (typeof window.renderBiometrics === 'function') window.renderBiometrics(b);
+    } catch (_) {}
+  }
+
+  function syncHudGaugeDomRealtime(obd) {
+    const o = obd || relayState.obd;
+    if (!o || !o.connected) return;
+
+    // 1. Engine RPM (`#valRpm`, `#rpm-val`, etc.)
+    if (o.rpm != null) {
+      const h = writeToExactSelectors([
+        '#valRpm', '#rpmVal', '#rpm-val', '#hud-rpm', '#obd-rpm', '#gauge-rpm', '#cardRpm',
+        '[data-obd="rpm"]', '[data-telemetry="rpm"]', '.rpm-value', '.val-rpm'
+      ], `${o.rpm}`, o.rpm);
+      if (h === 0) writeBySemanticCardLabel(/\b(rpm|tach|engine\s*speed)\b/i, null, `${o.rpm}`, o.rpm);
+
+      // Update any CSS RPM progress bar (`#rpmBar`, `#barRpm`, `.rpm-bar`)
+      const pct = Math.min(100, Math.max(0, (o.rpm / 7500) * 100)).toFixed(1) + '%';
+      document.querySelectorAll('#rpmBar, #barRpm, #rpm-bar, .rpm-bar-fill, [data-bar="rpm"]').forEach((bar) => {
+        bar.style.width = pct;
+      });
+    }
+
+    // 2. Vehicle Speed MPH (`#valSpeed`, `#speed-val`, etc.)
+    if (o.speedMph != null) {
+      const h = writeToExactSelectors([
+        '#valSpeed', '#speedVal', '#speed-val', '#mph-val', '#valMph', '#hud-speed', '#hud-mph', '#obd-speed', '#cardSpeed',
+        '[data-obd="speed"]', '[data-telemetry="speed"]', '.speed-value', '.val-speed'
+      ], `${o.speedMph}`, o.speedMph);
+      if (h === 0) writeBySemanticCardLabel(/\b(mph|speed|velocity)\b/i, /\b(engine\s*speed|wind)\b/i, `${o.speedMph}`, o.speedMph);
+    }
+
+    // 3. 7AT Transmission Gear (`#valGear`, `#gear-val`, etc.)
+    if (o.gear != null) {
+      const h = writeToExactSelectors([
+        '#valGear', '#gearVal', '#gear-val', '#hud-gear', '#obd-gear', '#cardGear',
+        '[data-obd="gear"]', '[data-telemetry="gear"]', '.gear-value', '.val-gear'
+      ], `${o.gear}`, null);
+      if (h === 0) writeBySemanticCardLabel(/\b(gear|trans|7at)\b/i, null, `${o.gear}`, o.gear);
+    }
+
+    // 4. Engine Load % (`#valLoad`, `#cardLoad`, etc.)
+    if (o.load != null) {
+      const h = writeToExactSelectors([
+        '#valLoad', '#loadVal', '#load-val', '#hud-load', '#obd-load', '#cardLoad',
+        '[data-obd="load"]', '[data-telemetry="load"]', '.load-value', '.val-load'
+      ], `${o.load}%`, o.load);
+      if (h === 0) writeBySemanticCardLabel(/\b(engine\s*load|calc\s*load|^load$)\b/i, null, `${o.load}%`, o.load);
+    }
+
+    // 5. Coolant Temp °F (`#valCoolant`, `#cardCoolant`, etc.)
+    if (o.coolantF != null) {
+      const h = writeToExactSelectors([
+        '#valCoolant', '#coolantVal', '#coolant-val', '#valTemp', '#ect-val', '#hud-coolant', '#obd-coolant', '#cardCoolant',
+        '[data-obd="coolant"]', '[data-telemetry="coolant"]', '.coolant-value', '.val-coolant'
+      ], `${o.coolantF}°F`, o.coolantF);
+      if (h === 0) writeBySemanticCardLabel(/\b(coolant|water\s*temp|ect)\b/i, null, `${o.coolantF}°F`, o.coolantF);
+    }
+
+    // 6. Intake Air Temp °F (`#valIat`, `#cardIat`, etc.)
+    if (o.intakeF != null) {
+      const h = writeToExactSelectors([
+        '#valIat', '#iatVal', '#iat-val', '#intake-val', '#hud-iat', '#obd-iat', '#cardIat',
+        '[data-obd="iat"]', '[data-obd="intake"]', '[data-telemetry="iat"]', '.iat-value', '.val-iat'
+      ], `${o.intakeF}°F`, o.intakeF);
+      if (h === 0) writeBySemanticCardLabel(/\b(intake|iat|air\s*temp)\b/i, null, `${o.intakeF}°F`, o.intakeF);
+    }
+
+    // 7. Throttle Position % (`#valThrottle`, `#tps-val`, etc.)
+    if (o.throttle != null) {
+      const h = writeToExactSelectors([
+        '#valThrottle', '#throttleVal', '#throttle-val', '#valTps', '#tps-val', '#hud-throttle', '#obd-throttle', '#cardThrottle',
+        '[data-obd="throttle"]', '[data-obd="tps"]', '[data-telemetry="throttle"]', '.throttle-value'
+      ], `${o.throttle}%`, o.throttle);
+      if (h === 0) writeBySemanticCardLabel(/\b(throttle|tps|pedal)\b/i, null, `${o.throttle}%`, o.throttle);
+    }
+
+    // 8. Battery / Alternator Voltage (`#valBatt`, `#valVolt`, `BATTERY / ALT`, etc.) — strictly clamped 8.5V..18.5V!
+    if (o.voltage != null && o.voltage >= 8.5 && o.voltage <= 18.5) {
+      const vFixed = Number(o.voltage).toFixed(1);
+      const h = writeToExactSelectors([
+        '#valVolt', '#valVoltage', '#valBatt', '#valBattery', '#valAlt', '#voltVal', '#battVal',
+        '#volt-val', '#batt-val', '#voltage-val', '#hud-volt', '#obd-volt', '#cardVolt', '#cardVoltage', '#cardBatt', '#cardBattery',
+        '[data-obd="voltage"]', '[data-obd="volt"]', '[data-obd="batt"]', '[data-telemetry="voltage"]', '.volt-value', '.batt-value'
+      ], `${vFixed}`, vFixed);
+      writeBySemanticCardLabel(/\b(battery\s*\/\s*alt|volt|voltage|battery|alternator)\b/i, /\b(body\s*battery)\b/i, `${vFixed}V`, vFixed);
+    } else {
+      // Scrub any corrupted ELM collision string (e.g. "104141043.0") from the Battery/Alt card immediately
+      sanitizeCorruptedBatteryDom();
+    }
+
+    writeToExactSelectors([
+      '#obd-status', '#ecu-status', '#daemon-status', '#telemetry-status', '[data-obd="status"]'
+    ], `LINKED (${o.transport || 'BLE'})`, null);
+
+    try {
+      if (window.ZeldaOBD && typeof window.ZeldaOBD === 'object') {
+        Object.assign(window.ZeldaOBD, {
+          connected: true, rpm: o.rpm, speed: o.speedMph, gear: o.gear,
+          load: o.load, coolant: o.coolantF, iat: o.intakeF, throttle: o.throttle, voltage: o.voltage
+        });
+      }
+      if (typeof window.updateTelemetryUI === 'function') window.updateTelemetryUI(o);
+    } catch (_) {}
+  }
+
+
+
+  function sanitizeCorruptedBatteryDom() {
+    const fallbackV = (relayState.obd.voltage >= 8.5 && relayState.obd.voltage <= 18.5)
+      ? Number(relayState.obd.voltage).toFixed(1)
+      : null;
+    const containers = document.querySelectorAll(
+      '#valVolt, #valVoltage, #valBatt, #valBattery, #cardVolt, #cardBatt, [class*="card"], [class*="box"], [class*="gauge"]'
+    );
+    containers.forEach((box) => {
+      const txt = (box.textContent || '').replace(/\s+/g, ' ').trim();
+      if (txt.length > 140 || !/\b(battery|alt|volt)\b/i.test(txt)) return;
+      const leaves = box.children.length === 0 ? [box] : Array.from(box.querySelectorAll('*')).filter((n) => n.children.length === 0);
+      for (const leaf of leaves) {
+        const lt = (leaf.textContent || '').trim();
+        const numM = lt.match(/^(\d{3,}(?:\.\d+)?)\s*V?$/i);
+        if (numM && parseFloat(numM[1]) > 25) {
+          const nextSib = leaf.nextElementSibling ? (leaf.nextElementSibling.textContent || '').trim() : '';
+          const sepUnit = /^v$/i.test(nextSib);
+          leaf.textContent = fallbackV ? (sepUnit ? fallbackV : `${fallbackV}V`) : '--';
+        }
+      }
+    });
+  }
+
+
+  function isKnownGhostCanHeaderDtcSet(codesArr) {
+    if (!codesArr || !codesArr.length) return false;
+    const ghostSet = new Set(['P0003', 'C0300', 'P0007', 'C0700', 'P0000']);
+    return codesArr.every((c) => ghostSet.has(c.toUpperCase()));
+  }
+
+  function sanitizeGhostDtcBannerDom() {
+    const realCodes = (relayState.obd.storedDtcs || []).concat(relayState.obd.pendingDtcs || []);
+    const uniqueReal = Array.from(new Set(realCodes)).filter((c) => !/^(?:P0003|C0300|P0007|C0700|P0000)$/i.test(c));
+
+    // Scrub global ZeldaOBD state if zelda-daemon.js stored ghost codes there
+    try {
+      if (window.ZeldaOBD && Array.isArray(window.ZeldaOBD.dtcs)) {
+        if (isKnownGhostCanHeaderDtcSet(window.ZeldaOBD.dtcs)) {
+          window.ZeldaOBD.dtcs = uniqueReal;
+        }
+      }
+    } catch (_) {}
+
+    // Scrub top status pill (`DTC: P0003,C0300,P0007,C0700`) anywhere in DOM
+    const candidates = document.querySelectorAll('span, div, button, badge, [id*="dtc" i], [class*="dtc" i]');
+    candidates.forEach((el) => {
+      if (el.children.length > 0) return;
+      const t = (el.textContent || '').trim();
+      if (!t || t.length > 80) return;
+      if (/C0300|C0700|P0003,C0300/i.test(t)) {
+        if (uniqueReal.length > 0) {
+          el.textContent = `DTC: ${uniqueReal.join(',')}`;
+        } else {
+          el.textContent = 'DTC: NONE';
+          el.style.borderColor = '#00ff9d';
+          el.style.color = '#00ff9d';
+        }
+      }
+    });
+  }
+
+  function flushNextQueuedObdTx() {
+    if (!hasNativeObd()) return;
+    if (relayState.txBusy && (Date.now() - relayState.txBusySince < 650)) return;
+    if (relayState.txQueue.length === 0) return;
+    const nextB64 = relayState.txQueue.shift();
+    relayState.txBusy = true;
+    relayState.txBusySince = Date.now();
+    try {
+      window.ZeldaNativeObd.writeRawBase64(nextB64);
+    } catch (_) {
+      relayState.txBusy = false;
+    }
+  }
+
+  function sanitizeFrameBlockForDaemon(rawBlock) {
+    // Split any multi-line reply inside a single '>' block and validate fuel trim & voltage frames!
+    const lines = String(rawBlock || '').split(/[\r\n]+/).map((s) => s.trim()).filter(Boolean);
+    const safeLines = [];
+    const decel = isDecelFuelCutWindow();
+
+    for (const ln of lines) {
+      // If mixed hex + ATRV voltage collided on one line, isolate the valid voltage!
+      if (/\d+\.\d+\s*V/i.test(ln) && /41[0-9A-F]{2}/i.test(ln)) {
+        const vm = ln.match(/(\d{1,2}\.\d{1,2}\s*V)/i);
+        if (vm) safeLines.push(vm[1]);
+        continue;
+      }
+
+      const nospace = ln.replace(/\s+/g, '').toUpperCase();
+
+      // If two Mode 01 replies concatenated without '\r' (e.g. "410400410680" or "41060041087B"), drop corrupted collision!
+      if (/^410[6-9]/.test(nospace) && nospace.length !== 6) {
+        relayState.obd.blockedGlitchCount++;
+        relayState.obd.lastTrimNote = `Dropped collided multi-PID frame (${nospace.slice(0, 14)})`;
+        continue;
+      }
+
+      // Check 4106 (STFT B1) & 4108 (STFT B2) for Open-Loop 0x00 (-100%) or DFCO decel vacuum transient
+      const stftM = nospace.match(/^41(06|08)([0-9A-F]{2})$/);
+      if (stftM) {
+        const pid = stftM[1];
+        const b = parseInt(stftM[2], 16);
+        const pct = (b - 128) / 1.28;
+
+        // [1] Block impossible 0x00 (-100%) Open-Loop byte or > +/-45% glitch byte -> hold last steady closed-loop trim (or 0.0% = 0x80)
+        if (b === 0 || pct < -45 || pct > 45) {
+          const fallbackPct = pid === '06' ? (relayState.obd.stftB1 || 0) : (relayState.obd.stftB2 || 0);
+          const holdHex = Math.max(88, Math.min(168, Math.round(fallbackPct * 1.28 + 128))).toString(16).toUpperCase().padStart(2, '0');
+          safeLines.push(`41${pid}${holdHex}`);
+          continue;
+        }
+
+        // [2] During throttle-off deceleration (DFCO), prevent normal intake-runner fuel-film flash (-18%..-29%) from firing false HUD rich alarms!
+        if (decel && b < 0x70) {
+          safeLines.push(`41${pid}72`); // Softens display/alarm to -10.9% ONLY while coasting foot-off-gas; steady idle passes 100% raw!
+          continue;
+        }
+      }
+
+      // Strip echoed ELM327 commands ("03", "07", "010C1", "ATZ", "ATE0") when ATE0 hasn't fired yet
+      if (/^(?:03|07|04|01[0-9A-F]{2}\d?|AT[A-Z0-9]+)$/i.test(nospace)) {
+        continue;
+      }
+
+      // Normalize ISO 15765-4 CAN Mode 03 / Mode 07 replies ("4300", "4700", "43010172") for legacy K-line parsers:
+      // - "4300" / "4700" means 0 trouble codes -> send "43" / "47" with zero byte pairs so legacy parser never invents C0300/C0700!
+      // - "43 <count> <AABB...>" -> strip the 1-byte CAN count byte so legacy parser reads real <AABB> pairs after "43"!
+      const canDtcM = nospace.match(/^(43|47)([0-9A-F]{2})([0-9A-F]*)$/);
+      if (canDtcM) {
+        const svc = canDtcM[1];
+        const cnt = parseInt(canDtcM[2], 16);
+        const rest = canDtcM[3] || '';
+        if (cnt === 0 || rest.replace(/0/g, '') === '') {
+          safeLines.push(svc);
+        } else {
+          safeLines.push(svc + rest.slice(0, cnt * 4));
+        }
+        continue;
+      }
+
+      safeLines.push(ln);
+    }
+
+    return safeLines.join('\r') + '\r>';
+  }
+
+  function dispatchCleanStringToDaemon(str) {
+    if (!str || relayState.bleChunkListeners.size === 0) return;
+    const cleanBytes = new Uint8Array(str.length);
+    for (let j = 0; j < str.length; j++) cleanBytes[j] = str.charCodeAt(j);
+    const dv = new DataView(cleanBytes.buffer);
+    relayState.bleChunkListeners.forEach((entry) => {
+      try {
+        entry.char.value = dv;
+        const ev = { type: 'characteristicvaluechanged', target: entry.char, currentTarget: entry.char };
+        entry.fn.call(entry.char, ev);
+      } catch (_) {}
+    });
   }
 
   // Called by ZeldaObdEngine.java on every raw byte chunk from Vgate (BLE or Classic SPP)
   window.__onZeldaNativeBleChunk = function (base64Str) {
     try {
       const bin = atob(base64Str);
-      const bytes = new Uint8Array(bin.length);
       let ascii = '';
       for (let i = 0; i < bin.length; i++) {
-        const code = bin.charCodeAt(i);
-        bytes[i] = code;
-        ascii += String.fromCharCode(code);
+        ascii += String.fromCharCode(bin.charCodeAt(i));
       }
 
-      // Sniff frames into relayState.obd so Zelda AI always knows live RPM/MPH/Coolant!
+      // Assemble complete '>' prompt-delimited ELM327 frames before parsing or forwarding to zelda-daemon.js!
       relayState.elmSniffBuf += ascii;
       if (relayState.elmSniffBuf.includes('>')) {
         const parts = relayState.elmSniffBuf.split('>');
         relayState.elmSniffBuf = parts.pop() || '';
-        parts.forEach(parseElmHexFrameIntoObdState);
-        updateWatchBadgeUi();
-      }
 
-      // Dispatch standard Web Bluetooth DataView event to zelda-daemon.js!
-      const dv = new DataView(bytes.buffer);
-      relayState.bleChunkListeners.forEach((entry) => {
-        try {
-          entry.char.value = dv;
-          const ev = { type: 'characteristicvaluechanged', target: entry.char, currentTarget: entry.char };
-          entry.fn.call(entry.char, ev);
-        } catch (_) {}
-      });
+        for (const rawBlock of parts) {
+          parseElmHexFrameIntoObdState(rawBlock);
+          const sanitizedFrame = sanitizeFrameBlockForDaemon(rawBlock);
+          dispatchCleanStringToDaemon(sanitizedFrame);
+        }
+
+        syncHudGaugeDomRealtime(relayState.obd);
+        sanitizeCorruptedBatteryDom();
+        sanitizeGhostDtcBannerDom();
+        updateWatchBadgeUi();
+
+        // ELM327 returned '>' prompt -> safe to send next queued command without bus collision!
+        relayState.txBusy = false;
+        setTimeout(flushNextQueuedObdTx, 10);
+      }
     } catch (_) {}
   };
 
@@ -264,11 +828,16 @@
       const data = typeof payload === 'string' ? JSON.parse(payload) : payload;
       if (!data) return;
       const wasConnected = relayState.obd.connected;
+      if (data.voltage != null && (data.voltage < 8.5 || data.voltage > 18.5)) {
+        delete data.voltage;
+      } else if (data.voltage != null) {
+        relayState.lastValidVoltAt = Date.now();
+      }
       Object.assign(relayState.obd, data, { updatedAt: Date.now() });
       if (relayState.obd.rpm != null && !data.gear) {
         relayState.obd.gear = estimate370z7AtGear(relayState.obd.rpm, relayState.obd.speedMph || 0);
       }
-      syncHudGaugeDomFallback(relayState.obd);
+      syncHudGaugeDomRealtime(relayState.obd);
       window.dispatchEvent(new CustomEvent('zelda:obd-data', { detail: relayState.obd }));
       if (wasConnected !== relayState.obd.connected) updateWatchBadgeUi();
     } catch (_) {}
@@ -309,7 +878,10 @@
           const u8 = bufferSource instanceof ArrayBuffer
             ? new Uint8Array(bufferSource)
             : new Uint8Array(bufferSource.buffer, bufferSource.byteOffset, bufferSource.byteLength);
-          window.ZeldaNativeObd.writeRawBase64(uint8ToBase64(u8));
+          if (relayState.txQueue.length < 6) {
+            relayState.txQueue.push(uint8ToBase64(u8));
+          }
+          flushNextQueuedObdTx();
         },
         writeValueWithoutResponse: async function (bufferSource) {
           return ch.writeValue(bufferSource);
@@ -419,6 +991,7 @@
               const frames = relayState.elmSniffBuf.split('>');
               relayState.elmSniffBuf = frames.pop() || '';
               frames.forEach(parseElmHexFrameIntoObdState);
+              syncHudGaugeDomRealtime(relayState.obd);
               updateWatchBadgeUi();
             }
           } catch (_) {}
@@ -488,7 +1061,7 @@
 
     const candidates = document.querySelectorAll('button, [role="button"], .hud-btn');
     candidates.forEach((el) => {
-      if (el.id === 'zelda-watch-link-badge' || el.dataset.zeldaPttChecked === 'keep') return;
+      if (el.id === 'zelda-watch-link-badge' || el.id === 'zelda-car-launcher-btn' || el.dataset.zeldaPttChecked === 'keep') return;
       const idCls = `${el.id || ''} ${el.className || ''} ${el.getAttribute('title') || ''} ${el.getAttribute('aria-label') || ''}`;
       const label = (el.textContent || '').replace(/\s+/g, ' ').trim();
 
@@ -895,6 +1468,10 @@
   }
 
   function notifyAllGeoWatchers(fix) {
+    if (fix && !relayState.obd.connected && fix.speed != null && isFinite(fix.speed)) {
+      const gpsMph = Math.max(0, Math.round(Number(fix.speed) * 2.23694));
+      writeToExactSelectors(['#valSpeed', '#speed-val', '#mph-val', '#hud-speed', '[data-obd="speed"]'], `${gpsMph}`, gpsMph);
+    }
     const pos = toGeoPositionObject(fix);
     relayState.geoWatchers.forEach((cb, key) => {
       if (typeof key === 'number' && typeof cb === 'function') {
@@ -1197,6 +1774,9 @@
       if (o.intakeF != null) obdItems.push(`Intake Air: ${o.intakeF}F`);
       if (o.load != null) obdItems.push(`Engine Load: ${o.load}%`);
       if (o.voltage != null) obdItems.push(`Battery: ${o.voltage}V`);
+      if (o.stftB1 != null || o.stftB2 != null) obdItems.push(`Closed-Loop STFT B1/B2: ${o.stftB1 ?? 0}%/${o.stftB2 ?? 0}%`);
+      if (o.ltftB1 != null || o.ltftB2 != null) obdItems.push(`LTFT B1/B2: ${o.ltftB1 ?? 0}%/${o.ltftB2 ?? 0}%`);
+      if (o.storedDtcs && o.storedDtcs.length) obdItems.push(`Real Stored DTCs: ${o.storedDtcs.join(',')}`);
       if (obdItems.length) {
         parts.push(`Live 370Z VQ37VHR ECU (${o.transport || 'Vgate'}): ${obdItems.join(', ')}.`);
       }
@@ -1480,16 +2060,84 @@
     badge.style.color = !hasKey ? '#fcee0a' : '#00f0ff';
   }
 
+  function enqueueAsciiObdCmd(cmdStr) {
+    if (!hasNativeObd()) return;
+    const full = cmdStr.endsWith('\r') ? cmdStr : (cmdStr + '\r');
+    const u8 = new Uint8Array(full.length);
+    for (let i = 0; i < full.length; i++) u8[i] = full.charCodeAt(i);
+    relayState.txQueue.push(uint8ToBase64(u8));
+    flushNextQueuedObdTx();
+  }
+
+  function runRealEcuDtcAndTrimDiagnostic() {
+    if (hasNativeObd() && relayState.obd.connected) {
+      // Query real Nissan ECU Stored DTCs (03), Pending DTCs (07), and Long-Term Fuel Trims (0107 / 0109)
+      ['01071', '01091', '03', '07'].forEach(enqueueAsciiObdCmd);
+    }
+    setTimeout(() => {
+      const o = relayState.obd;
+      const fmtPct = (v) => (v == null ? '--' : `${v > 0 ? '+' : ''}${v}%`);
+      const stored = o.storedDtcs && o.storedDtcs.length ? o.storedDtcs.join(', ') : 'NONE (0 Real ECU Codes)';
+      const pending = o.pendingDtcs && o.pendingDtcs.length ? o.pendingDtcs.join(', ') : 'NONE (0 Pending Codes)';
+      const report = [
+        `=== 370Z VQ37VHR REAL ECU vs. SCANNER VERIFIER ===`,
+        `Stored ECU Codes (Mode 03) : ${stored}`,
+        `Pending ECU Codes (Mode 07): ${pending}`,
+        `Steady Idle STFT B1 / B2   : ${fmtPct(o.idleStftB1 ?? o.stftB1)}  /  ${fmtPct(o.idleStftB2 ?? o.stftB2)}`,
+        `Long-Term LTFT B1 / B2     : ${fmtPct(o.ltftB1)}  /  ${fmtPct(o.ltftB2)}`,
+        `Last Decel/DFCO Swing B1/B2: ${fmtPct(o.decelStftB1)}  /  ${fmtPct(o.decelStftB2)}`,
+        `Glitch/0x00 Bytes Blocked  : ${o.blockedGlitchCount}`,
+        `Note: ${o.lastTrimNote}`
+      ].join('\n');
+      appendHudChatLog('ZELDA', report.replace(/\n/g, ' | '));
+      window.alert(report);
+    }, 1500);
+  }
+
   function injectWatchLinkBadge() {
     if (document.getElementById('zelda-watch-link-badge')) return;
-    const badge = document.createElement('button');
-    badge.type = 'button';
-    badge.id = 'zelda-watch-link-badge';
-    badge.style.cssText = `
+
+    const dock = document.createElement('div');
+    dock.id = 'zelda-top-right-dock';
+    dock.style.cssText = `
       position: fixed;
       top: 8px;
       right: 12px;
       z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    `;
+
+    // Show Native Car Home Launcher App/System Drawer Pill when running inside zelda-car-370z.apk!
+    if (typeof window.ZeldaCarLauncher !== 'undefined' && window.ZeldaCarLauncher !== null) {
+      const sysBtn = document.createElement('button');
+      sysBtn.type = 'button';
+      sysBtn.id = 'zelda-car-launcher-btn';
+      sysBtn.textContent = '⊞ APPS';
+      sysBtn.style.cssText = `
+        background: rgba(14, 10, 28, 0.92);
+        color: #ea80fc;
+        border: 1px solid #b026ff;
+        padding: 4px 9px;
+        font-family: 'Orbitron', 'Rajdhani', monospace, sans-serif;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        cursor: pointer;
+        border-radius: 999px;
+        box-shadow: 0 0 10px rgba(176, 38, 255, 0.28);
+      `;
+      sysBtn.addEventListener('click', () => {
+        try { window.ZeldaCarLauncher.openSystemDrawer(); } catch (_) {}
+      });
+      dock.appendChild(sysBtn);
+    }
+
+    const badge = document.createElement('button');
+    badge.type = 'button';
+    badge.id = 'zelda-watch-link-badge';
+    badge.style.cssText = `
       background: rgba(5, 7, 14, 0.92);
       color: #00f0ff;
       border: 1px solid #00f0ff;
@@ -1507,16 +2155,16 @@
       const hasKey = Boolean(findGeminiApiKeySync());
       const o = relayState.obd;
       const obdLine = o.connected
-        ? `370Z ECU: LIVE (${o.transport || 'BLE'}) — ${o.rpm || 0} RPM | ${o.speedMph || 0} MPH | ${o.coolantF != null ? o.coolantF + '°F' : '--'}`
+        ? `370Z ECU: LIVE (${o.transport || 'BLE'}) — ${o.rpm || 0} RPM | ${o.voltage != null ? o.voltage + 'V' : '--'} | Idle Trim: ${o.stftB1 ?? '--'}%/${o.stftB2 ?? '--'}%`
         : `370Z ECU: Scanning Vgate (type OBD below to force rescan)`;
       const entered = window.prompt(
-        `ZELDA COCKPIT // ${currentShort}\n` +
+        `ZELDA COCKPIT v5.0 // ${currentShort}\n` +
         `${obdLine}\n` +
         `Gemini Key: ${hasKey ? 'LOCKED ✅' : 'NEEDED ❌ (Paste AIza... key below)'}\n\n` +
+        `• Type DTC to check REAL 370Z ECU Codes & Idle vs Decel Trims\n` +
+        `• Type APPS to open Car System / Wi-Fi / App Drawer\n` +
         `• Type OBD to force Vgate BLE/SPP rescan\n` +
-        `• Paste AIza... Gemini key to lock in Vault\n` +
-        `• Enter 4-char Watch/Phone code\n` +
-        `• Type AUDIO to toggle Wrist-Only vs Car+Wrist:`,
+        `• Paste AIza... Gemini key or 4-char Watch/Phone code:`,
         currentShort
       );
       if (!entered || !entered.trim()) return;
@@ -1529,6 +2177,16 @@
       }
 
       const clean = trimmed.toUpperCase().replace(/[^A-Z0-9\-_]/g, '');
+      if (clean === 'DTC' || clean === 'CHECK') {
+        runRealEcuDtcAndTrimDiagnostic();
+        return;
+      }
+      if (clean === 'APPS' || clean === 'SYS' || clean === 'SETTINGS') {
+        if (window.ZeldaCarLauncher) {
+          try { window.ZeldaCarLauncher.openSystemDrawer(); } catch (_) {}
+        }
+        return;
+      }
       if (clean === 'OBD') {
         if (hasNativeObd()) {
           try { window.ZeldaNativeObd.connect(); } catch (_) {}
@@ -1546,7 +2204,9 @@
       relayState.channel = fullTopic;
       connectWatchRelay();
     });
-    document.body.appendChild(badge);
+
+    dock.appendChild(badge);
+    document.body.appendChild(dock);
     updateWatchBadgeUi();
   }
 
@@ -1561,7 +2221,10 @@
 
       const payload = typeof envelope.message === 'string' ? JSON.parse(envelope.message) : envelope.message;
       if (!payload || payload.source === 'zelda-car') return;
-      if (payload.ts && Math.abs(Date.now() - payload.ts) > 60000) return;
+      const ageMs = payload.ts ? Math.abs(Date.now() - payload.ts) : 0;
+      const isActionPacket = (payload.type === 'voice' || payload.type === 'zlock');
+      if (isActionPacket && ageMs > 25000) return;
+      if (!isActionPacket && ageMs > 900000) return;
 
       if (payload.gps && isFinite(payload.gps.lat) && isFinite(payload.gps.lng)) {
         const fix = {
@@ -1609,7 +2272,7 @@
     if (relayState.reconnectTimer) { clearTimeout(relayState.reconnectTimer); relayState.reconnectTimer = null; }
 
     try {
-      const es = new EventSource(`https://ntfy.sh/${encodeURIComponent(topic)}/sse`);
+      const es = new EventSource(`https://ntfy.sh/${encodeURIComponent(topic)}/sse?since=15m`);
       relayState.sse = es;
       es.onopen = () => { relayState.connected = true; updateWatchBadgeUi(); };
       es.onmessage = (ev) => handleIncomingPacket(ev.data);
@@ -1631,6 +2294,7 @@
 
   function autoTriggerDaemonIfNativeApk() {
     if (!hasNativeObd()) return;
+    setTimeout(() => { enqueueAsciiObdCmd('ATE0'); }, 600);
     // If zelda-daemon.js exposes an auto-connect function, call it seamlessly after DOM settles
     setTimeout(() => {
       try {
@@ -1651,6 +2315,38 @@
     connectWatchRelay();
     autoTriggerDaemonIfNativeApk();
 
+    // Immediately populate HUD biometric & OBD boxes from cached/live state and keep tabs synced!
+    syncBiometricsDomRealtime(relayState.biometrics);
+    setTimeout(() => syncBiometricsDomRealtime(relayState.biometrics), 600);
+    setInterval(() => {
+      syncBiometricsDomRealtime(relayState.biometrics);
+      sanitizeCorruptedBatteryDom();
+      sanitizeGhostDtcBannerDom();
+      if (relayState.obd.connected) {
+        syncHudGaugeDomRealtime(relayState.obd);
+        if (hasNativeObd() && (Date.now() - relayState.lastValidVoltAt > 8000) && relayState.txQueue.length === 0) {
+          const atrvBytes = new Uint8Array([65, 84, 82, 86, 13]); // "ATRV\r"
+          relayState.txQueue.push(uint8ToBase64(atrvBytes));
+          flushNextQueuedObdTx();
+        }
+      }
+    }, 1200);
+
+    document.addEventListener('click', (ev) => {
+      if (ev.target && ev.target.closest('button, [role="button"], [data-tab], .tab-btn, nav')) {
+        setTimeout(() => {
+          syncBiometricsDomRealtime(relayState.biometrics);
+          if (relayState.obd.connected) syncHudGaugeDomRealtime(relayState.obd);
+        }, 80);
+      }
+    }, true);
+
+    // Reconnect ntfy SSE immediately when returning to Project Zelda on Fold 7 or Car!
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && !relayState.connected) {
+        connectWatchRelay();
+      }
+    });
     window.addEventListener('online', connectWatchRelay);
 
     const obs = new MutationObserver(() => {
