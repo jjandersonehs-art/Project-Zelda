@@ -1,4 +1,4 @@
-name: Build Zelda 370Z Car, Watch Ultra & Fold 7 APKs
+name: Build Zelda v5.0 Car Home Launcher, Watch Ultra & Fold 7 APKs
 
 on:
   workflow_dispatch:
@@ -34,7 +34,7 @@ jobs:
               -dname "CN=Android Debug,O=Android,C=US"
           fi
 
-      - name: Generate 370Z Car, Watch Ultra & Fold 7 Projects
+      - name: Generate 370Z Car Launcher, Watch Ultra & Fold 7 Projects
         shell: python
         run: |
           import os
@@ -92,8 +92,8 @@ jobs:
           |        applicationId = "com.example.zeldacar"
           |        minSdk = 26
           |        targetSdk = 34
-          |        versionCode = 14
-          |        versionName = "4.9.0"
+          |        versionCode = 15
+          |        versionName = "5.0.0"
           |    }
           |    buildTypes {
           |        release {
@@ -122,6 +122,8 @@ jobs:
           |    <uses-permission android:name="android.permission.INTERNET" />
           |    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
           |    <uses-permission android:name="android.permission.WAKE_LOCK" />
+          |    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+          |    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
           |    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
           |    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
           |    <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -141,6 +143,10 @@ jobs:
           |
           |    <queries>
           |        <intent><action android:name="android.intent.action.TTS_SERVICE" /></intent>
+          |        <intent>
+          |            <action android:name="android.intent.action.MAIN" />
+          |            <category android:name="android.intent.category.LAUNCHER" />
+          |        </intent>
           |    </queries>
           |
           |    <application
@@ -156,13 +162,28 @@ jobs:
           |            android:name=".MainActivity"
           |            android:exported="true"
           |            android:launchMode="singleTask"
+          |            android:stateNotNeeded="true"
+          |            android:clearTaskOnLaunch="true"
+          |            android:excludeFromRecents="false"
           |            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
           |            android:label="Project Zelda 370Z">
           |            <intent-filter>
           |                <action android:name="android.intent.action.MAIN" />
           |                <category android:name="android.intent.category.LAUNCHER" />
+          |                <category android:name="android.intent.category.HOME" />
+          |                <category android:name="android.intent.category.DEFAULT" />
           |            </intent-filter>
           |        </activity>
+          |
+          |        <receiver
+          |            android:name=".ZeldaBootReceiver"
+          |            android:enabled="true"
+          |            android:exported="true">
+          |            <intent-filter>
+          |                <action android:name="android.intent.action.BOOT_COMPLETED" />
+          |                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+          |            </intent-filter>
+          |        </receiver>
           |    </application>
           |</manifest>
           """)
@@ -791,7 +812,7 @@ jobs:
           |                    stepAutonomous370zPoller();
           |                }
           |            }
-          |        }, 3200L);
+          |        }, 7500L);
           |    }
           |
           |    private synchronized void writeRawBytes(byte[] data) {
@@ -922,8 +943,8 @@ jobs:
           |        if (i42 >= 0 && hex.length() >= i42 + 8) {
           |            int a = Integer.parseInt(hex.substring(i42 + 4, i42 + 6), 16);
           |            int b = Integer.parseInt(hex.substring(i42 + 6, i42 + 8), 16);
-          |            latestVoltage = Math.round((((a * 256.0) + b) / 1000.0) * 10.0) / 10.0;
-          |            updated = true;
+          |            double v = Math.round((((a * 256.0) + b) / 1000.0) * 10.0) / 10.0;
+          |            if (v >= 8.5 && v <= 18.5) { latestVoltage = v; updated = true; }
           |        }
           |
           |        if (updated) {
@@ -983,6 +1004,184 @@ jobs:
           |}
           """)
 
+          save(car_pkg + "/ZeldaBootReceiver.java", """
+          |package com.example.zeldacar;
+          |
+          |import android.content.BroadcastReceiver;
+          |import android.content.Context;
+          |import android.content.Intent;
+          |
+          |public class ZeldaBootReceiver extends BroadcastReceiver {
+          |    @Override
+          |    public void onReceive(Context context, Intent intent) {
+          |        if (intent == null || intent.getAction() == null) return;
+          |        String act = intent.getAction();
+          |        if (Intent.ACTION_BOOT_COMPLETED.equals(act) || Intent.ACTION_MY_PACKAGE_REPLACED.equals(act)) {
+          |            try {
+          |                Intent launch = new Intent(context, MainActivity.class);
+          |                launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+          |                context.startActivity(launch);
+          |            } catch (Exception ignored) {}
+          |        }
+          |    }
+          |}
+          """)
+
+          save(car_pkg + "/ZeldaLauncherBridge.java", """
+          |package com.example.zeldacar;
+          |
+          |import android.app.Activity;
+          |import android.app.AlertDialog;
+          |import android.content.ComponentName;
+          |import android.content.DialogInterface;
+          |import android.content.Intent;
+          |import android.content.pm.PackageManager;
+          |import android.content.pm.ResolveInfo;
+          |import android.provider.Settings;
+          |import android.webkit.JavascriptInterface;
+          |
+          |import java.util.ArrayList;
+          |import java.util.Collections;
+          |import java.util.Comparator;
+          |import java.util.List;
+          |
+          |@SuppressWarnings("deprecation")
+          |public class ZeldaLauncherBridge {
+          |    private final Activity activity;
+          |
+          |    public ZeldaLauncherBridge(Activity act) {
+          |        this.activity = act;
+          |    }
+          |
+          |    private void safeLaunchIntent(final Intent intent) {
+          |        activity.runOnUiThread(new Runnable() {
+          |            @Override
+          |            public void run() {
+          |                try {
+          |                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+          |                    activity.startActivity(intent);
+          |                } catch (Exception ignored) {}
+          |            }
+          |        });
+          |    }
+          |
+          |    @JavascriptInterface
+          |    public void openWifiSettings() {
+          |        safeLaunchIntent(new Intent(Settings.ACTION_WIFI_SETTINGS));
+          |    }
+          |
+          |    @JavascriptInterface
+          |    public void openBluetoothSettings() {
+          |        safeLaunchIntent(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
+          |    }
+          |
+          |    @JavascriptInterface
+          |    public void openSoundSettings() {
+          |        safeLaunchIntent(new Intent(Settings.ACTION_SOUND_SETTINGS));
+          |    }
+          |
+          |    @JavascriptInterface
+          |    public void openAndroidSettings() {
+          |        safeLaunchIntent(new Intent(Settings.ACTION_SETTINGS));
+          |    }
+          |
+          |    @JavascriptInterface
+          |    public void openHomeChooser() {
+          |        safeLaunchIntent(new Intent(Settings.ACTION_HOME_SETTINGS));
+          |    }
+          |
+          |    @JavascriptInterface
+          |    public void openSystemDrawer() {
+          |        activity.runOnUiThread(new Runnable() {
+          |            @Override
+          |            public void run() {
+          |                final String[] items = new String[]{
+          |                    "All Installed Car Apps (App Drawer)",
+          |                    "Wi-Fi & Hotspot Settings",
+          |                    "Bluetooth Settings",
+          |                    "Sound / EQ / Volume Settings",
+          |                    "Android System Settings",
+          |                    "Set or Switch Default Home Screen"
+          |                };
+          |                new AlertDialog.Builder(activity, AlertDialog.THEME_DEVICE_DEFAULT_DARK)
+          |                        .setTitle("ZELDA 370Z // SYSTEM LAUNCHER")
+          |                        .setItems(items, new DialogInterface.OnClickListener() {
+          |                            @Override
+          |                            public void onClick(DialogInterface dialog, int which) {
+          |                                if (which == 0) openAppDrawer();
+          |                                else if (which == 1) openWifiSettings();
+          |                                else if (which == 2) openBluetoothSettings();
+          |                                else if (which == 3) openSoundSettings();
+          |                                else if (which == 4) openAndroidSettings();
+          |                                else if (which == 5) openHomeChooser();
+          |                            }
+          |                        })
+          |                        .setNegativeButton("CLOSE", null)
+          |                        .show();
+          |            }
+          |        });
+          |    }
+          |
+          |    @JavascriptInterface
+          |    public void openAppDrawer() {
+          |        activity.runOnUiThread(new Runnable() {
+          |            @Override
+          |            public void run() {
+          |                try {
+          |                    final PackageManager pm = activity.getPackageManager();
+          |                    Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+          |                    mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+          |                    List<ResolveInfo> rawList = pm.queryIntentActivities(mainIntent, 0);
+          |                    final List<ResolveInfo> apps = new ArrayList<>();
+          |                    String myPkg = activity.getPackageName();
+          |
+          |                    for (ResolveInfo ri : rawList) {
+          |                        if (ri.activityInfo != null && !myPkg.equals(ri.activityInfo.packageName)) {
+          |                            apps.add(ri);
+          |                        }
+          |                    }
+          |
+          |                    Collections.sort(apps, new Comparator<ResolveInfo>() {
+          |                        @Override
+          |                        public int compare(ResolveInfo a, ResolveInfo b) {
+          |                            String la = a.loadLabel(pm).toString();
+          |                            String lb = b.loadLabel(pm).toString();
+          |                            return la.compareToIgnoreCase(lb);
+          |                        }
+          |                    });
+          |
+          |                    String[] labels = new String[apps.size()];
+          |                    for (int i = 0; i < apps.size(); i++) {
+          |                        labels[i] = apps.get(i).loadLabel(pm).toString();
+          |                    }
+          |
+          |                    new AlertDialog.Builder(activity, AlertDialog.THEME_DEVICE_DEFAULT_DARK)
+          |                            .setTitle("INSTALLED HEAD UNIT APPS")
+          |                            .setItems(labels, new DialogInterface.OnClickListener() {
+          |                                @Override
+          |                                public void onClick(DialogInterface dialog, int idx) {
+          |                                    if (idx >= 0 && idx < apps.size()) {
+          |                                        ResolveInfo chosen = apps.get(idx);
+          |                                        Intent launch = new Intent(Intent.ACTION_MAIN);
+          |                                        launch.addCategory(Intent.CATEGORY_LAUNCHER);
+          |                                        launch.setComponent(new ComponentName(
+          |                                                chosen.activityInfo.packageName,
+          |                                                chosen.activityInfo.name
+          |                                        ));
+          |                                        launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+          |                                        try { activity.startActivity(launch); } catch (Exception ignored) {}
+          |                                    }
+          |                                }
+          |                            })
+          |                            .setNegativeButton("BACK", null)
+          |                            .show();
+          |                } catch (Exception ignored) {}
+          |            }
+          |        });
+          |    }
+          |}
+          """)
+
           save(car_pkg + "/MainActivity.java", """
           |package com.example.zeldacar;
           |
@@ -990,11 +1189,15 @@ jobs:
           |import android.annotation.SuppressLint;
           |import android.app.Activity;
           |import android.content.Context;
+          |import android.content.Intent;
           |import android.content.pm.PackageManager;
           |import android.graphics.Color;
           |import android.location.Location;
           |import android.location.LocationListener;
           |import android.location.LocationManager;
+          |import android.net.ConnectivityManager;
+          |import android.net.Network;
+          |import android.net.NetworkCapabilities;
           |import android.os.Build;
           |import android.os.Bundle;
           |import android.os.Looper;
@@ -1003,6 +1206,7 @@ jobs:
           |import android.webkit.GeolocationPermissions;
           |import android.webkit.PermissionRequest;
           |import android.webkit.WebChromeClient;
+          |import android.webkit.WebResourceError;
           |import android.webkit.WebResourceRequest;
           |import android.webkit.WebSettings;
           |import android.webkit.WebView;
@@ -1014,14 +1218,18 @@ jobs:
           |
           |@SuppressWarnings("deprecation")
           |public class MainActivity extends Activity implements LocationListener {
-          |    private static final String HUD_URL = "https://jjandersonehs-art.github.io/Project-Zelda/?apk=490";
+          |    private static final String HUD_URL = "https://jjandersonehs-art.github.io/Project-Zelda/?apk=500";
           |    private static final int REQ_CAR_PERMS = 401;
           |
           |    private WebView webView;
           |    private ZeldaVaultBridge vaultBridge;
           |    private ZeldaVoiceBridge voiceBridge;
           |    private ZeldaObdEngine obdEngine;
+          |    private ZeldaLauncherBridge launcherBridge;
           |    private LocationManager locationManager;
+          |    private ConnectivityManager connectivityManager;
+          |    private ConnectivityManager.NetworkCallback netCallback;
+          |    private volatile boolean showingOfflineFallback = false;
           |
           |    @SuppressLint({"SetJavaScriptEnabled", "JavascriptInterface"})
           |    @Override
@@ -1030,10 +1238,12 @@ jobs:
           |        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
           |        applyImmersiveFullscreen();
           |
+          |        connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+          |
           |        webView = new WebView(this);
           |        webView.setBackgroundColor(Color.parseColor("#040508"));
           |
-          |        WebSettings ws = webView.getSettings();
+          |        final WebSettings ws = webView.getSettings();
           |        ws.setJavaScriptEnabled(true);
           |        ws.setDomStorageEnabled(true);
           |        ws.setDatabaseEnabled(true);
@@ -1043,18 +1253,19 @@ jobs:
           |        ws.setAllowContentAccess(true);
           |        ws.setLoadWithOverviewMode(true);
           |        ws.setUseWideViewPort(true);
-          |        ws.setCacheMode(WebSettings.LOAD_DEFAULT);
+          |        ws.setCacheMode(isNetworkOnline() ? WebSettings.LOAD_DEFAULT : WebSettings.LOAD_CACHE_ELSE_NETWORK);
           |        ws.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
           |
           |        vaultBridge = new ZeldaVaultBridge(this);
           |        voiceBridge = new ZeldaVoiceBridge(this, vaultBridge);
           |        obdEngine = new ZeldaObdEngine(this, webView);
+          |        launcherBridge = new ZeldaLauncherBridge(this);
           |
-          |        // Expose all Project Zelda native interfaces to JS!
           |        webView.addJavascriptInterface(vaultBridge, "ZeldaNativeVault");
           |        webView.addJavascriptInterface(vaultBridge, "ZeldaBridge");
           |        webView.addJavascriptInterface(voiceBridge, "ZeldaNativeVoice");
           |        webView.addJavascriptInterface(obdEngine, "ZeldaNativeObd");
+          |        webView.addJavascriptInterface(launcherBridge, "ZeldaCarLauncher");
           |
           |        webView.setWebViewClient(new WebViewClient() {
           |            @Override
@@ -1065,8 +1276,24 @@ jobs:
           |            @Override
           |            public void onPageFinished(WebView view, String url) {
           |                super.onPageFinished(view, url);
+          |                if (url != null && url.startsWith("https://")) {
+          |                    showingOfflineFallback = false;
+          |                }
           |                obdEngine.connect();
           |                startCarGpsTracking();
+          |            }
+          |
+          |            @Override
+          |            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+          |                if (request != null && request.isForMainFrame()) {
+          |                    if (ws.getCacheMode() != WebSettings.LOAD_CACHE_ELSE_NETWORK) {
+          |                        ws.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+          |                        view.loadUrl(HUD_URL);
+          |                        return;
+          |                    }
+          |                    showingOfflineFallback = true;
+          |                    renderCyberBootStandbyScreen();
+          |                }
           |            }
           |        });
           |
@@ -1092,7 +1319,75 @@ jobs:
           |            obdEngine.connect();
           |        }
           |
+          |        registerHotspotAutoReconnect();
           |        webView.loadUrl(HUD_URL);
+          |    }
+          |
+          |    private boolean isNetworkOnline() {
+          |        if (connectivityManager == null) return false;
+          |        try {
+          |            Network net = connectivityManager.getActiveNetwork();
+          |            if (net == null) return false;
+          |            NetworkCapabilities caps = connectivityManager.getNetworkCapabilities(net);
+          |            return caps != null && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+          |        } catch (Exception e) {
+          |            return false;
+          |        }
+          |    }
+          |
+          |    private void registerHotspotAutoReconnect() {
+          |        if (connectivityManager == null) return;
+          |        try {
+          |            netCallback = new ConnectivityManager.NetworkCallback() {
+          |                @Override
+          |                public void onAvailable(Network network) {
+          |                    runOnUiThread(new Runnable() {
+          |                        @Override
+          |                        public void run() {
+          |                            if (webView == null) return;
+          |                            webView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
+          |                            if (showingOfflineFallback) {
+          |                                showingOfflineFallback = false;
+          |                                webView.loadUrl(HUD_URL);
+          |                            } else {
+          |                                webView.evaluateJavascript("window.dispatchEvent(new Event('online'));", null);
+          |                            }
+          |                        }
+          |                    });
+          |                }
+          |            };
+          |            connectivityManager.registerDefaultNetworkCallback(netCallback);
+          |        } catch (Exception ignored) {}
+          |    }
+          |
+          |    private void renderCyberBootStandbyScreen() {
+          |        if (webView == null) return;
+          |        String html = "<html><body style='margin:0;background:#040508;color:#00f0ff;font-family:monospace;"
+          |                + "display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;text-align:center;'>"
+          |                + "<div style='font-size:24px;letter-spacing:0.14em;font-weight:bold;margin-bottom:10px;'>PROJECT ZELDA // 370Z</div>"
+          |                + "<div style='color:#90a4ae;font-size:14px;margin-bottom:28px;'>Awaiting Fold 7 Hotspot Uplink (Auto-launching when Wi-Fi connects)...</div>"
+          |                + "<div style='display:flex;gap:14px;'>"
+          |                + "<button onclick='window.ZeldaCarLauncher.openWifiSettings()' style='background:#0b1929;color:#00f0ff;border:2px solid #00f0ff;border-radius:999px;padding:12px 22px;font-family:monospace;font-size:14px;'>WIFI SETTINGS</button>"
+          |                + "<button onclick='window.ZeldaCarLauncher.openSystemDrawer()' style='background:#1a0b29;color:#ea80fc;border:2px solid #b026ff;border-radius:999px;padding:12px 22px;font-family:monospace;font-size:14px;'>CAR APPS / SYSTEM</button>"
+          |                + "<button onclick='window.location.reload()' style='background:#0b2618;color:#00ff9d;border:2px solid #00ff9d;border-radius:999px;padding:12px 22px;font-family:monospace;font-size:14px;'>RETRY NOW</button>"
+          |                + "</div></body></html>";
+          |        webView.loadDataWithBaseURL(HUD_URL, html, "text/html", "UTF-8", null);
+          |    }
+          |
+          |    @Override
+          |    protected void onNewIntent(Intent intent) {
+          |        super.onNewIntent(intent);
+          |        setIntent(intent);
+          |        applyImmersiveFullscreen();
+          |        if (obdEngine != null) obdEngine.connect();
+          |    }
+          |
+          |    @Override
+          |    protected void onResume() {
+          |        super.onResume();
+          |        applyImmersiveFullscreen();
+          |        startCarGpsTracking();
+          |        if (obdEngine != null) obdEngine.connect();
           |    }
           |
           |    private void applyImmersiveFullscreen() {
@@ -1205,6 +1500,7 @@ jobs:
           |
           |    @Override
           |    protected void onDestroy() {
+          |        try { if (connectivityManager != null && netCallback != null) connectivityManager.unregisterNetworkCallback(netCallback); } catch (Exception ignored) {}
           |        try { if (locationManager != null) locationManager.removeUpdates(this); } catch (Exception ignored) {}
           |        if (obdEngine != null) obdEngine.shutdown();
           |        if (voiceBridge != null) voiceBridge.shutdown();
@@ -1226,8 +1522,8 @@ jobs:
           |        applicationId = "com.example.zeldawatch"
           |        minSdk = 30
           |        targetSdk = 34
-          |        versionCode = 14
-          |        versionName = "4.9.0"
+          |        versionCode = 15
+          |        versionName = "5.0.0"
           |    }
           |    buildTypes {
           |        release {
@@ -2060,7 +2356,7 @@ jobs:
           |            orientation = LinearLayout.VERTICAL
           |            gravity = Gravity.CENTER_HORIZONTAL
           |        }
-          |
+
           |        subtitleView = TextView(this).apply {
           |            text = if (savedCode.isEmpty()) "Tap LINK below to pair 4-char code" else "Tap wave to speak"
           |            setTextColor(Color.parseColor("#E8F4FF"))
@@ -2489,8 +2785,8 @@ jobs:
           |        applicationId = "com.example.zeldabridge"
           |        minSdk = 28
           |        targetSdk = 34
-          |        versionCode = 5
-          |        versionName = "4.9.0"
+          |        versionCode = 6
+          |        versionName = "5.0.0"
           |    }
           |    buildTypes {
           |        release {
@@ -3002,7 +3298,7 @@ jobs:
           |}
           """)
 
-          print("Generated all 3 Zelda v4.9.0 Android projects (Car 370Z + Watch Ultra + Fold 7) cleanly.")
+          print("Generated all 3 Zelda v5.0.0 Android projects (Car Home Launcher + Watch Ultra + Fold 7) cleanly.")
 
       - name: Install Gradle 8.11.1 & Compile All 3 Signed APKs
         shell: bash
@@ -3023,7 +3319,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete zelda-v4.9.0 --yes --cleanup-tag 2>/dev/null || true
-          gh release create zelda-v4.9.0 zelda-car-370z.apk zelda-watch-ultra.apk zelda-fold7-health-bridge.apk \
-            --title "Project Zelda v4.9.0: 370Z Car OBD Cockpit APK + Watch Ultra APK + Fold 7 Bridge APK" \
-            --notes "Complete 3-APK Neural Suite: zelda-car-370z.apk (XYAuto 370Z Cockpit with native Vgate BLE/SPP OBD-II + Immortal Vault + GPS), zelda-watch-ultra.apk (Neon Ribbon Comlink + Live BPM), and zelda-fold7-health-bridge.apk (Health Connect + GPS + Key Sync)."
+          gh release delete zelda-v5.0.0 --yes --cleanup-tag 2>/dev/null || true
+          gh release create zelda-v5.0.0 zelda-car-370z.apk zelda-watch-ultra.apk zelda-fold7-health-bridge.apk \
+            --title "Project Zelda v5.0.0: 370Z Native Car Home Launcher APK + Watch Ultra + Fold 7 Bridge" \
+            --notes "Complete v5.0.0 Suite: zelda-car-370z.apk now acts as a true Android Car Home Screen Launcher (CATEGORY_HOME + Instant Offline Cache Boot + Built-in App/System Drawer + Collision-Free Vgate OBD), alongside zelda-watch-ultra.apk and zelda-fold7-health-bridge.apk."
